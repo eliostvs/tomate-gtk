@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Tomate
+GenericName=Clock
+Comment=Gtk version from Tomate pomodoro timer.
+Categories=Utility;Clock;
+Exec=tomate-gtk
+Icon=tomate
+Terminal=false
+Type=Application

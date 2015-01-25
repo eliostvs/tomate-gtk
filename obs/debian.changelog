@@ -1,0 +1,51 @@
+tomate-gtk (0.4.0) trusty; urgency=low
+   [ Elio Esteves Duarte ]
+  * Remove libgranite.
+  * Split some feature into plugins.
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Sun, 01 Dec 2013 12:29:52 -0200
+
+tomate-gtk (0.3.0) saucy; urgency=low
+   [ Frederik Elwert ]
+  * Automatically select the next timer.
+  * Fix indicator status attention.
+
+  [ Elio Esteves Duarte ]
+  * Add smart close.
+  * Lock the execution of more than one instance.
+  * Pops up window on finished.
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Sun, 01 Dec 2013 12:29:52 -0200
+
+tomate-gtk (0.2.1) precise; urgency=low
+
+  * Fix icon name in setup.py.
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Thu, 18 Oct 2012 18:28:53 -0300
+
+tomate-gtk (0.2) precise; urgency=low
+
+   [ Elio Esteves Duarte ]
+  * Change the osd message in the start of the pomodoro.
+  * Add setting to hide the window instead of closing it.
+  * Create a counter for pomodoros.
+  * Merge the buttons start and stop.
+
+   [ Frederik Elwert ]
+  * Add themed icons for ubuntu-mono-dark and ubuntu-mono-light and use it
+    for the indicator.
+  * Make indicator show the progress while timer is running.
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Thu, 02 Aug 2012 09:10:30 -0300
+
+tomate-gtk (0.1.1) precise; urgency=low
+
+  * fix typo in tomate.py
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Thu, 02 Aug 2012 08:22:28 -0300
+
+tomate-gtk (0.1) precise; urgency=low
+
+  * Initial release.
+
+ -- Elio Esteves Duarte <elio.esteves.duarte@gmail.com>  Tue, 24 Jul 2012 16:14:47 -0300
