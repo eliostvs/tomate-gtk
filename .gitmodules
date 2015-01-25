@@ -1,0 +1,4 @@
+[submodule "tomate"]
+	path = tomate
+	url = git@github.com:eliostvs/tomate.git
+	branch = master
