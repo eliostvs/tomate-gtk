@@ -30,7 +30,6 @@ def clear():
 @task
 def run():
     import os
-
     from xdg.BaseDirectory import xdg_data_dirs
 
     xdg_data_dirs.insert(0, str(DATA_PATH))
