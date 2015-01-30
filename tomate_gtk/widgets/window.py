@@ -5,16 +5,18 @@ import logging
 import time
 from locale import gettext as _
 
-from gi.repository import AppIndicator3, GdkPixbuf, Gtk
+from gi.repository import GdkPixbuf, Gtk
+
 from tomate.base import ConnectSignalMixin
-from tomate.view import IView
 from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
 from tomate.signals import (app_exit, change_task, interrupt_session,
                             reset_sessions, start_session, window_visible)
 from tomate.utils import format_time_left
+from tomate.view import IView
 
 from .about import AboutDialog
+from .indicator import Indicator
 from .modebutton import ModeButton
 from .preference import PreferenceDialog
 
@@ -48,7 +50,9 @@ class Window(ConnectSignalMixin,
         self.set_size_request(380, 200)
         self.connect('delete-event', self.on_window_delete_event)
 
-        self.menu = Menu(self)
+        self.menu = MainMenu(self)
+
+        self.indicator = Indicator(self)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(Toolbar(self), False, False, 0)
@@ -60,16 +64,6 @@ class Window(ConnectSignalMixin,
         self.add(box)
 
         self.show_all()
-
-        self.indicator = AppIndicator3.Indicator.new_with_path(
-            'tomate',
-            'tomate-indicator',
-            AppIndicator3.IndicatorCategory.APPLICATION_STATUS,
-            profile.get_icon_paths()[0]
-        )
-
-        self.indicator.set_menu(self.menu)
-        self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
         self.connect_signals()
 
@@ -96,18 +90,20 @@ class Window(ConnectSignalMixin,
 
     def on_window_visibility_changed(self, sender=None, **kwargs):
         if kwargs.get('visible', True):
+            self.indicator.hide()
             return self.present_with_time(time.time())
 
+        self.indicator.show()
         return self.hide_on_delete()
 
 
 class TaskButtons(ConnectSignalMixin, ModeButton):
 
         signals = (
-            ('session_started', 'disable_buttons'),
-            ('session_interrupted', 'enable_buttons'),
+            ('session_started', 'disable'),
+            ('session_interrupted', 'enable'),
             ('session_ended', 'change_selected'),
-            ('session_ended', 'enable_buttons'),
+            ('session_ended', 'enable'),
         )
 
         def __init__(self):
@@ -127,11 +123,11 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
             self.append_text(_('Long Break'))
             self.set_selected(0)
 
-            self.connect('mode_changed', self.on_modebutton_mode_changed)
+            self.connect('mode_changed', self.on_mode_changed)
 
             self.connect_signals()
 
-        def on_modebutton_mode_changed(self, widget, index):
+        def on_mode_changed(self, widget, index):
             task = Task.get_by_index(index)
 
             change_task.send(self.__class__, task=task)
@@ -143,21 +139,21 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
 
             self.set_selected(task.value)
 
-        def disable_buttons(self, sender=None, **kwargs):
+        def disable(self, sender=None, **kwargs):
             self.set_sensitive(False)
 
-        def enable_buttons(self, sender=None, **kwargs):
+        def enable(self, sender=None, **kwargs):
             self.set_sensitive(True)
 
 
 class TimerFrame(ConnectSignalMixin, Gtk.Frame):
 
         signals = (
-            ('session_ended', 'update_session_label'),
-            ('sessions_reseted', 'update_session_label'),
-            ('session_interrupted', 'update_timer_label'),
-            ('task_changed', 'update_timer_label'),
-            ('timer_updated', 'update_timer_label'),
+            ('session_ended', 'update_session'),
+            ('sessions_reseted', 'update_session'),
+            ('session_interrupted', 'update_timer'),
+            ('task_changed', 'update_timer'),
+            ('timer_updated', 'update_timer'),
         )
 
         def __init__(self):
@@ -185,11 +181,11 @@ class TimerFrame(ConnectSignalMixin, Gtk.Frame):
 
             self.add(box)
 
-            self.update_session_label(0)
+            self.update_session(0)
 
             self.connect_signals()
 
-        def update_timer_label(self, sender=None, **kwargs):
+        def update_timer(self, sender=None, **kwargs):
             time_left = format_time_left(kwargs.get('time_left', 25 * 60))
 
             markup = '<span font="60">{}</span>'.format(time_left)
@@ -197,7 +193,7 @@ class TimerFrame(ConnectSignalMixin, Gtk.Frame):
 
             logger.debug('timer label update %s', time_left)
 
-        def update_session_label(self, sender=None, **kwargs):
+        def update_session(self, sender=None, **kwargs):
             sessions = kwargs.get('sessions', 0)
 
             markup = ('<span font="12">{0} pomodoros</span>'
@@ -296,51 +292,20 @@ class Appmenu(Gtk.ToolItem):
         self.add(appmenu)
 
 
-class Menu(ConnectSignalMixin,
-           Gtk.Menu):
-
-    signals = (
-        ('window_visibility_changed', 'on_window_visibility_changed'),
-    )
+class MainMenu(Gtk.Menu):
 
     def __init__(self, parent):
         Gtk.Menu.__init__(self, halign=Gtk.Align.CENTER)
 
-        self.show_menu = Gtk.MenuItem(_('Show'),
-                                      visible=False,
-                                      no_show_all=True)
-        self.show_menu.connect('activate', self.on_show_menu_activate)
-
-        self.hide_menu = Gtk.MenuItem(_('Hide'))
-        self.hide_menu.connect('activate', self.on_hide_menu_activate)
-
-        quit_menu = Gtk.MenuItem(_('Quit'))
-        quit_menu.connect('activate', self.on_quit_menu_activate)
-
         preferences_menu = Gtk.MenuItem(_('Preferences'))
         preferences_menu.connect('activate', self.on_settings_menu_activate, parent)
+        self.append(preferences_menu)
 
         about_menu = Gtk.MenuItem(_('About'))
         about_menu.connect('activate', self.on_about_menu_activate)
-
-        quit_menu = Gtk.MenuItem(_('Quit'))
-        quit_menu.connect('activate', self.on_quit_menu_activate)
-
-        self.append(self.show_menu)
-        self.append(self.hide_menu)
-        self.append(preferences_menu)
         self.append(about_menu)
-        self.append(Gtk.SeparatorMenuItem())
-        self.append(quit_menu)
+
         self.show_all()
-
-        self.connect_signals()
-
-    def on_show_menu_activate(self, widget):
-        window_visible.send(self.__class__, visible=True)
-
-    def on_hide_menu_activate(self, widget):
-        window_visible.send(self.__class__, visible=False)
 
     def on_settings_menu_activate(self, widget, parent):
         dialog = PreferenceDialog(parent)
@@ -350,16 +315,3 @@ class Menu(ConnectSignalMixin,
     def on_about_menu_activate(self, widget):
         dialog = AboutDialog(widget.get_ancestor(Gtk.Window))
         dialog.run()
-        dialog.destroy()
-
-    def on_quit_menu_activate(self, widget):
-        app_exit.send(self.__class__)
-
-    def on_window_visibility_changed(self, sender=None, **kwargs):
-        visible = kwargs.get('visible', True)
-
-        self.hide_menu.set_visible(visible)
-
-        self.show_menu.set_visible(not visible)
-
-        logger.debug('menu visibility changed')
