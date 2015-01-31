@@ -20,7 +20,7 @@ class GtkApplication(AutoConnectSignalMixin,
     view_class = Window
 
     signals = (
-        ('app_exit', 'exit'),
+        ('app_quit', 'exit'),
         ('session_duration_changed', 'on_configuration_changed'),
     )
 

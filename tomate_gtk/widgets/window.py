@@ -10,8 +10,7 @@ from gi.repository import GdkPixbuf, Gtk
 from tomate.base import ConnectSignalMixin
 from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
-from tomate.signals import (app_exit, change_task, interrupt_session,
-                            reset_sessions, start_session, window_visible)
+from tomate.signals import tomate_signals
 from tomate.utils import format_time_left
 from tomate.view import IView
 
@@ -32,7 +31,8 @@ class Window(ConnectSignalMixin,
              Gtk.Window):
 
     signals = (
-        ('window_visibility_changed', 'on_window_visibility_changed'),
+        ('window_hid', 'on_window_hid'),
+        ('window_showed', 'on_window_showed'),
         ('session_ended', 'show_window'),
     )
 
@@ -52,7 +52,7 @@ class Window(ConnectSignalMixin,
 
         self.menu = MainMenu(self)
 
-        self.indicator = Indicator(self)
+        self.indicator = Indicator()
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(Toolbar(self), False, False, 0)
@@ -68,32 +68,30 @@ class Window(ConnectSignalMixin,
         self.connect_signals()
 
     def show_window(self, sender=None, **kwargs):
-        logger.debug('show window')
-
-        window_visible.send(self.__class__, visible=True)
+        self.on_window_showed()
 
     def hide_window(self):
-        logger.debug('Hide window')
-
-        window_visible.send(self.__class__, visible=False)
+        self.on_window_hid()
 
     def run_window(self):
+        logger.debug('window run')
+
         Gtk.main()
 
     def delete_window(self, *args, **kwargs):
-        logger.debug('delete window')
-
         Gtk.main_quit()
 
+        logger.debug('window quit')
+
     def on_window_delete_event(self, window, event):
-        return app_exit.send(self.__class__)
+        tomate_signals.emit('app_quit')
 
-    def on_window_visibility_changed(self, sender=None, **kwargs):
-        if kwargs.get('visible', True):
-            self.indicator.hide()
-            return self.present_with_time(time.time())
+    def on_window_showed(self):
+        tomate_signals.emit('window showed')
+        return self.present_with_time(time.time())
 
-        self.indicator.show()
+    def on_window_hid(self):
+        tomate_signals.emit('window hid')
         return self.hide_on_delete()
 
 
@@ -130,7 +128,7 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
         def on_mode_changed(self, widget, index):
             task = Task.get_by_index(index)
 
-            change_task.send(self.__class__, task=task)
+            tomate_signals.emit('change_task', task=task)
 
         def change_selected(self, sender=None, **kwargs):
             task = kwargs.get('task', Task.pomodoro)
@@ -252,13 +250,13 @@ class Toolbar(ConnectSignalMixin, Gtk.Toolbar):
         self.connect_signals()
 
     def on_start_button_clicked(self, widget):
-        start_session.send(self.__class__)
+        tomate_signals.emit('start_session')
 
     def on_interrupt_button_clicked(self, widget):
-        interrupt_session.send(self.__class__)
+        tomate_signals.emit('interrupt_session')
 
     def on_reset_button_clicked(self, widget):
-        reset_sessions.send(self.__class__)
+        tomate_signals.emit('reset_sessions')
 
     def enable_interrupt_button(self, sender=None, **kwargs):
         self.start_button.set_visible(False)

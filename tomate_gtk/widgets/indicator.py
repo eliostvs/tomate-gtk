@@ -3,7 +3,7 @@ from locale import gettext as _
 from gi.repository import AppIndicator3, Gtk
 
 from tomate.profile import ProfileManagerSingleton
-from tomate.signals import window_visible
+from tomate.signals import tomate_signals
 from tomate.base import ConnectSignalMixin
 
 profile = ProfileManagerSingleton.get()
@@ -11,7 +11,7 @@ profile = ProfileManagerSingleton.get()
 
 class IndicatorMenu(Gtk.Menu):
 
-    def __init__(self, window):
+    def __init__(self):
         Gtk.Menu.__init__(self, halign=Gtk.Align.CENTER)
 
         self.show_menu = Gtk.MenuItem(_('Show'), visible=False)
@@ -20,23 +20,25 @@ class IndicatorMenu(Gtk.Menu):
         self.show_all()
 
     def on_show_menu_activate(self, widget):
-        window_visible.send(self.__class__, visible=True)
+        tomate_signals.emit('window hid')
 
 
 class Indicator(ConnectSignalMixin):
 
     signals = (
         ('session_ended', 'hide'),
+        ('window_showed', 'hide'),
+        ('window_hid', 'show'),
     )
 
-    def __init__(self, window):
+    def __init__(self):
         self.indicator = AppIndicator3.Indicator.new_with_path(
                 'tomate',
                 'tomate-indicator',
                 AppIndicator3.IndicatorCategory.APPLICATION_STATUS,
                 profile.get_icon_paths()[0]
             )
-        self.indicator.set_menu(IndicatorMenu(window))
+        self.indicator.set_menu(IndicatorMenu())
 
         self.connect_signals()
 
