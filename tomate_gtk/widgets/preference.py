@@ -4,7 +4,7 @@ import locale
 import logging
 from locale import gettext as _
 
-from gi.repository import Gtk
+from gi.repository import GdkPixbuf, Gtk
 from tomate.profile import ProfileManagerSingleton
 from tomate.signals import tomate_signals
 from yapsy.PluginManager import PluginManagerSingleton
@@ -30,16 +30,20 @@ class PreferenceDialog(Gtk.Dialog):
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
 
-        self.set_size_request(370, 200)
+        self.set_size_request(350, 200)
+
         self.connect('response', self.on_dialog_response)
+
+        self.connect('show', self.on_dialog_show)
 
         stack = Gtk.Stack()
         stack.add_titled(TimerDurationGrid(), 'timer', _('Timer'))
 
+        self.plugin_list = PluginList()
         scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.OUT)
-        scrolledwindow.add_with_viewport(PluginTreeView())
+        scrolledwindow.add_with_viewport(self.plugin_list)
 
-        stack.add_titled(scrolledwindow, 'plugin', _('Plugins'))
+        stack.add_titled(scrolledwindow, 'extension', _('Extensions'))
 
         switcher = Gtk.StackSwitcher(margin_top=5,
                                      margin_bottom=5,
@@ -59,6 +63,9 @@ class PreferenceDialog(Gtk.Dialog):
 
     def on_dialog_response(self, widget, parameter):
         widget.destroy()
+
+    def on_dialog_show(self, widget):
+        self.plugin_list.refresh()
 
 
 class TimerDurationGrid(Gtk.Grid):
@@ -130,63 +137,106 @@ class TimerDurationGrid(Gtk.Grid):
         logger.debug('Session %s duration change to %d', option, value)
 
 
-class PluginTreeView(Gtk.TreeView):
+class PluginList(Gtk.TreeView):
 
     def __init__(self):
-        Gtk.TreeView.__init__(self)
-
-        self.set_headers_visible(True)
+        Gtk.TreeView.__init__(self, headers_visible=False)
 
         self.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
-        self._store = Gtk.ListStore(bool, str, str, str, object)
+        self._store = Gtk.ListStore(bool,  # active
+                                    GdkPixbuf.Pixbuf,  # icon
+                                    str,   # name
+                                    str,   # detail
+                                    object)  # plugin
 
         self.set_model(self._store)
 
         renderer = Gtk.CellRendererToggle()
-        renderer.connect('toggled', self.on_active_toggled)
-        column = Gtk.TreeViewColumn(_('Active'), renderer, active=0)
+        renderer.connect('toggled', self.on_plugin_toggled)
+        column = Gtk.TreeViewColumn('Active', renderer, active=0)
+        self.append_column(column)
+
+        renderer = Gtk.CellRendererPixbuf()
+        column = Gtk.TreeViewColumn('Icon', renderer, pixbuf=1)
         self.append_column(column)
 
         renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(_('Version'), renderer, text=1)
+        column = Gtk.TreeViewColumn('Detail', renderer, markup=3)
         self.append_column(column)
 
-        renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(_('Name'), renderer, text=2)
-        self.append_column(column)
-
-        renderer = Gtk.CellRendererText()
-        column = Gtk.TreeViewColumn(('Description'), renderer, text=3)
-        self.append_column(column)
-
-        self.refresh()
-
-    def on_active_toggled(self, widget, path):
-        iter = self._store.get_iter(path)
-        self._store[iter][0] = not self._store[iter][0]
-
-        manager = PluginManagerSingleton.get()
-
-        if self._store[iter][0]:
-            manager.activatePluginByName(self._store[iter][2])
-
-        else:
-            manager.deactivatePluginByName(self._store[iter][2])
+        self.manager = PluginManagerSingleton.get()
 
     def refresh(self):
+        self.clear()
+
+        for plugin in self.manager.getAllPlugins():
+            self.add_plugin(plugin)
+
+        if self.there_are_plugins:
+            self.select_first_plugin()
+
+    def on_plugin_toggled(self, widget, path):
+        plugin = Plugin(self._store, path)
+
+        plugin.toggle()
+
+        if plugin.is_enable:
+            self.manager.activatePluginByName(plugin.name)
+
+        else:
+            self.manager.deactivatePluginByName(plugin.name)
+
+    def clear(self):
         self._store.clear()
 
-        manager = PluginManagerSingleton.get()
+    def select_first_plugin(self):
+        self.get_selection().select_iter(self._store.get_iter_first())
 
-        for plugin in manager.getAllPlugins():
-            self._store.append((plugin.plugin_object.is_activated,
-                                str(plugin.version),
-                                plugin.name,
-                                plugin.description,
-                                plugin))
+    @property
+    def there_are_plugins(self):
+        return bool(len(self._store))
 
-            logger.debug('load plugin in grid %s', plugin.name)
+    def add_plugin(self, plugin):
+        self._store.append((plugin.plugin_object.is_activated,
+                            Plugin.pixbuf(plugin),
+                            plugin.name,
+                            Plugin.markup(plugin),
+                            plugin))
 
-        if len(self._store):
-            self.get_selection().select_iter(self._store.get_iter_first())
+        logger.debug('plugin %s added', plugin.name)
+
+
+class Plugin(object):
+
+    ENABLE = 0
+    TITLE = 2
+
+    def __init__(self, treestore, treepath):
+        treeiter = treestore.get_iter(treepath)
+        self._instance = treestore[treeiter]
+
+    @property
+    def name(self):
+        return self._instance[self.TITLE]
+
+    @property
+    def is_enable(self):
+        return self._instance[self.ENABLE]
+
+    def toggle(self):
+        self._instance[self.ENABLE] = not self._instance[self.ENABLE]
+
+    @staticmethod
+    def pixbuf(plugin):
+        icon_name = getattr(plugin, 'icon', 'libpeas-plugin')
+        icon_path = profile.get_icon_path(icon_name, 16)
+        return GdkPixbuf.Pixbuf.new_from_file(icon_path)
+
+    @staticmethod
+    def markup(plugin):
+        return ('<b>{name}</b> ({version})'
+                '\n<small>{description}</small>'
+                ).format(name=plugin.name,
+                         version=plugin.version,
+                         description=plugin.description)
