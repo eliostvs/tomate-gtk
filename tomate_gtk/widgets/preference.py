@@ -79,7 +79,7 @@ class TimerDurationGrid(Gtk.Grid):
 
         # Pomodoro Lenght Setting
         spinbutton = Gtk.SpinButton.new_with_range(1, 99, 1)
-        label, setting = self._add_setting(_('Timer:'),
+        label, setting = self._add_setting(_('Pomodoro:'),
                                            spinbutton,
                                            'pomodoro_duration')
         self.attach(label, 0, 1, 1, 1)
