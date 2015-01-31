@@ -4,12 +4,12 @@ import logging
 
 import dbus.mainloop.glib
 from gi.repository import Gdk
-from tomate.application import application_factory, Application
+from tomate.application import Application, application_factory
 from tomate.base import AutoConnectSignalMixin
 from tomate.utils import setup_logging
 
 from .utils import parse_options
-from .widgets.window import Window
+from .view import GtkView
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 class GtkApplication(AutoConnectSignalMixin,
                      Application):
 
-    view_class = Window
+    view_class = GtkView
 
     signals = (
-        ('app_quit', 'exit'),
-        ('session_duration_changed', 'on_configuration_changed'),
+        ('app_quit', 'quit'),
+        ('setting_changed', 'on_setting_changed'),
     )
 
-    def on_configuration_changed(self, sender=None, **kwargs):
+    def on_setting_changed(self, sender=None, **kwargs):
         section = kwargs.get('section')
         option = kwargs.get('option')
         value = kwargs.get('value')
@@ -32,7 +32,7 @@ class GtkApplication(AutoConnectSignalMixin,
         self.profile.set(section, option, value)
 
         if 'duration' in option:
-            self.pomodoro.change_task(self.__class__, task=self.pomodoro.task)
+            self.pomodoro.change_task(task=self.pomodoro.task)
 
         logger.debug('Configuration %s in section %s changed to %s',
                      option, section, value)

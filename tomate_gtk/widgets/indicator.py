@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from locale import gettext as _
 
 from gi.repository import AppIndicator3, Gtk

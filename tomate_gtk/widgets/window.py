@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import locale
 import logging
-import time
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
@@ -12,10 +11,8 @@ from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
 from tomate.signals import tomate_signals
 from tomate.utils import format_time_left
-from tomate.view import IView
 
 from .about import AboutDialog
-from .indicator import Indicator
 from .modebutton import ModeButton
 from .preference import PreferenceDialog
 
@@ -26,15 +23,7 @@ logger = logging.getLogger(__name__)
 profile = ProfileManagerSingleton.get()
 
 
-class Window(ConnectSignalMixin,
-             IView,
-             Gtk.Window):
-
-    signals = (
-        ('window_hid', 'on_window_hid'),
-        ('window_showed', 'on_window_showed'),
-        ('session_ended', 'show_window'),
-    )
+class Window(Gtk.Window):
 
     iconpath = profile.get_icon_path('tomate', 22)
 
@@ -52,8 +41,6 @@ class Window(ConnectSignalMixin,
 
         self.menu = MainMenu(self)
 
-        self.indicator = Indicator()
-
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(Toolbar(self), False, False, 0)
         box.pack_start(TimerFrame(), True, True, 0)
@@ -65,34 +52,8 @@ class Window(ConnectSignalMixin,
 
         self.show_all()
 
-        self.connect_signals()
-
-    def show_window(self, sender=None, **kwargs):
-        self.on_window_showed()
-
-    def hide_window(self):
-        self.on_window_hid()
-
-    def run_window(self):
-        logger.debug('window run')
-
-        Gtk.main()
-
-    def delete_window(self, *args, **kwargs):
-        Gtk.main_quit()
-
-        logger.debug('window quit')
-
     def on_window_delete_event(self, window, event):
         tomate_signals.emit('app_quit')
-
-    def on_window_showed(self):
-        tomate_signals.emit('window showed')
-        return self.present_with_time(time.time())
-
-    def on_window_hid(self):
-        tomate_signals.emit('window hid')
-        return self.hide_on_delete()
 
 
 class TaskButtons(ConnectSignalMixin, ModeButton):

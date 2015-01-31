@@ -6,7 +6,7 @@ from locale import gettext as _
 
 from gi.repository import Gtk
 from tomate.profile import ProfileManagerSingleton
-from tomate.signals import session_duration_changed
+from tomate.signals import tomate_signals
 from yapsy.PluginManager import PluginManagerSingleton
 
 locale.textdomain('tomate')
@@ -122,10 +122,10 @@ class TimerDurationGrid(Gtk.Grid):
     def on_spinbutton_value_changed(self, widget, option):
         value = widget.get_value_as_int()
 
-        session_duration_changed.send(self.__class__,
-                                      section='Timer',
-                                      option=option,
-                                      value=str(value))
+        tomate_signals.emit('setting_changed',
+                            section='Timer',
+                            option=option,
+                            value=str(value))
 
         logger.debug('Session %s duration change to %d', option, value)
 
