@@ -51,3 +51,9 @@ class Indicator(ConnectSignalMixin):
 
     def hide(self, *args, **kwargs):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
+
+    def __getattr__(self, function):
+        if function in ('show', 'hide'):
+            return getattr(self, function)
+
+        return getattr(self.indicator, function)
