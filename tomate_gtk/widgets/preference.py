@@ -34,8 +34,6 @@ class PreferenceDialog(Gtk.Dialog):
 
         self.connect('response', self.on_dialog_response)
 
-        self.connect('show', self.on_dialog_show)
-
         stack = Gtk.Stack()
         stack.add_titled(TimerDurationGrid(), 'timer', _('Timer'))
 
@@ -64,7 +62,7 @@ class PreferenceDialog(Gtk.Dialog):
     def on_dialog_response(self, widget, parameter):
         widget.destroy()
 
-    def on_dialog_show(self, widget):
+    def refresh_plugin(self):
         self.plugin_list.refresh()
 
 

@@ -274,6 +274,7 @@ class MainMenu(Gtk.Menu):
 
     def on_settings_menu_activate(self, widget, parent):
         dialog = PreferenceDialog(parent)
+        dialog.refresh_plugin()
         dialog.run()
         dialog.destroy()
 
