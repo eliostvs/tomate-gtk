@@ -47,7 +47,7 @@ def main():
 
         app = application_factory(GtkApplication, options=options)
 
-        app.start()
+        app.run()
 
         if app.is_running():
             Gdk.notify_startup_complete()
