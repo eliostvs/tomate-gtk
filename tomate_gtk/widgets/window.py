@@ -33,8 +33,8 @@ class Window(Gtk.Window):
             window_position=Gtk.WindowPosition.CENTER,
             resizable=False
         )
+        self.set_size_request(350, 200)
 
-        self.set_size_request(380, 200)
         self.connect('delete-event', self.on_window_delete_event)
 
         self.menu = MainMenu(self)
