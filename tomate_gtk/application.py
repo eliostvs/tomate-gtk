@@ -17,16 +17,16 @@ logger = logging.getLogger(__name__)
 class GtkApplication(AutoConnectSignalMixin,
                      Application):
 
-    bus_name = 'com.github.TomateGtk'
-    bus_object_path = '/'
-    bus_interface_name = 'com.github.TomateGtk'
-
     view_class = GtkView
 
     signals = (
         ('app_quit', 'quit'),
+        ('app_request', 'on_app_request'),
         ('setting_changed', 'on_setting_changed'),
     )
+
+    def on_app_request(self, *args):
+        return self
 
     def on_setting_changed(self, sender=None, **kwargs):
         section = kwargs.get('section')

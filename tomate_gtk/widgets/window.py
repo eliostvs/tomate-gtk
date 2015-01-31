@@ -5,12 +5,10 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
-
 from tomate.base import ConnectSignalMixin
 from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
-from tomate.signals import tomate_signals
-from tomate.utils import format_time_left
+from tomate.utils import format_time_left, LazyApplication
 
 from .about import AboutDialog
 from .modebutton import ModeButton
@@ -50,10 +48,15 @@ class Window(Gtk.Window):
 
         self.add(box)
 
+        self.app = LazyApplication()
+
         self.show_all()
 
     def on_window_delete_event(self, window, event):
-        tomate_signals.emit('app_quit')
+        return self.app.quit()
+
+    def show_window(self):
+        return self.present()
 
 
 class TaskButtons(ConnectSignalMixin, ModeButton):
@@ -84,17 +87,18 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
 
             self.connect('mode_changed', self.on_mode_changed)
 
+            self.app = LazyApplication()
+
             self.connect_signals()
 
         def on_mode_changed(self, widget, index):
             task = Task.get_by_index(index)
-
-            tomate_signals.emit('change_task', task=task)
+            self.app.change_task(task=task)
 
         def change_selected(self, sender=None, **kwargs):
             task = kwargs.get('task', Task.pomodoro)
 
-            logger.debug('Task change %s', task)
+            logger.debug('task changed %s', task)
 
             self.set_selected(task.value)
 
@@ -208,16 +212,18 @@ class Toolbar(ConnectSignalMixin, Gtk.Toolbar):
         style = self.get_style_context()
         style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
+        self.app = LazyApplication()
+
         self.connect_signals()
 
     def on_start_button_clicked(self, widget):
-        tomate_signals.emit('start_session')
+        self.app.start()
 
     def on_interrupt_button_clicked(self, widget):
-        tomate_signals.emit('interrupt_session')
+        self.app.interrupt()
 
     def on_reset_button_clicked(self, widget):
-        tomate_signals.emit('reset_sessions')
+        self.app.reset()
 
     def enable_interrupt_button(self, sender=None, **kwargs):
         self.start_button.set_visible(False)

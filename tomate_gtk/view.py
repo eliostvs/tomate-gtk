@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 class GtkView(IView, ConnectSignalMixin):
 
     signals = (
-        ('window_hid', 'hide'),
-        ('window_showed', 'show'),
-        ('session_ended', 'show_window'),
+        ('session_ended', 'show'),
     )
 
     def __init__(self):
@@ -38,11 +36,12 @@ class GtkView(IView, ConnectSignalMixin):
         Gtk.main_quit()
 
         logger.debug('window quit')
+        return True
 
-    def show(self):
-        tomate_signals.emit('window showed')
-        return self.present_with_time(time.time())
+    def show(self, *args, **kwargs):
+        tomate_signals.emit('window_showed')
+        return self.window.present_with_time(time.time())
 
-    def hide(self):
-        tomate_signals.emit('window hid')
-        return self.hide_on_delete()
+    def hide(self, *args, **kwargs):
+        tomate_signals.emit('window_hid')
+        return self.window.hide_on_delete()
