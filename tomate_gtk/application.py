@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 class GtkApplication(AutoConnectSignalMixin,
                      Application):
 
+    bus_name = 'com.github.TomateGtk'
+    bus_object_path = '/'
+    bus_interface_name = 'com.github.TomateGtk'
+
     view_class = GtkView
 
     signals = (
