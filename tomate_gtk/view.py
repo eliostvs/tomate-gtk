@@ -5,7 +5,7 @@ import time
 
 from gi.repository import Gtk
 
-from tomate.base import ConnectSignalMixin
+from tomate.mixins import ConnectSignalMixin
 from tomate.signals import tomate_signals
 from tomate.view import IView
 

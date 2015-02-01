@@ -5,7 +5,7 @@ import logging
 import dbus.mainloop.glib
 from gi.repository import Gdk
 from tomate.application import Application, application_factory
-from tomate.signals import ConnectSignalMixin
+from tomate.mixins import ConnectSignalMixin
 from tomate.utils import setup_logging
 
 from .utils import parse_options

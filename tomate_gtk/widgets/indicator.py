@@ -4,7 +4,7 @@ from locale import gettext as _
 
 from gi.repository import AppIndicator3, Gtk
 
-from tomate.signals import ConnectSignalMixin
+from tomate.mixins import ConnectSignalMixin
 from tomate.profile import ProfileManagerSingleton
 from tomate.utils import LazyApplication
 
