@@ -125,14 +125,8 @@ class TimerDurationGrid(Gtk.Grid):
         return label, spinbutton
 
     def on_spinbutton_value_changed(self, widget, option):
-        value = widget.get_value_as_int()
-
-        tomate_signals.emit('setting_changed',
-                            section='Timer',
-                            option=option,
-                            value=str(value))
-
-        logger.debug('Session %s duration change to %d', option, value)
+        value = str(widget.get_value_as_int())
+        profile.set('Timer', option, value)
 
 
 class PluginList(Gtk.TreeView):
