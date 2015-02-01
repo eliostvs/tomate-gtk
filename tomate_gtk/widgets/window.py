@@ -9,7 +9,7 @@ from gi.repository import GdkPixbuf, Gtk
 from tomate.mixins import ConnectSignalMixin
 from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
-from tomate.utils import format_time_left, LazyApplication
+from tomate.utils import format_time_left, LazyApplicationSingleton
 
 from .about import AboutDialog
 from .modebutton import ModeButton
@@ -49,7 +49,7 @@ class Window(Gtk.Window):
 
         self.add(box)
 
-        self.app = LazyApplication()
+        self.app = LazyApplicationSingleton.get()
 
         self.show_all()
 
@@ -88,7 +88,7 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
 
             self.connect('mode_changed', self.on_mode_changed)
 
-            self.app = LazyApplication()
+            self.app = LazyApplicationSingleton.get()
 
             self.connect_signals()
 
@@ -213,7 +213,7 @@ class Toolbar(ConnectSignalMixin, Gtk.Toolbar):
         style = self.get_style_context()
         style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
-        self.app = LazyApplication()
+        self.app = LazyApplicationSingleton.get()
 
         self.connect_signals()
 

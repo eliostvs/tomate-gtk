@@ -6,7 +6,7 @@ from gi.repository import AppIndicator3, Gtk
 
 from tomate.mixins import ConnectSignalMixin
 from tomate.profile import ProfileManagerSingleton
-from tomate.utils import LazyApplication
+from tomate.utils import LazyApplicationSingleton
 
 profile = ProfileManagerSingleton.get()
 
@@ -21,7 +21,7 @@ class IndicatorMenu(Gtk.Menu):
         self.append(self.show_menu)
         self.show_all()
 
-        self.app = LazyApplication()
+        self.app = LazyApplicationSingleton.get()
 
     def on_show_menu_activate(self, widget):
         return self.app.show()
