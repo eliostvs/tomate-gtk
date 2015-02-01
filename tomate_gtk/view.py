@@ -7,7 +7,7 @@ from gi.repository import Gtk
 
 from tomate.mixins import ConnectSignalMixin
 from tomate.signals import tomate_signals
-from tomate.view import IView
+from tomate.interfaces import IView
 
 from .widgets import indicator, window
 
