@@ -4,24 +4,19 @@ import os
 
 from setuptools import find_packages, setup
 
-DATA_FILES = [
-    ('share/icons', 'data/icons'),
-    ('share/applications', 'data/applications'),
-]
 
-
-def find_xdg_data_files(install_path, topdir, pkgname, data_files=[]):
-    for (dirpath, _, filenames) in os.walk(topdir):
+def find_xdg_data_files(syspath, relativepath, pkgname, data_files=[]):
+    for (dirname, _, filenames) in os.walk(relativepath):
         if filenames:
-            install_path = install_path.format(pkgname=pkgname)
+            syspath = syspath.format(pkgname=pkgname)
 
-            subpath = dirpath.split(topdir)[1]
+            subpath = dirname.split(relativepath)[1]
             if subpath.startswith('/'):
                 subpath = subpath[1:]
 
-            files = [os.path.join(dirpath, f) for f in filenames]
+            files = [os.path.join(dirname, f) for f in filenames]
 
-            data_files.append((os.path.join(install_path, subpath), files))
+            data_files.append((os.path.join(syspath, subpath), files))
 
     return data_files
 
@@ -29,10 +24,16 @@ def find_xdg_data_files(install_path, topdir, pkgname, data_files=[]):
 def find_data_files(data_map, pkgname):
     data_files = []
 
-    for (system_path, local_path) in data_map:
-        find_xdg_data_files(system_path, local_path, pkgname, data_files)
+    for (syspath, relativepath) in data_map:
+        find_xdg_data_files(syspath, relativepath, pkgname, data_files)
 
     return data_files
+
+
+DATA_FILES = [
+    ('share/icons', 'data/icons'),
+    ('share/applications', 'data/applications'),
+]
 
 
 setup(

@@ -5,6 +5,7 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
+
 from tomate.mixins import ConnectSignalMixin
 from tomate.pomodoro import Task
 from tomate.profile import ProfileManagerSingleton
