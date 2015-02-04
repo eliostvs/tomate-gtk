@@ -5,10 +5,10 @@ from locale import gettext as _
 from gi.repository import AppIndicator3, Gtk
 
 from tomate.mixins import ConnectSignalMixin
-from tomate.profile import ProfileManagerSingleton
+from tomate.profile import ProfileManager
 from tomate.utils import LazyApplicationSingleton
 
-profile = ProfileManagerSingleton.get()
+profile = ProfileManager()
 
 
 class IndicatorMenu(Gtk.Menu):

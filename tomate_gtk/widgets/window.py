@@ -8,7 +8,7 @@ from gi.repository import GdkPixbuf, Gtk
 
 from tomate.mixins import ConnectSignalMixin
 from tomate.pomodoro import Task
-from tomate.profile import ProfileManagerSingleton
+from tomate.profile import ProfileManager
 from tomate.utils import format_time_left, LazyApplicationSingleton
 
 from .about import AboutDialog
@@ -19,7 +19,7 @@ locale.textdomain('tomate')
 
 logger = logging.getLogger(__name__)
 
-profile = ProfileManagerSingleton.get()
+profile = ProfileManager()
 
 
 class Window(Gtk.Window):

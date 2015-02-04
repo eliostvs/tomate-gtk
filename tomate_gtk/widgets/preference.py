@@ -5,15 +5,14 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
-from tomate.profile import ProfileManagerSingleton
-from tomate.signals import tomate_signals
+from tomate.profile import ProfileManager
 from yapsy.PluginManager import PluginManagerSingleton
 
 locale.textdomain('tomate')
 
 logger = logging.getLogger(__name__)
 
-profile = ProfileManagerSingleton.get()
+profile = ProfileManager()
 
 
 class PreferenceDialog(Gtk.Dialog):

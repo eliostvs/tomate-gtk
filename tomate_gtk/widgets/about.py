@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 import tomate_gtk
 from gi.repository import GdkPixbuf, Gtk
-from tomate.profile import ProfileManagerSingleton
+from tomate.profile import ProfileManager
 
-profile = ProfileManagerSingleton.get()
+profile = ProfileManager()
 
 
 class AboutDialog(Gtk.AboutDialog):
