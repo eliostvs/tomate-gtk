@@ -44,3 +44,4 @@ whoosh_index/
 *.vagrant
 *.deb
 *.bzr
+*.sublime-*
