@@ -3,10 +3,9 @@ from __future__ import unicode_literals
 from locale import gettext as _
 
 from gi.repository import AppIndicator3, Gtk
-
 from tomate.mixins import ConnectSignalMixin
 from tomate.profile import ProfileManager
-from tomate.utils import LazyApplicationSingleton
+from tomate.services import Cache
 
 profile = ProfileManager()
 
@@ -21,7 +20,7 @@ class IndicatorMenu(Gtk.Menu):
         self.append(self.show_menu)
         self.show_all()
 
-        self.app = LazyApplicationSingleton.get()
+        self.app = Cache.get('GtkApplication')
 
     def on_show_menu_activate(self, widget):
         return self.app.show()
