@@ -20,7 +20,7 @@ class IndicatorMenu(Gtk.Menu):
         self.append(self.show_menu)
         self.show_all()
 
-        self.app = Cache.get('GtkApplication')
+        self.app = Cache.lookup('GtkApplication')
 
     def on_show_menu_activate(self, widget):
         return self.app.show()

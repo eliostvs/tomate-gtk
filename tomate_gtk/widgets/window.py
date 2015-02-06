@@ -49,7 +49,7 @@ class Window(Gtk.Window):
 
         self.add(box)
 
-        self.app = Cache.get('GtkApplication')
+        self.app = Cache.lookup('GtkApplication')
 
         self.show_all()
 
@@ -88,7 +88,7 @@ class TaskButtons(ConnectSignalMixin, ModeButton):
 
             self.connect('mode_changed', self.on_mode_changed)
 
-            self.app = Cache.get('GtkApplication')
+            self.app = Cache.lookup('GtkApplication')
 
             self.connect_signals()
 
@@ -213,7 +213,7 @@ class Toolbar(ConnectSignalMixin, Gtk.Toolbar):
         style = self.get_style_context()
         style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
-        self.app = Cache.get('GtkApplication')
+        self.app = Cache.lookup('GtkApplication')
 
         self.connect_signals()
 
