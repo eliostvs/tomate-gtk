@@ -81,26 +81,23 @@ class TimerDurationGrid(Gtk.Grid):
         section = self._add_section(_('Duration:'))
         self.attach(section, 0, 0, 1, 1)
 
-        # Pomodoro Lenght Setting
-        spinbutton = Gtk.SpinButton.new_with_range(1, 99, 1)
+        # Pomodoro Duration
         label, setting = self._add_setting(_('Pomodoro:'),
-                                           spinbutton,
+                                           Gtk.SpinButton.new_with_range(1, 99, 1),
                                            'pomodoro_duration')
         self.attach(label, 0, 1, 1, 1)
         self.attach_next_to(setting, label, Gtk.PositionType.RIGHT, 3, 1)
 
-        # Short Break Letting Setting
-        spinbutton = Gtk.SpinButton.new_with_range(1, 99, 1)
+        # Short Break Duration
         label, setting = self._add_setting(_('Short break:'),
-                                           spinbutton,
+                                           Gtk.SpinButton.new_with_range(1, 99, 1),
                                            'shortbreak_duration')
         self.attach(label, 0, 2, 1, 1)
         self.attach_next_to(setting, label, Gtk.PositionType.RIGHT, 3, 1)
 
-        # Long Break Lenght Setting
-        spinbutton = Gtk.SpinButton.new_with_range(1, 99, 1)
+        # Long Break Duration
         label, setting = self._add_setting(_('Long Break'),
-                                           spinbutton,
+                                           Gtk.SpinButton.new_with_range(1, 99, 1),
                                            'longbreak_duration')
         self.attach(label, 0, 3, 1, 1)
         self.attach_next_to(setting, label, Gtk.PositionType.RIGHT, 3, 1)
@@ -156,12 +153,12 @@ class PluginList(Gtk.TreeView):
         column = Gtk.TreeViewColumn('Detail', renderer, markup=3)
         self.append_column(column)
 
-        self.manager = PluginManagerSingleton.get()
+        self.plugin = PluginManagerSingleton.get()
 
     def refresh(self):
         self.clear()
 
-        for plugin in self.manager.getAllPlugins():
+        for plugin in self.plugin.getAllPlugins():
             self.add_plugin(plugin)
 
         if self.there_are_plugins:
@@ -173,10 +170,10 @@ class PluginList(Gtk.TreeView):
         plugin.toggle()
 
         if plugin.is_enable:
-            self.manager.activatePluginByName(plugin.name)
+            self.plugin.activatePluginByName(plugin.name)
 
         else:
-            self.manager.deactivatePluginByName(plugin.name)
+            self.plugin.deactivatePluginByName(plugin.name)
 
     def clear(self):
         self._store.clear()
@@ -200,7 +197,7 @@ class PluginList(Gtk.TreeView):
 
 class Plugin(object):
 
-    ENABLE = 0
+    ACTIVE = 0
     TITLE = 2
 
     def __init__(self, treestore, treepath):
@@ -213,10 +210,10 @@ class Plugin(object):
 
     @property
     def is_enable(self):
-        return self._instance[self.ENABLE]
+        return self._instance[self.ACTIVE]
 
     def toggle(self):
-        self._instance[self.ENABLE] = not self._instance[self.ENABLE]
+        self._instance[self.ACTIVE] = not self._instance[self.ACTIVE]
 
     @staticmethod
     def pixbuf(plugin):
