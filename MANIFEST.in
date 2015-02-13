@@ -1,0 +1,3 @@
+include AUTHORS COPYING README.md
+recursive-include data/applications *.desktop
+recursive-include data/icons *.png *.svg
