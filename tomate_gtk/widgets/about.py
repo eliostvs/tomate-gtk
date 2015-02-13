@@ -22,7 +22,7 @@ class AboutDialog(Gtk.AboutDialog):
             program_name='Tomate Gtk',
             title='Tomate Gtk',
             transient_for=parent,
-            version='0.1.0',
+            version='0.1.1',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
         )
