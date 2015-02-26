@@ -8,6 +8,7 @@ python-coverage
 python-dbus
 python-enum34
 python-gi
+python-nose
 python-paver
 python-xdg
 python-yapsy

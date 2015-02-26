@@ -1,47 +1,44 @@
 from __future__ import unicode_literals
 
-import logging
 import time
 
 from gi.repository import Gtk
+from wiring import implements, inject
 
-from tomate.mixins import ConnectSignalMixin
-from tomate.signals import tomate_signals
-from tomate.interfaces import IView
-
-from .widgets import indicator, window
-
-logger = logging.getLogger(__name__)
+from tomate.signals import subscribe
+from tomate.view import IView
 
 
-class GtkView(IView, ConnectSignalMixin):
+@implements(IView)
+class GtkView(object):
 
-    signals = (
+    subscriptions = (
         ('session_ended', 'show'),
     )
 
-    def __init__(self):
-        self.indicator = indicator.Indicator()
-
-        self.window = window.Window()
-
-        self.connect_signals()
+    @subscribe
+    @inject(window='view.window',
+            session='tomate.session',
+            signals='tomate.signals')
+    def __init__(self, session=None, signals=None, window=None):
+        self.session = session
+        self.signals = signals
+        self.window = window
 
     def run(self):
-        logger.debug('window run')
-
         Gtk.main()
 
-    def quit(self, *args, **kwargs):
-        Gtk.main_quit()
+    def quit(self):
+        if self.session.timer_is_running():
+            self.hide()
 
-        logger.debug('window quit')
-        return True
+        else:
+            Gtk.main_quit()
 
-    def show(self, *args, **kwargs):
-        tomate_signals.emit('window_showed')
+    def show(self):
+        self.signals.emit('window_showed')
         return self.window.present_with_time(time.time())
 
-    def hide(self, *args, **kwargs):
-        tomate_signals.emit('window_hid')
+    def hide(self):
+        self.signals.emit('window_hid')
         return self.window.hide_on_delete()

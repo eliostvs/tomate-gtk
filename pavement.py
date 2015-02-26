@@ -15,10 +15,16 @@ DATA_PATH = ROOT_PATH / 'data'
 TOMATE_PATH = ROOT_PATH / 'tomate'
 
 
-@needs(['run'])
+@needs(['test'])
 @task
 def default():
     pass
+
+
+@task
+@needs(['clean', 'setup'])
+def test(options):
+    sh('nosetests tests')
 
 
 @task
@@ -26,9 +32,14 @@ def clear():
     sh('pyclean tomate_gtk')
 
 
-@needs(['clean'])
+@needs(['clean', 'setup'])
 @task
 def run():
+    sh('python -m tomate_gtk -v')
+
+
+@task
+def setup():
     import os
     from xdg.BaseDirectory import xdg_data_dirs
 
@@ -37,8 +48,6 @@ def run():
     os.environ['XDG_DATA_DIRS'] = ':'.join(xdg_data_dirs)
     os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
     os.environ['PYTHONPATH'] = '%s:%s' % (TOMATE_PATH, ROOT_PATH)
-
-    sh('python -m tomate_gtk -v')
 
 
 @task
