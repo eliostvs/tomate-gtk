@@ -3,56 +3,67 @@ from __future__ import unicode_literals
 from locale import gettext as _
 
 from gi.repository import AppIndicator3, Gtk
-from tomate.mixins import ConnectSignalMixin
-from tomate.profile import ProfileManager
-from tomate.services import Cache
+from tomate.signals import subscribe
+from wiring import implements, inject, Interface
 
-profile = ProfileManager()
+
+class IIndicator(Interface):
+
+    indicator = ''
+
+    def hide():
+        pass
+
+    def show():
+        pass
+
+    def set_icon(icon):
+        pass
 
 
 class IndicatorMenu(Gtk.Menu):
 
-    def __init__(self):
+    @inject(view='tomate.view')
+    def __init__(self, view=None):
         Gtk.Menu.__init__(self, halign=Gtk.Align.CENTER)
-
+        self.view = view
         self.show_menu = Gtk.MenuItem(_('Show'), visible=False)
         self.show_menu.connect('activate', self.on_show_menu_activate)
         self.append(self.show_menu)
         self.show_all()
 
-        self.app = Cache.lookup('GtkApplication')
-
     def on_show_menu_activate(self, widget):
-        return self.app.show()
+        return self.view.show()
 
 
-class Indicator(ConnectSignalMixin):
+@implements(IIndicator)
+class Indicator(object):
 
-    signals = (
+    subscriptions = (
         ('session_ended', 'hide'),
         ('window_showed', 'hide'),
         ('window_hid', 'show'),
     )
 
-    def __init__(self):
+    @subscribe
+    @inject(config='tomate.config', menu='indicator.menu')
+    def __init__(self, config=None, menu=None):
+        self.config = config
+
         self.indicator = AppIndicator3.Indicator.new_with_path(
                 'tomate',
                 'tomate-indicator',
                 AppIndicator3.IndicatorCategory.APPLICATION_STATUS,
-                profile.get_icon_paths()[0]
+                self.config.get_icon_paths()[0]
             )
-        self.indicator.set_menu(IndicatorMenu())
 
-        self.connect_signals()
+        self.indicator.set_menu(menu)
 
-    def show(self, *args, **kwargs):
+    def show(self):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
-    def hide(self, *args, **kwargs):
+    def hide(self):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
-    def __getattr__(self, function):
-        if function in ('show', 'hide'):
-            return getattr(self, function)
-
-        return getattr(self.indicator, function)
+    def set_icon(self, icon):
+        self.indicator.set_icon(icon)

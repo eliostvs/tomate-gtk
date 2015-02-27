@@ -24,7 +24,7 @@ def default():
 @task
 @needs(['clean', 'setup'])
 def test(options):
-    sh('nosetests tests')
+    sh('nosetests')
 
 
 @task
