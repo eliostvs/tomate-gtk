@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-RUN echo 'Acquire::http::Proxy "http://172.17.42.1:3142";' > /etc/apt/apt.conf.d/90-apt-cacher.conf
+#RUN echo 'Acquire::http::Proxy "http://172.17.42.1:3142";' > /etc/apt/apt.conf.d/90-apt-cacher.conf
 RUN apt-get install -y -qq wget
 RUN wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_14.04/Release.key | sudo apt-key add -
 RUN echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_14.04/ ./' > /etc/apt/sources.list.d/tomate.list
