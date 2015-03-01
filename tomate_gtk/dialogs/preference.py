@@ -5,27 +5,28 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
-from tomate.profile import ProfileManager
-from yapsy.PluginManager import PluginManagerSingleton
+from wiring import inject, Module, SingletonScope
 
 locale.textdomain('tomate')
-
 logger = logging.getLogger(__name__)
-
-profile = ProfileManager()
 
 
 class PreferenceDialog(Gtk.Dialog):
 
-    def __init__(self, parent):
+    @inject(duration='view.preference.duration',
+            extension='view.preference.extension')
+    def __init__(self, duration, extension):
+        self.extension = extension
+        self.duration = duration
+
         Gtk.Dialog.__init__(
             self,
             _('Preferences'),
-            parent,
+            self.get_toplevel(),
             buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
             modal=True,
             resizable=False,
-            transient_for=parent,
+            transient_for=self.get_toplevel(),
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
 
@@ -34,11 +35,10 @@ class PreferenceDialog(Gtk.Dialog):
         self.connect('response', self.on_dialog_response)
 
         stack = Gtk.Stack()
-        stack.add_titled(TimerDurationGrid(), 'timer', _('Timer'))
+        stack.add_titled(self.duration, 'timer', _('Timer'))
 
-        self.plugin_list = PluginList()
         scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.OUT)
-        scrolledwindow.add_with_viewport(self.plugin_list)
+        scrolledwindow.add_with_viewport(self.extension)
 
         stack.add_titled(scrolledwindow, 'extension', _('Extensions'))
 
@@ -59,15 +59,18 @@ class PreferenceDialog(Gtk.Dialog):
         content_area.add(box)
 
     def on_dialog_response(self, widget, parameter):
-        widget.destroy()
+        widget.hide()
 
     def refresh_plugin(self):
-        self.plugin_list.refresh()
+        self.extension.refresh()
 
 
-class TimerDurationGrid(Gtk.Grid):
+class TimerDuration(Gtk.Grid):
 
-    def __init__(self):
+    @inject(config='tomate.config')
+    def __init__(self, config):
+        self.config = config
+
         Gtk.Grid.__init__(
             self,
             column_spacing=6,
@@ -115,19 +118,23 @@ class TimerDurationGrid(Gtk.Grid):
 
         spinbutton.set_hexpand(True)
         spinbutton.set_halign(Gtk.Align.START)
-        spinbutton.set_value(profile.get_int('Timer', option))
+        spinbutton.set_value(self.config.get_int('Timer', option))
         spinbutton.connect('value-changed', self.on_spinbutton_value_changed, option)
 
         return label, spinbutton
 
     def on_spinbutton_value_changed(self, widget, option):
         value = str(widget.get_value_as_int())
-        profile.set('Timer', option, value)
+        self.config.set('Timer', option, value)
 
 
-class PluginList(Gtk.TreeView):
+class Extension(Gtk.TreeView):
 
-    def __init__(self):
+    @inject(plugin='tomate.plugin', config='tomate.config')
+    def __init__(self, plugin, config):
+        self.plugin = plugin
+        self.config = config
+
         Gtk.TreeView.__init__(self, headers_visible=False)
 
         self.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
@@ -153,8 +160,6 @@ class PluginList(Gtk.TreeView):
         column = Gtk.TreeViewColumn('Detail', renderer, markup=3)
         self.append_column(column)
 
-        self.plugin = PluginManagerSingleton.get()
-
     def refresh(self):
         self.clear()
 
@@ -165,7 +170,7 @@ class PluginList(Gtk.TreeView):
             self.select_first_plugin()
 
     def on_plugin_toggled(self, widget, path):
-        plugin = Plugin(self._store, path)
+        plugin = GridPlugin(self._store, path)
 
         plugin.toggle()
 
@@ -186,16 +191,19 @@ class PluginList(Gtk.TreeView):
         return bool(len(self._store))
 
     def add_plugin(self, plugin):
+        iconname = getattr(plugin, 'icon', 'libpeas-plugin')
+        iconpath = self.config.get_icon_path(iconname, 16)
+
         self._store.append((plugin.plugin_object.is_activated,
-                            Plugin.pixbuf(plugin),
+                            GridPlugin.pixbuf(iconpath),
                             plugin.name,
-                            Plugin.markup(plugin),
+                            GridPlugin.markup(plugin),
                             plugin))
 
         logger.debug('plugin %s added', plugin.name)
 
 
-class Plugin(object):
+class GridPlugin(object):
 
     ACTIVE = 0
     TITLE = 2
@@ -216,10 +224,8 @@ class Plugin(object):
         self._instance[self.ACTIVE] = not self._instance[self.ACTIVE]
 
     @staticmethod
-    def pixbuf(plugin):
-        icon_name = getattr(plugin, 'icon', 'libpeas-plugin')
-        icon_path = profile.get_icon_path(icon_name, 16)
-        return GdkPixbuf.Pixbuf.new_from_file(icon_path)
+    def pixbuf(iconpath):
+        return GdkPixbuf.Pixbuf.new_from_file(iconpath)
 
     @staticmethod
     def markup(plugin):
@@ -228,3 +234,11 @@ class Plugin(object):
                 ).format(name=plugin.name,
                          version=plugin.version,
                          description=plugin.description)
+
+
+class PreferenceDialogProvider(Module):
+    factories = {
+        'view.preference.extension': (Extension, SingletonScope),
+        'view.preference.duration': (TimerDuration, SingletonScope),
+        'view.preference': (PreferenceDialog, SingletonScope),
+    }

@@ -1,27 +1,24 @@
 from __future__ import unicode_literals
 
 from gi.repository import GdkPixbuf, Gtk
-from tomate.profile import ProfileManager
-
-profile = ProfileManager()
+from wiring import inject, Module
 
 
 class AboutDialog(Gtk.AboutDialog):
 
-    iconpath = profile.get_icon_path('tomate', 48)
-
-    def __init__(self, parent):
+    @inject(config='tomate.config')
+    def __init__(self, config):
         Gtk.AboutDialog.__init__(
             self,
             comments='Tomate Pomodoro Timer (GTK+ Interface).',
             copyright='2014, Elio Esteves Duarte',
             license='GPL-3',
             license_type=Gtk.License.GPL_3_0,
-            logo=GdkPixbuf.Pixbuf.new_from_file(self.iconpath),
+            logo=GdkPixbuf.Pixbuf.new_from_file(config.get_icon_path('tomate', 48)),
             modal=True,
             program_name='Tomate Gtk',
             title='Tomate Gtk',
-            transient_for=parent,
+            transient_for=self.get_toplevel(),
             version='0.1.2',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
@@ -32,4 +29,10 @@ class AboutDialog(Gtk.AboutDialog):
         self.connect("response", self.on_dialog_response)
 
     def on_dialog_response(self, widget, parameter):
-        self.destroy()
+        widget.hide()
+
+
+class AboutDialogProvider(Module):
+    factories = {
+        'view.about': AboutDialog
+    }
