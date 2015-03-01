@@ -1,10 +1,11 @@
 from __future__ import unicode_literals
 
-from tomate.app import Application
 from wiring import inject, Module, SingletonScope
 
+from tomate.app import Application
 
-class GtkApp(Application):
+
+class GtkApplication(Application):
 
     @inject(bus='dbus.session',
             view='tomate.view',
@@ -12,12 +13,12 @@ class GtkApp(Application):
             config='tomate.config',
             plugin='tomate.plugin')
     def __init__(self, bus, view, indicator, config, plugin):
-        super(GtkApp, self).__init__(bus, view, config, plugin)
+        super(GtkApplication, self).__init__(bus, view, config, plugin)
 
         self.indicator = indicator
 
 
 class AppProvider(Module):
     factories = {
-        'tomate.app': (GtkApp, SingletonScope)
+        'tomate.app': (GtkApplication, SingletonScope)
     }
