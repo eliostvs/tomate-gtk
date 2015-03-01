@@ -7,6 +7,7 @@ from gi.repository import GdkPixbuf, Gtk
 from wiring import implements, inject, Module, SingletonScope
 
 from tomate.view import IView
+from tomate.signals import subscribe
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,11 @@ logger = logging.getLogger(__name__)
 @implements(IView)
 class GtkView(Gtk.Window):
 
+    subscriptions = (
+        ('setting_changed', 'on_setting_changed'),
+    )
+
+    @subscribe
     @inject(session='tomate.session',
             signals='tomate.signals',
             config='tomate.config',
@@ -73,6 +79,10 @@ class GtkView(Gtk.Window):
         logger.debug('view hide')
         self.signals.emit('view_hid')
         return self.hide_on_delete()
+
+    def on_setting_changed(self, *args, **kwargs):
+        if kwargs.get('section') == 'timer':
+            self.session.change_task()
 
 
 class ViewProvider(Module):
