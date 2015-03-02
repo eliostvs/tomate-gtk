@@ -40,7 +40,6 @@ class TestGtkView(unittest.TestCase):
         graph.register_factory('tomate.session', Mock)
         graph.register_factory('config.parser', Mock)
         graph.register_factory('tomate.config', Config)
-        graph.register_factory('view.signals', Config)
         graph.register_factory('view.about', Mock)
         graph.register_factory('view.preference', Mock)
         graph.register_factory('view.appmenu', Appmenu)

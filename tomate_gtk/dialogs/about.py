@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject, Module
+from wiring import inject, Module, SingletonScope
 
 
 class AboutDialog(Gtk.AboutDialog):
@@ -34,5 +34,5 @@ class AboutDialog(Gtk.AboutDialog):
 
 class AboutDialogProvider(Module):
     factories = {
-        'view.about': AboutDialog
+        'view.about': (AboutDialog, SingletonScope)
     }
