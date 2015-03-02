@@ -2,19 +2,42 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mock import Mock
+import dbus
+from mock import Mock, patch
 from tomate.app import IApplication
+from tomate.graph import graph
+from wiring import FactoryProvider, SingletonScope
 
 
 class TestGtkApp(unittest.TestCase):
 
-    def test_inteface(self):
-        from tomate_gtk.app import GtkApplication
+    def test_inteface_and_module_provider(self):
+        from tomate_gtk.app import GtkApplication, AppProvider
 
-        app = GtkApplication(bus=Mock(),
-                             view=Mock(),
-                             indicator=Mock(),
-                             config=Mock(),
-                             plugin=Mock())
+        self.assertEqual(['tomate.app'], AppProvider.providers.keys())
+        AppProvider().add_to(graph)
 
-        IApplication.check_compliance(app)
+        provider = graph.providers['tomate.app']
+
+        self.assertIsInstance(provider, FactoryProvider)
+        self.assertEqual(provider.scope, SingletonScope)
+
+        dependencies = dict(bus='dbus.session',
+                            view='tomate.view',
+                            indicator='tomate.indicator',
+                            config='tomate.config',
+                            plugin='tomate.plugin')
+
+        self.assertDictEqual(provider.dependencies, dependencies)
+
+        graph.register_factory('dbus.session', dbus.SessionBus)
+        graph.register_factory('tomate.view', Mock)
+        graph.register_factory('tomate.config', Mock)
+        graph.register_factory('tomate.plugin', Mock)
+        graph.register_factory('tomate.indicator', Mock)
+
+        with patch('tomate.app.dbus'):
+            app = graph.get('tomate.app')
+
+            self.assertIsInstance(app, GtkApplication)
+            IApplication.check_compliance(app)

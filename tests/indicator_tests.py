@@ -19,7 +19,8 @@ class TestIndicator(unittest.TestCase):
 
         self.assertIsInstance(provider, FactoryProvider)
         self.assertEqual(provider.scope, SingletonScope)
-        self.assertEqual(provider.dependencies, {'config': 'tomate.config', 'view': 'tomate.view'})
+        self.assertDictEqual({'config': 'tomate.config', 'view': 'tomate.view'},
+                             provider.dependencies)
 
         graph.register_instance('tomate.view', Mock())
         graph.register_instance('tomate.config', Mock(**{'get_icon_paths.return_value': ['']}))

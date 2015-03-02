@@ -34,7 +34,7 @@ class TestGtkView(unittest.TestCase):
                             timerframe='view.timerframe',
                             taskbutton='view.taskbutton')
 
-        self.assertEqual(provider.dependencies, dependencies)
+        self.assertDictEqual(dependencies, provider.dependencies)
 
         graph.register_factory('tomate.signals', Mock)
         graph.register_factory('tomate.session', Mock)
