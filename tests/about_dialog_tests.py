@@ -5,28 +5,27 @@ import unittest
 from mock import Mock
 from wiring import FactoryProvider, SingletonScope
 
-from tomate.config import Config
 from tomate.graph import graph
 
 
 class TestAboutDialog(unittest.TestCase):
 
     def test_provider_module(self, *args):
-        from tomate_gtk.dialogs.about import AboutDialog, AboutDialogProvider
+        from tomate_gtk.widgets.appmenu import Appmenu, AppmenuProvider
 
-        self.assertEqual(['view.about'], AboutDialogProvider.providers.keys())
-        AboutDialogProvider().add_to(graph)
+        self.assertEqual(['view.appmenu'], AppmenuProvider.providers.keys())
+        AppmenuProvider().add_to(graph)
 
-        provider = graph.providers['view.about']
+        provider = graph.providers['view.appmenu']
 
         self.assertIsInstance(provider, FactoryProvider)
         self.assertEqual(provider.scope, SingletonScope)
 
-        self.assertDictEqual({'config': 'tomate.config'}, provider.dependencies)
+        self.assertDictEqual({'about': 'view.about', 'preference': 'view.preference'},
+                             provider.dependencies)
 
-        graph.register_factory('tomate.signals', Mock)
-        graph.register_factory('config.parser', Mock)
-        graph.register_factory('tomate.config', Config)
+        graph.register_factory('view.preference', Mock)
+        graph.register_factory('view.about', Mock)
 
-        about = graph.get('view.about')
-        self.assertIsInstance(about, AboutDialog)
+        appmenu = graph.get('view.appmenu')
+        self.assertIsInstance(appmenu, Appmenu)
