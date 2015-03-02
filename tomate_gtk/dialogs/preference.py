@@ -65,7 +65,7 @@ class PreferenceDialog(Gtk.Dialog):
         self.extension.refresh()
 
 
-class TimerDuration(Gtk.Grid):
+class TimerDurationStack(Gtk.Grid):
 
     @inject(config='tomate.config')
     def __init__(self, config):
@@ -128,7 +128,7 @@ class TimerDuration(Gtk.Grid):
         self.config.set('Timer', option, value)
 
 
-class Extension(Gtk.TreeView):
+class ExtensionStack(Gtk.TreeView):
 
     @inject(plugin='tomate.plugin', config='tomate.config')
     def __init__(self, plugin, config):
@@ -238,7 +238,7 @@ class GridPlugin(object):
 
 class PreferenceDialogProvider(Module):
     factories = {
-        'view.preference.extension': (Extension, SingletonScope),
-        'view.preference.duration': (TimerDuration, SingletonScope),
+        'view.preference.extension': (ExtensionStack, SingletonScope),
+        'view.preference.duration': (TimerDurationStack, SingletonScope),
         'view.preference': (PreferenceDialog, SingletonScope),
     }
