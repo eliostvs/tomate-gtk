@@ -3,28 +3,19 @@ from __future__ import unicode_literals
 import unittest
 
 from mock import Mock
+from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
 
 
-class TestIndicatorInterface(unittest.TestCase):
+class TestIndicator(unittest.TestCase):
 
-    def test_interface(self):
-        from tomate_gtk.indicator import IIndicator, Indicator
+    def test_interface_and_provider(self):
+        from tomate_gtk.indicator import IIndicator, Indicator, IndicatorProvider
 
-        indicator = Indicator(config=Mock(**{'get_icon_paths.return_value': ['']}))
-        IIndicator.check_compliance(indicator)
-
-
-class TestIndicatorProvider(unittest.TestCase):
-
-    def test_provider_module(self):
-        from tomate_gtk.indicator import IndicatorProvider, Indicator
-        from tomate.graph import graph
-
-        self.assertEqual(['view.indicator'], IndicatorProvider.providers.keys())
+        self.assertEqual(['tomate.indicator'], IndicatorProvider.providers.keys())
         IndicatorProvider().add_to(graph)
 
-        provider = graph.providers['view.indicator']
+        provider = graph.providers['tomate.indicator']
 
         self.assertIsInstance(provider, FactoryProvider)
         self.assertEqual(provider.scope, SingletonScope)
@@ -32,4 +23,8 @@ class TestIndicatorProvider(unittest.TestCase):
 
         graph.register_instance('tomate.view', Mock())
         graph.register_instance('tomate.config', Mock(**{'get_icon_paths.return_value': ['']}))
-        self.assertIsInstance(graph.get('view.indicator'), Indicator)
+
+        indicator = graph.get('tomate.indicator')
+
+        self.assertIsInstance(indicator, Indicator)
+        IIndicator.check_compliance(indicator)

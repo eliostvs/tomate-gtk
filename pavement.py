@@ -25,16 +25,28 @@ def run():
     from xdg.BaseDirectory import xdg_data_dirs
 
     xdg_data_dirs.insert(0, str(DATA_PATH))
-
     os.environ['XDG_DATA_DIRS'] = ':'.join(xdg_data_dirs)
     os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
 
     sys.path.insert(0, str(TOMATE_PATH))
     sys.path.insert(0, str(ROOT_PATH))
-
     sys.argv = ['/usr/bin/paver', '-v']
+
     from tomate_gtk.main import main
     main()
+
+
+@task
+def test():
+    import os
+    from xdg.BaseDirectory import xdg_data_dirs
+
+    xdg_data_dirs.insert(0, str(DATA_PATH))
+    os.environ['XDG_DATA_DIRS'] = ':'.join(xdg_data_dirs)
+    os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
+    os.environ['PYTHONPATH'] = '%s:%s' % (TOMATE_PATH, ROOT_PATH)
+
+    sh('nosetests')
 
 
 @task
