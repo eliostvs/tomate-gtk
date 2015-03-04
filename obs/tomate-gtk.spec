@@ -89,8 +89,7 @@ fi
 %{_datadir}/icons/hicolor/*/*/*.*
 %{_datadir}/icons/ubuntu-mono-light/
 %{_datadir}/icons/ubuntu-mono-dark/
-%{python_sitelib}/%{module_name}/
-%{python_sitelib}/%{module_name}-%{version}-*.egg-info/
+%{python_sitelib}/*
 
 %doc AUTHORS COPYING README.md
 
