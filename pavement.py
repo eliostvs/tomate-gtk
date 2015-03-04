@@ -68,8 +68,3 @@ def docker_build():
 def docker_run():
     sh('docker run --rm -v $PWD:/code -e DISPLAY --net=host '
        '-v $HOME/.Xauthority:/root/.Xauthority eliostvs/tomate-gtk')
-
-
-@task
-def docker_bash():
-    sh('docker run --rm -it -v $PWD:/code --entrypoint /bin/bash eliostvs/tomate-gtk')
