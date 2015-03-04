@@ -3,45 +3,89 @@ from __future__ import unicode_literals
 import logging
 import time
 
-from gi.repository import Gtk
+from gi.repository import GdkPixbuf, Gtk
+from wiring import implements, inject, Module, SingletonScope
 
-from tomate.mixins import ConnectSignalMixin
-from tomate.signals import tomate_signals
-from tomate.interfaces import IView
-
-from .widgets import indicator, window
+from tomate.view import IView
+from tomate.signals import subscribe
 
 logger = logging.getLogger(__name__)
 
 
-class GtkView(IView, ConnectSignalMixin):
+@implements(IView)
+class GtkView(Gtk.Window):
 
-    signals = (
-        ('session_ended', 'show'),
+    subscriptions = (
+        ('setting_changed', 'on_setting_changed'),
     )
 
-    def __init__(self):
-        self.indicator = indicator.Indicator()
+    @subscribe
+    @inject(session='tomate.session',
+            signals='tomate.signals',
+            config='tomate.config',
+            toolbar='view.toolbar',
+            timerframe='view.timerframe',
+            taskbutton='view.taskbutton')
+    def __init__(self, session, signals, config, toolbar, timerframe, taskbutton):
+        self.config = config
+        self.session = session
+        self.signals = signals
 
-        self.window = window.Window()
+        Gtk.Window.__init__(
+            self,
+            title='Tomate',
+            icon=GdkPixbuf.Pixbuf.new_from_file(
+                self.config.get_icon_path('tomate', 22)
+            ),
+            window_position=Gtk.WindowPosition.CENTER,
+            resizable=False
+        )
+        self.set_size_request(350, -1)
 
-        self.connect_signals()
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.pack_start(toolbar, False, False, 0)
+        box.pack_start(timerframe, True, True, 0)
+        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL),
+                       False, False, 8)
+        box.pack_start(taskbutton, True, True, 0)
+
+        self.connect('delete-event', self.on_window_delete_event)
+
+        self.add(box)
+
+        self.show_all()
+
+        self.session.change_task()
+
+    def on_window_delete_event(self, window, event):
+        return self.quit()
 
     def run(self):
-        logger.debug('window run')
-
         Gtk.main()
 
-    def quit(self, *args, **kwargs):
-        Gtk.main_quit()
+    def quit(self):
+        if self.session.timer_is_running():
+            return self.hide()
 
-        logger.debug('window quit')
-        return True
+        else:
+            Gtk.main_quit()
 
-    def show(self, *args, **kwargs):
-        tomate_signals.emit('window_showed')
-        return self.window.present_with_time(time.time())
+    def show(self):
+        logger.debug('view show')
+        self.signals.emit('view_showed')
+        return self.present_with_time(time.time())
 
-    def hide(self, *args, **kwargs):
-        tomate_signals.emit('window_hid')
-        return self.window.hide_on_delete()
+    def hide(self):
+        logger.debug('view hide')
+        self.signals.emit('view_hid')
+        return self.hide_on_delete()
+
+    def on_setting_changed(self, *args, **kwargs):
+        if kwargs.get('section') == 'timer':
+            self.session.change_task()
+
+
+class ViewProvider(Module):
+    factories = {
+        'tomate.view': (GtkView, SingletonScope)
+    }

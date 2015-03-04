@@ -8,6 +8,10 @@ python-coverage
 python-dbus
 python-enum34
 python-gi
+python-mock
+python-nose
 python-paver
+python-wiring
+python-wrapt
 python-xdg
 python-yapsy

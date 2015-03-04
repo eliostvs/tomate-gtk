@@ -1,10 +1,6 @@
 #!/bin/env python
-
 from paver.easy import needs, path, sh
-from paver.setuputils import install_distutils_tasks
 from paver.tasks import task
-
-install_distutils_tasks()
 
 PKGNAME = 'tomate'
 
@@ -21,24 +17,46 @@ def default():
     pass
 
 
-@task
-def clear():
-    sh('pyclean tomate_gtk')
-
-
-@needs(['clean'])
+@needs('clean')
 @task
 def run():
+    import os
+    import sys
+    from xdg.BaseDirectory import xdg_data_dirs
+
+    xdg_data_dirs.insert(0, str(DATA_PATH))
+    os.environ['XDG_DATA_DIRS'] = ':'.join(xdg_data_dirs)
+    os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
+
+    sys.path.insert(0, str(TOMATE_PATH))
+    sys.path.insert(0, str(ROOT_PATH))
+    sys.argv = ['/usr/bin/paver', '-v']
+
+    from tomate_gtk.main import main
+    main()
+
+
+@task
+def test():
     import os
     from xdg.BaseDirectory import xdg_data_dirs
 
     xdg_data_dirs.insert(0, str(DATA_PATH))
-
     os.environ['XDG_DATA_DIRS'] = ':'.join(xdg_data_dirs)
     os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
     os.environ['PYTHONPATH'] = '%s:%s' % (TOMATE_PATH, ROOT_PATH)
 
-    sh('python -m tomate_gtk -v')
+    sh('nosetests')
+
+
+@task
+def clean():
+    sh('pyclean tomate_gtk')
+
+
+@task
+def docker_rmi():
+    sh('docker rmi eliostvs/tomate-gtk', ignore_error=True)
 
 
 @task
