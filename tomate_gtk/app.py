@@ -14,7 +14,6 @@ class GtkApplication(Application):
             plugin='tomate.plugin')
     def __init__(self, bus, view, indicator, config, plugin):
         super(GtkApplication, self).__init__(bus, view, config, plugin)
-
         self.indicator = indicator
 
 

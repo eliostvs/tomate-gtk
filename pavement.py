@@ -54,6 +54,12 @@ def clean():
     sh('pyclean tomate_gtk')
 
 
+@needs(['docker_rmi', 'docker_build'])
+@task
+def docker_test():
+    sh('docker run --rm -v $PWD:/code eliostvs/tomate-gtk test')
+
+
 @task
 def docker_rmi():
     sh('docker rmi eliostvs/tomate-gtk', ignore_error=True)
