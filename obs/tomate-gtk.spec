@@ -19,7 +19,7 @@
 %define module_name %{real_name}_gtk
 
 Name: %{real_name}-gtk
-Version: 0.1.2
+Version: 0.2.0
 Release: 0
 License: GPL-3.0+
 Summary: Tomate Pomodoro Timer (GTK+ Interface)
@@ -89,8 +89,7 @@ fi
 %{_datadir}/icons/hicolor/*/*/*.*
 %{_datadir}/icons/ubuntu-mono-light/
 %{_datadir}/icons/ubuntu-mono-dark/
-%{python_sitelib}/%{module_name}/
-%{python_sitelib}/%{module_name}-%{version}-*.egg-info/
+%{python_sitelib}/*
 
 %doc AUTHORS COPYING README.md
 
