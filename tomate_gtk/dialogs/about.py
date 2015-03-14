@@ -19,7 +19,7 @@ class AboutDialog(Gtk.AboutDialog):
             program_name='Tomate Gtk',
             title='Tomate Gtk',
             transient_for=self.get_toplevel(),
-            version='0.1.2',
+            version='0.2.0',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
         )
