@@ -50,7 +50,7 @@ class TimerFrame(Gtk.Frame):
 
         self.update_session(0)
 
-    def update_timer(self, sender=None, **kwargs):
+    def update_timer(self, *args, **kwargs):
         time_left = format_time_left(kwargs.get('time_left', 25 * 60))
 
         markup = '<span font="60">{}</span>'.format(time_left)
@@ -58,7 +58,7 @@ class TimerFrame(Gtk.Frame):
 
         logger.debug('timer label update %s', time_left)
 
-    def update_session(self, sender=None, **kwargs):
+    def update_session(self, *args, **kwargs):
         sessions = kwargs.get('sessions', 0)
 
         markup = ('<span font="12">{0} pomodoros</span>'

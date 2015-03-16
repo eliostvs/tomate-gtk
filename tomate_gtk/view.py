@@ -60,22 +60,22 @@ class GtkView(Gtk.Window):
     def on_window_delete_event(self, window, event):
         return self.quit()
 
-    def run(self):
+    def run(self, *args, **kwargs):
         Gtk.main()
 
-    def quit(self):
+    def quit(self, *args, **kwargs):
         if self.session.timer_is_running():
             return self.hide()
 
         else:
             Gtk.main_quit()
 
-    def show(self):
+    def show(self, *args, **kwargs):
         logger.debug('view show')
         self.signals.emit('view_showed')
         return self.present_with_time(time.time())
 
-    def hide(self):
+    def hide(self, *args, **kwargs):
         logger.debug('view hide')
         self.signals.emit('view_hid')
         return self.hide_on_delete()

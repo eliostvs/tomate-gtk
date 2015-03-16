@@ -58,10 +58,10 @@ class TaskButton(ModeButton):
 
         self.set_selected(task.value)
 
-    def disable(self, sender=None, **kwargs):
+    def disable(self, *args, **kwargs):
         self.set_sensitive(False)
 
-    def enable(self, sender=None, **kwargs):
+    def enable(self, *args, **kwargs):
         self.set_sensitive(True)
 
 
