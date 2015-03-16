@@ -5,9 +5,19 @@ import unittest
 from wiring import FactoryProvider, SingletonScope
 
 from tomate.graph import graph
+from tomate.tests import SubscriptionMixin
 
 
-class TestAboutDialog(unittest.TestCase):
+class TestTimerFrameSubscriptions(SubscriptionMixin,
+                                  unittest.TestCase):
+
+    def create_instance(self):
+        from tomate_gtk.widgets.timerframe import TimerFrame
+
+        return TimerFrame()
+
+
+class TestTimerFrame(unittest.TestCase):
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.timerframe import TimerFrame, TimerFrameProvider
