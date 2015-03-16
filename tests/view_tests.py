@@ -7,7 +7,29 @@ from wiring import FactoryProvider, SingletonScope
 
 from tomate.config import Config
 from tomate.graph import graph
+from tomate.tests import SubscriptionMixin
 from tomate.view import IView
+
+
+class TestViewSubscriptions(SubscriptionMixin, unittest.TestCase):
+    def create_instance(self):
+        from tomate_gtk.widgets.taskbutton import TaskButton
+        from tomate_gtk.widgets.timerframe import TimerFrame
+        from tomate_gtk.widgets.toolbar import Toolbar
+        from tomate_gtk.widgets.appmenu import Appmenu
+
+        graph.register_factory('tomate.signals', Mock)
+        graph.register_factory('tomate.session', Mock)
+        graph.register_factory('config.parser', Mock)
+        graph.register_factory('tomate.config', Config)
+        graph.register_factory('view.about', Mock)
+        graph.register_factory('view.preference', Mock)
+        graph.register_factory('view.appmenu', Appmenu)
+        graph.register_factory('view.toolbar', Toolbar)
+        graph.register_factory('view.timerframe', TimerFrame)
+        graph.register_factory('view.taskbutton', TaskButton)
+
+        return graph.get('tomate.view')
 
 
 class TestGtkView(unittest.TestCase):
