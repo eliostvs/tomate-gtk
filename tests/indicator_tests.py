@@ -4,7 +4,16 @@ import unittest
 
 from mock import Mock
 from tomate.graph import graph
+from tomate.tests import SubscriptionMixin
 from wiring import FactoryProvider, SingletonScope
+
+
+class TestIndicatorSubscriptions(SubscriptionMixin, unittest.TestCase):
+    def create_instance(self):
+        from tomate_gtk.indicator import Indicator
+
+        return Indicator(config=Mock(**{'get_icon_paths.return_value': ['']}),
+                         view=Mock())
 
 
 class TestIndicator(unittest.TestCase):
