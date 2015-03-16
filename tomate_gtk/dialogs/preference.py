@@ -191,7 +191,7 @@ class ExtensionStack(Gtk.TreeView):
         return bool(len(self._store))
 
     def add_plugin(self, plugin):
-        iconname = getattr(plugin, 'icon', 'libpeas-plugin')
+        iconname = getattr(plugin, 'icon', 'tomate-plugin')
         iconpath = self.config.get_icon_path(iconname, 16)
 
         self._store.append((plugin.plugin_object.is_activated,

@@ -71,12 +71,14 @@ class GtkView(Gtk.Window):
             Gtk.main_quit()
 
     def show(self, *args, **kwargs):
-        logger.debug('view show')
+        logger.debug('Emiting signal view_showed')
+
         self.signals.emit('view_showed')
         return self.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
-        logger.debug('view hide')
+        logger.debug('Emitig signal view_hid')
+
         self.signals.emit('view_hid')
         return self.hide_on_delete()
 
