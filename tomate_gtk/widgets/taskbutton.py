@@ -51,7 +51,7 @@ class TaskButton(ModeButton):
         task = Task.get_by_index(index)
         self.session.change_task(task=task)
 
-    def change_selected(self, sender=None, **kwargs):
+    def change_selected(self, *args, **kwargs):
         task = kwargs.get('task', Task.pomodoro)
 
         logger.debug('task changed %s', task)
