@@ -3,11 +3,28 @@ from __future__ import unicode_literals
 import unittest
 
 from mock import Mock
-from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
 
+from tomate.graph import graph
+from tomate.tests import SubscriptionMixin
 
-class TestAboutDialog(unittest.TestCase):
+
+class TestToolbarSubscriptions(SubscriptionMixin, unittest.TestCase):
+
+    def create_instance(self):
+        from tomate_gtk.widgets.toolbar import ToolbarProvider
+        from tomate_gtk.widgets.appmenu import Appmenu
+
+        graph.register_factory('view.preference', Mock)
+        graph.register_factory('view.about', Mock)
+        graph.register_factory('tomate.session', Mock)
+        graph.register_factory('tomate.appmenu', Appmenu)
+
+        ToolbarProvider().add_to(graph)
+        return graph.get('view.toolbar')
+
+
+class TestToolbar(unittest.TestCase):
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.toolbar import Toolbar, ToolbarProvider

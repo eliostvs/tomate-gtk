@@ -13,6 +13,7 @@ from tomate.view import IView
 
 class TestViewSubscriptions(SubscriptionMixin, unittest.TestCase):
     def create_instance(self):
+        from tomate_gtk.view import ViewProvider
         from tomate_gtk.widgets.taskbutton import TaskButton
         from tomate_gtk.widgets.timerframe import TimerFrame
         from tomate_gtk.widgets.toolbar import Toolbar
@@ -29,6 +30,7 @@ class TestViewSubscriptions(SubscriptionMixin, unittest.TestCase):
         graph.register_factory('view.timerframe', TimerFrame)
         graph.register_factory('view.taskbutton', TaskButton)
 
+        ViewProvider().add_to(graph)
         return graph.get('tomate.view')
 
 
