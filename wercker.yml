@@ -4,11 +4,11 @@ build:
     - script:
         name: create docker image
         code: |
-          docker build -t eliostvs/python-tomate .
+          docker build -t eliostvs/tomate-gtk .
     - script:
         name: run tests
         code: |
-          docker run --rm eliostvs/python-tomate
+          docker run --rm eliostvs/tomate-gtk test
 deploy:
     steps:
         - eliostvs/obs-runservice@0.0.1:
