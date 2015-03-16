@@ -46,7 +46,7 @@ def test():
     os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
     os.environ['PYTHONPATH'] = '%s:%s' % (TOMATE_PATH, ROOT_PATH)
 
-    sh('nosetests')
+    sh('xvfb-run -a nosetests')
 
 
 @task
