@@ -1,5 +1,4 @@
 #!/bin/env python
-
 from optparse import Option
 
 from paver.easy import cmdopts, needs, path, sh
