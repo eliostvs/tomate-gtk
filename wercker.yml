@@ -1,0 +1,15 @@
+box: wercker-labs/docker
+build:
+  steps:
+    - script:
+        name: create docker image
+        code: |
+          docker build -t eliostvs/python-tomate .
+    - script:
+        name: run tests
+        code: |
+          docker run --rm eliostvs/python-tomate
+deploy:
+    steps:
+        - eliostvs/obs-runservice@0.0.1:
+            token: $OBS_TOKEN
