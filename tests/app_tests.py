@@ -4,9 +4,10 @@ import unittest
 
 import dbus
 from mock import Mock, patch
+from wiring import FactoryProvider, SingletonScope
+
 from tomate.app import IApplication
 from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope
 
 
 class TestGtkApp(unittest.TestCase):

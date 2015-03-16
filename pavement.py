@@ -1,5 +1,7 @@
 #!/bin/env python
-from paver.easy import needs, path, sh
+from optparse import Option
+
+from paver.easy import cmdopts, needs, path, sh
 from paver.tasks import task
 
 PKGNAME = 'tomate'
@@ -37,7 +39,10 @@ def run():
 
 
 @task
-def test():
+@cmdopts([
+    Option('-v', '--verbosity', default=1, type=int),
+])
+def test(options):
     import os
     from xdg.BaseDirectory import xdg_data_dirs
 
@@ -46,7 +51,7 @@ def test():
     os.environ['LIBOVERLAY_SCROLLBAR'] = '0'
     os.environ['PYTHONPATH'] = '%s:%s' % (TOMATE_PATH, ROOT_PATH)
 
-    sh('nosetests')
+    sh('xvfb-run -a nosetests --verbosity=%s' % options.test.verbosity)
 
 
 @task

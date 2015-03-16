@@ -70,14 +70,14 @@ class Toolbar(Gtk.Toolbar):
     def on_reset_button_clicked(self, widget):
         self.session.reset()
 
-    def enable_interrupt_button(self, sender=None, **kwargs):
+    def enable_interrupt_button(self, *args, **kwargs):
         self.start_button.set_visible(False)
 
         self.interrupt_button.set_visible(True)
 
         self.reset_button.set_sensitive(False)
 
-    def enable_start_button(self, sender=None, **kwargs):
+    def enable_start_button(self, *args, **kwargs):
         self.start_button.set_visible(True)
 
         self.interrupt_button.set_visible(False)
@@ -85,7 +85,7 @@ class Toolbar(Gtk.Toolbar):
         sensitive = bool(kwargs.get('sessions'))
         self.reset_button.set_sensitive(sensitive)
 
-    def disable_reset_button(self, sender=None, **kwargs):
+    def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
 
 
