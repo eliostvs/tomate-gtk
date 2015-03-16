@@ -9,9 +9,9 @@ from tomate.graph import graph
 from tomate.tests import SubscriptionMixin
 
 
-class TestToolbarSubscriptions(SubscriptionMixin, unittest.TestCase):
+class TestToolbar(SubscriptionMixin, unittest.TestCase):
 
-    def create_instance(self):
+    def setUp(self):
         from tomate_gtk.widgets.toolbar import ToolbarProvider
         from tomate_gtk.widgets.appmenu import Appmenu
 
@@ -21,17 +21,14 @@ class TestToolbarSubscriptions(SubscriptionMixin, unittest.TestCase):
         graph.register_factory('tomate.appmenu', Appmenu)
 
         ToolbarProvider().add_to(graph)
+
+    def create_instance(self):
         return graph.get('view.toolbar')
-
-
-class TestToolbar(unittest.TestCase):
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.toolbar import Toolbar, ToolbarProvider
-        from tomate_gtk.widgets.appmenu import Appmenu
 
         self.assertEqual(['view.toolbar'], ToolbarProvider.providers.keys())
-        ToolbarProvider().add_to(graph)
 
         provider = graph.providers['view.toolbar']
 
@@ -40,11 +37,6 @@ class TestToolbar(unittest.TestCase):
 
         self.assertDictEqual({'session': 'tomate.session', 'appmenu': 'view.appmenu'},
                              provider.dependencies)
-
-        graph.register_factory('view.preference', Mock)
-        graph.register_factory('view.about', Mock)
-        graph.register_factory('tomate.session', Mock)
-        graph.register_factory('tomate.appmenu', Appmenu)
 
         toolbar = graph.get('view.toolbar')
         self.assertIsInstance(toolbar, Toolbar)

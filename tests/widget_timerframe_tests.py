@@ -8,16 +8,12 @@ from tomate.graph import graph
 from tomate.tests import SubscriptionMixin
 
 
-class TestTimerFrameSubscriptions(SubscriptionMixin,
-                                  unittest.TestCase):
+class TestTimerFrame(SubscriptionMixin, unittest.TestCase):
 
     def create_instance(self):
         from tomate_gtk.widgets.timerframe import TimerFrame
 
         return TimerFrame()
-
-
-class TestTimerFrame(unittest.TestCase):
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.timerframe import TimerFrame, TimerFrameProvider
