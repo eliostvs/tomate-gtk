@@ -17,6 +17,7 @@ class GtkView(Gtk.Window):
 
     subscriptions = (
         ('setting_changed', 'on_setting_changed'),
+        ('session_ended', 'show'),
     )
 
     @subscribe
@@ -77,7 +78,7 @@ class GtkView(Gtk.Window):
         return self.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
-        logger.debug('Emitig signal view_hid')
+        logger.debug('Emiting signal view_hid')
 
         self.signals.emit('view_hid')
         return self.hide_on_delete()
