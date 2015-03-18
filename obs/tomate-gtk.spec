@@ -33,7 +33,7 @@ BuildRequires: python-setuptools
 
 Requires: dbus-x11
 Requires: python-setuptools
-Requires: python-tomate
+Requires: python-tomate >= 0.3.0
 
 %if 0%{?fedora}
 BuildArch: noarch
