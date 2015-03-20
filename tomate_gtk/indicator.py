@@ -10,10 +10,10 @@ from tomate.signals import subscribe
 
 class IIndicator(Interface):
 
-    def hide(sender=None):
+    def hide(*args, **kwargs):
         pass
 
-    def show(sender=None):
+    def show(*args, **kwargs):
         pass
 
     def set_icon(icon):
@@ -55,10 +55,10 @@ class Indicator(object):
     def on_show_menu_activate(self, widget):
         return self.view.show()
 
-    def show(self, sender=None):
+    def show(self, *args, **kwargs):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
-    def hide(self, sender=None):
+    def hide(self, *args, **kwargs):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
     def set_icon(self, icon):

@@ -6,9 +6,15 @@ from mock import Mock
 from wiring import FactoryProvider, SingletonScope
 
 from tomate.graph import graph
+from tomate.tests import SubscriptionMixin
 
 
-class TestAboutDialog(unittest.TestCase):
+class TestTaskButton(SubscriptionMixin, unittest.TestCase):
+
+    def create_instance(self):
+        from tomate_gtk.widgets.taskbutton import TaskButton
+
+        return TaskButton(session=Mock())
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.taskbutton import TaskButton, TaskButtonProvider

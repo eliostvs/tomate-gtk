@@ -17,6 +17,7 @@ class GtkView(Gtk.Window):
 
     subscriptions = (
         ('setting_changed', 'on_setting_changed'),
+        ('session_ended', 'show'),
     )
 
     @subscribe
@@ -60,23 +61,25 @@ class GtkView(Gtk.Window):
     def on_window_delete_event(self, window, event):
         return self.quit()
 
-    def run(self):
+    def run(self, *args, **kwargs):
         Gtk.main()
 
-    def quit(self):
+    def quit(self, *args, **kwargs):
         if self.session.timer_is_running():
             return self.hide()
 
         else:
             Gtk.main_quit()
 
-    def show(self):
-        logger.debug('view show')
+    def show(self, *args, **kwargs):
+        logger.debug('Emiting signal view_showed')
+
         self.signals.emit('view_showed')
         return self.present_with_time(time.time())
 
-    def hide(self):
-        logger.debug('view hide')
+    def hide(self, *args, **kwargs):
+        logger.debug('Emiting signal view_hid')
+
         self.signals.emit('view_hid')
         return self.hide_on_delete()
 

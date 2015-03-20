@@ -8,7 +8,7 @@ from wiring import FactoryProvider, SingletonScope
 from tomate.graph import graph
 
 
-class TestAboutDialog(unittest.TestCase):
+class TestAppmenu(unittest.TestCase):
 
     def test_provider_module(self, *args):
         from tomate_gtk.widgets.appmenu import Appmenu, AppmenuProvider

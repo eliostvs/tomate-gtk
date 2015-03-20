@@ -11,8 +11,7 @@ locale.textdomain('tomate')
 
 class Appmenu(Gtk.ToolItem):
 
-    @inject(about='view.about',
-            preference='view.preference')
+    @inject(about='view.about', preference='view.preference')
     def __init__(self, about, preference):
         self.about = about
         self.preference = preference
