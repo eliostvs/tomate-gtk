@@ -5,7 +5,6 @@ import logging
 import dbus.mainloop.glib
 from gi.repository import Gdk
 
-from tomate.app import application_factory
 from tomate.config import ConfigProvider
 from tomate.graph import graph
 from tomate.plugin import PluginProvider
@@ -13,7 +12,7 @@ from tomate.session import SessionProvider
 from tomate.signals import SignalsProvider
 from tomate.timer import TimerProvider
 
-from .app import AppProvider
+from .app import AppProvider, GtkApplication
 from .dialogs import AboutDialogProvider, PreferenceDialogProvider
 from .indicator import IndicatorProvider
 from .utils import parse_options, setup_logging
@@ -51,7 +50,7 @@ def main():
 
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-        app = application_factory(graph)
+        app = GtkApplication.fromgraph(graph)
 
         app.run()
 
