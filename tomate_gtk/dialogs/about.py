@@ -18,7 +18,6 @@ class AboutDialog(Gtk.AboutDialog):
             modal=True,
             program_name='Tomate Gtk',
             title='Tomate Gtk',
-            transient_for=self.get_toplevel(),
             version='0.3.0',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
