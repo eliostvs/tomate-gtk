@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import unittest
 
 from mock import Mock
-from wiring import FactoryProvider, SingletonScope
+from wiring import FactoryProvider, SingletonScope, Graph
 
 from tomate.graph import graph
 
@@ -21,7 +21,7 @@ class TestAppmenu(unittest.TestCase):
         self.assertIsInstance(provider, FactoryProvider)
         self.assertEqual(provider.scope, SingletonScope)
 
-        self.assertDictEqual({'about': 'view.about', 'preference': 'view.preference'},
+        self.assertDictEqual({'about': 'view.about', 'preference': 'view.preference', 'graph': Graph},
                              provider.dependencies)
 
         graph.register_factory('view.preference', Mock)
