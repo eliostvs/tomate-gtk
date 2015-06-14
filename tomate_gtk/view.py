@@ -21,13 +21,16 @@ class GtkView(Gtk.Window):
     )
 
     @subscribe
-    @inject(session='tomate.session',
-            signals='tomate.signals',
-            config='tomate.config',
-            toolbar='view.toolbar',
-            timerframe='view.timerframe',
-            taskbutton='view.taskbutton')
-    def __init__(self, session, signals, config, toolbar, timerframe, taskbutton):
+    @inject(
+        session='tomate.session',
+        signals='tomate.signals',
+        config='tomate.config',
+        toolbar='view.toolbar',
+        timerframe='view.timerframe',
+        taskbutton='view.taskbutton',
+        infobar='view.infobar',
+    )
+    def __init__(self, session, signals, config, toolbar, timerframe, taskbutton, infobar):
         self.config = config
         self.session = session
         self.signals = signals
@@ -35,9 +38,7 @@ class GtkView(Gtk.Window):
         Gtk.Window.__init__(
             self,
             title='Tomate',
-            icon=GdkPixbuf.Pixbuf.new_from_file(
-                self.config.get_icon_path('tomate', 22)
-            ),
+            icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
             window_position=Gtk.WindowPosition.CENTER,
             resizable=False
         )
@@ -45,9 +46,9 @@ class GtkView(Gtk.Window):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar, False, False, 0)
+        box.pack_start(infobar, False, False, 0)
         box.pack_start(timerframe, True, True, 0)
-        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL),
-                       False, False, 8)
+        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton, True, True, 0)
 
         self.connect('delete-event', self.on_window_delete_event)

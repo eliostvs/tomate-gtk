@@ -18,7 +18,7 @@ from .indicator import IndicatorProvider
 from .utils import parse_options, setup_logging
 from .view import ViewProvider
 from .widgets import (AppmenuProvider, TaskButtonProvider, TimerFrameProvider,
-                      ToolbarProvider)
+                      ToolbarProvider, InfobarProvider)
 
 
 def main():
@@ -42,6 +42,7 @@ def main():
         ToolbarProvider().add_to(graph)
         TimerFrameProvider().add_to(graph)
         TaskButtonProvider().add_to(graph)
+        InfobarProvider().add_to(graph)
         ViewProvider().add_to(graph)
         IndicatorProvider().add_to(graph)
 

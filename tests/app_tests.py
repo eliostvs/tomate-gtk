@@ -8,13 +8,12 @@ from wiring import FactoryProvider, SingletonScope
 
 from tomate.app import IApplication
 from tomate.graph import graph
+from tomate_gtk.app import GtkApplication, AppProvider
 
 
 class TestGtkApp(unittest.TestCase):
 
     def test_inteface_and_module_provider(self):
-        from tomate_gtk.app import GtkApplication, AppProvider
-
         self.assertEqual(['tomate.app'], AppProvider.providers.keys())
         AppProvider().add_to(graph)
 

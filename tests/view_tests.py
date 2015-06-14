@@ -19,6 +19,7 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
         from tomate_gtk.widgets.timerframe import TimerFrame
         from tomate_gtk.widgets.toolbar import Toolbar
         from tomate_gtk.widgets.appmenu import Appmenu
+        from tomate_gtk.widgets.infobar import Infobar
 
         ViewProvider().add_to(graph)
 
@@ -32,6 +33,7 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
         graph.register_factory('view.toolbar', Toolbar)
         graph.register_factory('view.timerframe', TimerFrame)
         graph.register_factory('view.taskbutton', TaskButton)
+        graph.register_factory('view.infobar', Infobar)
 
     def create_instance(self):
         return graph.get('tomate.view')
@@ -51,7 +53,8 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
                             config='tomate.config',
                             toolbar='view.toolbar',
                             timerframe='view.timerframe',
-                            taskbutton='view.taskbutton')
+                            taskbutton='view.taskbutton',
+                            infobar='view.infobar')
 
         self.assertDictEqual(dependencies, provider.dependencies)
 
