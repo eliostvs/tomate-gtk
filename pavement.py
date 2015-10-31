@@ -56,7 +56,7 @@ def test(options):
 
 @task
 def clean():
-    sh('pyclean tomate_gtk')
+    sh('find tomate_gtk -name "*.pyc" -o name __pycache__ -print0 | xargs -0 rm -rf')
 
 
 @needs(['docker_rmi', 'docker_build'])
