@@ -22,8 +22,8 @@ test: clean
 docker-test:
 	docker run --rm -v $PWD:/code $(DOCKER_IMAGE_NAME) test
 
-docker-rmi:
-	docker rmi $(DOCKER_IMAGE_NAME) 2> /dev/null
+docker-clean:
+	docker rmi $(DOCKER_IMAGE_NAME) 2> /dev/null || echo $(DOCKER_IMAGE_NAME) not found!
 
 docker-build:
 	docker build -t $(DOCKER_IMAGE_NAME) .
