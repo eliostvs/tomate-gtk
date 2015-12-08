@@ -15,7 +15,7 @@ depends=('desktop-file-utils'
          'python-tomate')
 makedepends=('python-setuptools')
 options=(!emptydirs)
-source=("https://github.com/eliostvs/tomate-gtk/archive/$pkgver.tar.gz")
+source=("https://github.com/eliostvs/$pkdname/archive/$pkgver.tar.gz")
 md5sums=('911d0dc1f8a3319336e6470dda29e940')
 install=tomate-gtk.install
 
