@@ -45,3 +45,4 @@ whoosh_index/
 *.deb
 *.bzr
 *.sublime-*
+tomate/
