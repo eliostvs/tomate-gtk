@@ -2,28 +2,27 @@ from __future__ import unicode_literals
 
 import unittest
 
+import six
 from mock import Mock
-from wiring import FactoryProvider, SingletonScope
-
 from tomate.config import Config
 from tomate.graph import graph
-from tomate.tests import SubscriptionMixin
 from tomate.view import IView
+from wiring import FactoryProvider, SingletonScope
 
 
-class TestGtkView(SubscriptionMixin, unittest.TestCase):
+class TestGtkView(unittest.TestCase):
 
     def setUp(self):
-        from tomate_gtk.view import ViewProvider
+        from tomate_gtk.view import ViewModule
         from tomate_gtk.widgets.taskbutton import TaskButton
         from tomate_gtk.widgets.timerframe import TimerFrame
         from tomate_gtk.widgets.toolbar import Toolbar
         from tomate_gtk.widgets.appmenu import Appmenu
         from tomate_gtk.widgets.infobar import Infobar
 
-        ViewProvider().add_to(graph)
+        ViewModule().add_to(graph)
 
-        graph.register_factory('tomate.signals', Mock)
+        graph.register_factory('tomate.events', Mock)
         graph.register_factory('tomate.session', Mock)
         graph.register_factory('config.parser', Mock)
         graph.register_factory('tomate.config', Config)
@@ -35,13 +34,10 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
         graph.register_factory('view.taskbutton', TaskButton)
         graph.register_factory('view.infobar', Infobar)
 
-    def create_instance(self):
-        return graph.get('tomate.view')
+    def test_module(self, *args):
+        from tomate_gtk.view import GtkView, ViewModule
 
-    def test_interface_and_module_provider(self, *args):
-        from tomate_gtk.view import GtkView, ViewProvider
-
-        self.assertEqual(['tomate.view'], ViewProvider.providers.keys())
+        six.assertCountEqual(self, ['tomate.view'], ViewModule.providers.keys())
 
         provider = graph.providers['tomate.view']
 
@@ -49,7 +45,7 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
         self.assertEqual(provider.scope, SingletonScope)
 
         dependencies = dict(session='tomate.session',
-                            signals='tomate.signals',
+                            events='tomate.events',
                             config='tomate.config',
                             toolbar='view.toolbar',
                             timerframe='view.timerframe',
@@ -60,4 +56,8 @@ class TestGtkView(SubscriptionMixin, unittest.TestCase):
 
         view = graph.get('tomate.view')
         self.assertIsInstance(view, GtkView)
+
+    def test_interface(self):
+        view = graph.get('tomate.view')
+
         IView.check_compliance(view)

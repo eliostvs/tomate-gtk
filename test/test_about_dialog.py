@@ -2,20 +2,21 @@ from __future__ import unicode_literals
 
 import unittest
 
+import six
 from mock import Mock
-from wiring import FactoryProvider, SingletonScope
-
 from tomate.config import Config
 from tomate.graph import graph
+from wiring import FactoryProvider, SingletonScope
+
+from tomate_gtk.dialogs.about import AboutDialog, AboutDialogModule
 
 
 class TestAboutDialog(unittest.TestCase):
 
-    def test_provider_module(self, *args):
-        from tomate_gtk.dialogs.about import AboutDialog, AboutDialogProvider
+    def test_module(self, *args):
+        six.assertCountEqual(self, ['view.about'], AboutDialogModule.providers.keys())
 
-        self.assertEqual(['view.about'], AboutDialogProvider.providers.keys())
-        AboutDialogProvider().add_to(graph)
+        AboutDialogModule().add_to(graph)
 
         provider = graph.providers['view.about']
 
@@ -24,9 +25,10 @@ class TestAboutDialog(unittest.TestCase):
 
         self.assertDictEqual({'config': 'tomate.config'}, provider.dependencies)
 
-        graph.register_factory('tomate.signals', Mock)
+        graph.register_factory('tomate.events', Mock)
         graph.register_factory('config.parser', Mock)
         graph.register_factory('tomate.config', Config)
 
         about = graph.get('view.about')
+
         self.assertIsInstance(about, AboutDialog)

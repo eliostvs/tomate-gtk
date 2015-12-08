@@ -5,7 +5,8 @@ from locale import gettext as _
 from gi.repository import AppIndicator3, Gtk
 from wiring import implements, inject, Interface, Module, SingletonScope
 
-from tomate.signals import subscribe
+from tomate.events import Subscriber, on, Events
+from tomate.enums import State
 
 
 class IIndicator(Interface):
@@ -21,15 +22,8 @@ class IIndicator(Interface):
 
 
 @implements(IIndicator)
-class Indicator(object):
+class Indicator(Subscriber):
 
-    subscriptions = (
-        ('session_ended', 'hide'),
-        ('view_showed', 'hide'),
-        ('view_hid', 'show'),
-    )
-
-    @subscribe
     @inject(config='tomate.config', view='tomate.view')
     def __init__(self, config, view):
         self.config = config
@@ -55,17 +49,20 @@ class Indicator(object):
     def on_show_menu_activate(self, widget):
         return self.view.show()
 
-    def show(self, *args, **kwargs):
+    @on(Events.View, [State.hiding])
+    def show(self, sener=None, **kwargs):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
-    def hide(self, *args, **kwargs):
+    @on(Events.Session, [State.finished])
+    @on(Events.View, [State.showing])
+    def hide(self, sender=None, **kwargs):
         self.indicator.set_status(AppIndicator3.IndicatorStatus.PASSIVE)
 
     def set_icon(self, icon):
         self.indicator.set_icon(icon)
 
 
-class IndicatorProvider(Module):
+class IndicatorModule(Module):
     factories = {
         'tomate.indicator': (Indicator, SingletonScope),
     }

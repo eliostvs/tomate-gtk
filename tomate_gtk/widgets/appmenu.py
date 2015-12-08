@@ -48,10 +48,10 @@ class Appmenu(Gtk.ToolItem):
 
     @property
     def toplevel(self):
-        return self.graph.get('tomate.view')
+        return self.graph.get('tomate.view').widget
 
 
-class AppmenuProvider(Module):
+class AppmenuModule(Module):
     factories = {
         'view.appmenu': (Appmenu, SingletonScope)
     }

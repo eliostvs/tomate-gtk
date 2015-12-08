@@ -2,33 +2,25 @@ from __future__ import unicode_literals
 
 import unittest
 
+import six
 from mock import Mock
+from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
 
-from tomate.graph import graph
-from tomate.tests import SubscriptionMixin
+from tomate_gtk.widgets.appmenu import Appmenu
+from tomate_gtk.widgets.toolbar import Toolbar, ToolbarModule
 
 
-class TestToolbar(SubscriptionMixin, unittest.TestCase):
-
+class TestToolbar(unittest.TestCase):
     def setUp(self):
-        from tomate_gtk.widgets.toolbar import ToolbarProvider
-        from tomate_gtk.widgets.appmenu import Appmenu
-
         graph.register_factory('view.preference', Mock)
         graph.register_factory('view.about', Mock)
         graph.register_factory('tomate.session', Mock)
         graph.register_factory('tomate.appmenu', Appmenu)
+        ToolbarModule().add_to(graph)
 
-        ToolbarProvider().add_to(graph)
-
-    def create_instance(self):
-        return graph.get('view.toolbar')
-
-    def test_provider_module(self, *args):
-        from tomate_gtk.widgets.toolbar import Toolbar, ToolbarProvider
-
-        self.assertEqual(['view.toolbar'], ToolbarProvider.providers.keys())
+    def test_module(self):
+        six.assertCountEqual(self, ['view.toolbar'], ToolbarModule.providers.keys())
 
         provider = graph.providers['view.toolbar']
 
@@ -39,4 +31,5 @@ class TestToolbar(SubscriptionMixin, unittest.TestCase):
                              provider.dependencies)
 
         toolbar = graph.get('view.toolbar')
+
         self.assertIsInstance(toolbar, Toolbar)

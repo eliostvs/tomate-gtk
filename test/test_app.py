@@ -3,19 +3,20 @@ from __future__ import unicode_literals
 import unittest
 
 import dbus
-from mock import Mock, patch
+import six
+from mock import Mock
+from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
 
-from tomate.app import IApplication
-from tomate.graph import graph
-from tomate_gtk.app import GtkApplication, AppProvider
+from tomate_gtk.app import AppModule
 
 
 class TestGtkApp(unittest.TestCase):
 
-    def test_inteface_and_module_provider(self):
-        self.assertEqual(['tomate.app'], AppProvider.providers.keys())
-        AppProvider().add_to(graph)
+    def test_module(self):
+        six.assertCountEqual(self, ['tomate.app'], AppModule.providers.keys())
+
+        AppModule().add_to(graph)
 
         provider = graph.providers['tomate.app']
 
@@ -35,9 +36,3 @@ class TestGtkApp(unittest.TestCase):
         graph.register_factory('tomate.config', Mock)
         graph.register_factory('tomate.plugin', Mock)
         graph.register_factory('tomate.indicator', Mock)
-
-        with patch('tomate.app.dbus'):
-            app = graph.get('tomate.app')
-
-            self.assertIsInstance(app, GtkApplication)
-            IApplication.check_compliance(app)

@@ -4,6 +4,7 @@ ENV PROJECT /code/
 
 RUN apt-get update -qq && apt-get install -yq \
     dbus-x11 \
+    make \
     gir1.2-appindicator3-0.1 \
     gir1.2-gdkpixbuf-2.0 \
     gir1.2-glib-2.0 \
@@ -15,7 +16,6 @@ RUN apt-get update -qq && apt-get install -yq \
     python-gi \
     python-mock \
     python-nose \
-    python-paver \
     python-xdg \
     python-yapsy \
     xvfb \
@@ -31,5 +31,5 @@ RUN apt-get clean
 COPY . $PROJECT
 WORKDIR $PROJECT
 
-ENTRYPOINT ["paver"]
+ENTRYPOINT ["make"]
 CMD ["test"]

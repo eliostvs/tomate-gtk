@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 
-from wiring import inject, Module, SingletonScope
-
 from tomate.app import Application
+from wiring import inject, Module, SingletonScope
 
 
 class GtkApplication(Application):
@@ -17,7 +16,7 @@ class GtkApplication(Application):
         self.indicator = indicator
 
 
-class AppProvider(Module):
+class AppModule(Module):
     factories = {
         'tomate.app': (GtkApplication, SingletonScope)
     }

@@ -5,20 +5,20 @@ import logging
 import dbus.mainloop.glib
 from gi.repository import Gdk
 
-from tomate.config import ConfigProvider
+from tomate.config import ConfigModule
 from tomate.graph import graph
-from tomate.plugin import PluginProvider
-from tomate.session import SessionProvider
-from tomate.signals import SignalsProvider
-from tomate.timer import TimerProvider
+from tomate.plugin import PluginModule
+from tomate.session import SessionModule
+from tomate.events import EventsModule
+from tomate.timer import TimerModule
 
-from .app import AppProvider, GtkApplication
-from .dialogs import AboutDialogProvider, PreferenceDialogProvider
-from .indicator import IndicatorProvider
+from .app import AppModule, GtkApplication
+from .dialogs import AboutDialogModule, PreferenceDialogModule
+from .indicator import IndicatorModule
 from .utils import parse_options, setup_logging
-from .view import ViewProvider
-from .widgets import (AppmenuProvider, TaskButtonProvider, TimerFrameProvider,
-                      ToolbarProvider, InfobarProvider)
+from .view import ViewModule
+from .widgets import (AppmenuModule, TaskButtonModule, TimerFrameModule,
+                      ToolbarModule, InfobarModule)
 
 
 def main():
@@ -27,31 +27,31 @@ def main():
         setup_logging(options)
 
         # Base
-        PluginProvider().add_to(graph)
-        SignalsProvider().add_to(graph)
-        ConfigProvider().add_to(graph)
-        TimerProvider().add_to(graph)
-        SessionProvider().add_to(graph)
+        PluginModule().add_to(graph)
+        EventsModule().add_to(graph)
+        ConfigModule().add_to(graph)
+        TimerModule().add_to(graph)
+        SessionModule().add_to(graph)
 
         # Dialogs
-        AboutDialogProvider().add_to(graph)
-        PreferenceDialogProvider().add_to(graph)
+        AboutDialogModule().add_to(graph)
+        PreferenceDialogModule().add_to(graph)
 
         # Main window
-        AppmenuProvider().add_to(graph)
-        ToolbarProvider().add_to(graph)
-        TimerFrameProvider().add_to(graph)
-        TaskButtonProvider().add_to(graph)
-        InfobarProvider().add_to(graph)
-        ViewProvider().add_to(graph)
-        IndicatorProvider().add_to(graph)
+        AppmenuModule().add_to(graph)
+        ToolbarModule().add_to(graph)
+        TimerFrameModule().add_to(graph)
+        TaskButtonModule().add_to(graph)
+        InfobarModule().add_to(graph)
+        ViewModule().add_to(graph)
+        IndicatorModule().add_to(graph)
 
         # App
-        AppProvider().add_to(graph)
+        AppModule().add_to(graph)
 
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-        app = GtkApplication.fromgraph(graph)
+        app = GtkApplication.from_graph(graph)
 
         app.run()
 

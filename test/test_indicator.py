@@ -2,28 +2,23 @@ from __future__ import unicode_literals
 
 import unittest
 
+import six
 from mock import Mock
 from tomate.graph import graph
-from tomate.tests import SubscriptionMixin
 from wiring import FactoryProvider, SingletonScope
 
+from tomate_gtk.indicator import IIndicator, Indicator, IndicatorModule
 
-class TestIndicator(SubscriptionMixin, unittest.TestCase):
+
+class IndicatorTest(unittest.TestCase):
 
     def setUp(self):
-        from tomate_gtk.indicator import IndicatorProvider
-
-        IndicatorProvider().add_to(graph)
+        IndicatorModule().add_to(graph)
         graph.register_instance('tomate.view', Mock())
         graph.register_instance('tomate.config', Mock(**{'get_icon_paths.return_value': ['']}))
 
-    def create_instance(self):
-        return graph.get('tomate.indicator')
-
-    def test_interface_and_provider(self):
-        from tomate_gtk.indicator import IIndicator, Indicator, IndicatorProvider
-
-        self.assertEqual(['tomate.indicator'], IndicatorProvider.providers.keys())
+    def test_module(self):
+        six.assertCountEqual(self, ['tomate.indicator'], IndicatorModule.providers.keys())
 
         provider = graph.providers['tomate.indicator']
 
@@ -35,4 +30,8 @@ class TestIndicator(SubscriptionMixin, unittest.TestCase):
         indicator = graph.get('tomate.indicator')
 
         self.assertIsInstance(indicator, Indicator)
+
+    def test_indicator_interface(self):
+        indicator = graph.get('tomate.indicator')
+
         IIndicator.check_compliance(indicator)

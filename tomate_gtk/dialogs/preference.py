@@ -57,7 +57,8 @@ class PreferenceDialog(Gtk.Dialog):
         content_area = self.get_content_area()
         content_area.add(box)
 
-    def on_dialog_response(self, widget, parameter):
+    @staticmethod
+    def on_dialog_response(widget, parameter):
         widget.hide()
 
     def refresh_plugin(self):
@@ -104,7 +105,8 @@ class TimerDurationStack(Gtk.Grid):
         self.attach(label, 0, 3, 1, 1)
         self.attach_next_to(setting, label, Gtk.PositionType.RIGHT, 3, 1)
 
-    def _add_section(self, name):
+    @staticmethod
+    def _add_section(name):
         section = Gtk.Label('<b>{0}</b>'.format(name), use_markup=True)
         section.set_halign(Gtk.Align.START)
         return section
@@ -235,7 +237,7 @@ class GridPlugin(object):
                          description=plugin.description)
 
 
-class PreferenceDialogProvider(Module):
+class PreferenceDialogModule(Module):
     factories = {
         'view.preference.extension': (ExtensionStack, SingletonScope),
         'view.preference.duration': (TimerDurationStack, SingletonScope),

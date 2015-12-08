@@ -5,22 +5,6 @@ from gi.repository import Gtk, GLib
 from wiring import Interface, implements, Module, SingletonScope
 
 
-class IInfobar(Interface):
-    
-    def show_message(message, message_type=Gtk.MessageType.INFO, timeout=3):
-        pass
-
-    def add_callback(button_text, callback):
-        pass
-
-    def add_callback_with_message(button_text, callback, message, message_type=Gtk.MessageType.INFO, timeout=5):
-        pass
-
-    def hide_after(timeout=3):
-        pass
-
-
-@implements(IInfobar)
 class Infobar(Gtk.InfoBar):
     def __init__(self):
         Gtk.InfoBar.__init__(self, no_show_all=True)
@@ -64,8 +48,12 @@ class Infobar(Gtk.InfoBar):
             self.callback()
             self.callback = None
 
+    @property
+    def widget(self):
+        return self
 
-class InfobarProvider(Module):
+
+class InfobarModule(Module):
     factories = {
         'view.infobar': (Infobar, SingletonScope),
     }

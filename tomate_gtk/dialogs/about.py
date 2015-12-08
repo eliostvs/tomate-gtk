@@ -27,11 +27,12 @@ class AboutDialog(Gtk.AboutDialog):
 
         self.connect("response", self.on_dialog_response)
 
-    def on_dialog_response(self, widget, parameter):
+    @staticmethod
+    def on_dialog_response(widget, parameter):
         widget.hide()
 
 
-class AboutDialogProvider(Module):
+class AboutDialogModule(Module):
     factories = {
         'view.about': (AboutDialog, SingletonScope)
     }

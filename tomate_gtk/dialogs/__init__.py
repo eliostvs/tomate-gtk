@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from .about import AboutDialogProvider
-from .preference import PreferenceDialogProvider
+from .about import AboutDialogModule
+from .preference import PreferenceDialogModule
 
-__all__ = ['AboutDialogProvider', 'PreferenceDialogProvider']
+__all__ = ['AboutDialogModule', 'PreferenceDialogModule']
