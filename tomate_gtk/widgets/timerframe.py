@@ -3,11 +3,10 @@ from __future__ import unicode_literals
 import logging
 
 from gi.repository import Gtk
-
 from wiring import Module, SingletonScope
 
-from tomate.events import Subscriber, Events, on
-from tomate.enums import State
+from tomate.constant import State
+from tomate.event import Subscriber, Events, on
 from tomate.utils import format_time_left
 
 logger = logging.getLogger(__name__)

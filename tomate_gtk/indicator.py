@@ -5,8 +5,8 @@ from locale import gettext as _
 from gi.repository import AppIndicator3, Gtk
 from wiring import implements, inject, Interface, Module, SingletonScope
 
-from tomate.events import Subscriber, on, Events
-from tomate.enums import State
+from tomate.constant import State
+from tomate.event import Subscriber, on, Events
 
 
 class IIndicator(Interface):

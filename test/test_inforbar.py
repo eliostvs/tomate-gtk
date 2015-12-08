@@ -3,10 +3,10 @@ from __future__ import unicode_literals
 import unittest
 
 import six
-from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
 
-from tomate_gtk.widgets.infobar import InfobarModule, Infobar, InfobarModule
+from tomate.graph import graph
+from tomate_gtk.widgets.infobar import Infobar, InfobarModule
 
 
 class TestInfobar(unittest.TestCase):

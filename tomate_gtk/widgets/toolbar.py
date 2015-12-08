@@ -4,9 +4,10 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from tomate.enums import State
-from tomate.events import Subscriber, Events, on
 from wiring import inject, Module, SingletonScope
+
+from tomate.constant import State
+from tomate.event import Subscriber, Events, on
 
 locale.textdomain('tomate')
 
@@ -61,7 +62,7 @@ class Toolbar(Subscriber):
     def on_reset_button_clicked(self, widget):
         self.session.reset()
 
-    @on(Events.Session, [State.running])
+    @on(Events.Session, [State.started])
     def enable_stop_button(self, *args, **kwargs):
         self.start_button.set_visible(False)
 
@@ -78,14 +79,13 @@ class Toolbar(Subscriber):
         sensitive = bool(kwargs.get('sessions'))
         self.reset_button.set_sensitive(sensitive)
 
-    @on(Events.Session, [State.running, State.reset])
+    @on(Events.Session, [State.started, State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
 
     @property
     def widget(self):
         return self.toolbar
-
 
 
 class ToolbarModule(Module):

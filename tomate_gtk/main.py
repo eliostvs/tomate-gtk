@@ -9,7 +9,7 @@ from tomate.config import ConfigModule
 from tomate.graph import graph
 from tomate.plugin import PluginModule
 from tomate.session import SessionModule
-from tomate.events import EventsModule
+from tomate.event import EventsModule
 from tomate.timer import TimerModule
 
 from .app import AppModule, GtkApplication

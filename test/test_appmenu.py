@@ -4,10 +4,11 @@ import unittest
 
 import six
 from mock import Mock
-from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope, Graph
 
+from tomate.graph import graph
 from tomate_gtk.widgets.appmenu import Appmenu, AppmenuModule
+
 
 class TestAppmenu(unittest.TestCase):
 

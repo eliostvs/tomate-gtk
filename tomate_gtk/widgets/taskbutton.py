@@ -6,9 +6,8 @@ from locale import gettext as _
 
 from wiring import inject, Module, SingletonScope
 
-from tomate.enums import Task, State
-from tomate.events import Subscriber, Events, on
-
+from tomate.constant import Task, State
+from tomate.event import Subscriber, Events, on
 from .modebutton import ModeButton
 
 locale.textdomain('tomate')
@@ -50,7 +49,7 @@ class TaskButton(Subscriber):
 
         self.modebutton.set_selected(task.value)
 
-    @on(Events.Session, [State.running])
+    @on(Events.Session, [State.started])
     def disable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(False)
 

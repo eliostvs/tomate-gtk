@@ -4,10 +4,11 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from tomate.enums import State
-from tomate.events import Subscriber, on, Events
-from tomate.view import IView
 from wiring import implements, inject, Module, SingletonScope
+
+from tomate.constant import State
+from tomate.event import Subscriber, on, Events
+from tomate.view import IView
 
 logger = logging.getLogger(__name__)
 
