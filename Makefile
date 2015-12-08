@@ -20,7 +20,7 @@ test: clean
 	$(XDG_DATA_DIRS) $(PYTHONPATH) nosetests --verbosity=$(VERBOSITY)
 
 docker-test:
-	docker run --rm -v $PWD:/code $(DOCKER_IMAGE_NAME) test
+	docker run --rm -v $(PROJECT_ROOT):/code $(DOCKER_IMAGE_NAME) test
 
 docker-clean:
 	docker rmi $(DOCKER_IMAGE_NAME) 2> /dev/null || echo $(DOCKER_IMAGE_NAME) not found!
