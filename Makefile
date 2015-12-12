@@ -3,12 +3,12 @@ AUTHOR = eliostvs
 PROJECT_ROOT = $(CURDIR)
 PACKAGE_NAME = tomate_gtk
 DOCKER_IMAGE_NAME= $(AUTHOR)/$(PROJECT)
-VERBOSITY=1
 DATA_PATH = $(PROJECT_ROOT)/data
 DOCKER_IMAGE_NAME= $(AUTHOR)/$(PROJECT)
 TOMATE_PATH = $(PROJECT_ROOT)/tomate
 XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local/share:/usr/share
 PYTHONPATH = PYTHONPATH=$(TOMATE_PATH):$(PROJECT_ROOT)
+VERBOSITY=1
 
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__" \) -print0 | xargs -0 rm -rf
@@ -17,7 +17,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_NAME) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) nosetests --verbosity=$(VERBOSITY)
+	$(XDG_DATA_DIRS) $(PYTHONPATH) nosetests --with-coverage --cover-erase --cover-package=$(PACKAGE_NAME)
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
