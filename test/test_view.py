@@ -7,7 +7,7 @@ from mock import Mock, patch
 from wiring import FactoryProvider, SingletonScope, Graph
 
 from tomate.constant import State
-from tomate.view import IView
+from tomate.view import UI, TrayIcon
 
 
 @patch('tomate_gtk.view.GdkPixbuf')
@@ -15,15 +15,15 @@ from tomate.view import IView
 class TestGtkView(unittest.TestCase):
 
     def make_view(self):
-        from tomate_gtk.view import GtkView
+        from tomate_gtk.view import GtkUI
 
-        view = GtkView(session=Mock(),
-                       events=Mock(),
-                       config=Mock(),
-                       toolbar=Mock(),
-                       timerframe=Mock(),
-                       taskbutton=Mock(),
-                       infobar=Mock())
+        view = GtkUI(session=Mock(),
+                     events=Mock(),
+                     config=Mock(),
+                     graph=Mock(),
+                     toolbar=Mock(),
+                     timerframe=Mock(),
+                     taskbutton=Mock())
 
         return view
 
@@ -42,10 +42,10 @@ class TestGtkView(unittest.TestCase):
         dependencies = dict(session='tomate.session',
                             events='tomate.events',
                             config='tomate.config',
+                            graph=Graph,
                             toolbar='view.toolbar',
                             timerframe='view.timerframe',
-                            taskbutton='view.taskbutton',
-                            infobar='view.infobar')
+                            taskbutton='view.taskbutton')
 
         self.assertDictEqual(dependencies, provider.dependencies)
 
@@ -64,9 +64,20 @@ class TestGtkView(unittest.TestCase):
 
         Gtk.main_quit.assert_called_once_with()
 
-    def test_should_hide_when_timer_is_running(self, Gtk, GdkPixbuf):
+    def test_should_minimize_when_timer_is_running_and_trayicon_is_not_in_providers(self, Gtk, GdkPixbuf):
         view = self.make_view()
         view.session.timer_is_running.return_value = True
+        view.graph.providers = {}
+
+        view.quit()
+
+        view.event.send.assert_called_with(State.hiding)
+        view.window.iconify.assert_called_once_with()
+
+    def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(self, Gtk, GdkPixbuf):
+        view = self.make_view()
+        view.session.timer_is_running.return_value = True
+        view.graph.providers = {TrayIcon: ''}
 
         view.quit()
 
@@ -76,4 +87,4 @@ class TestGtkView(unittest.TestCase):
     def test_interface(self, Gtk, GdkPixbuf):
         view = self.make_view()
 
-        IView.check_compliance(view)
+        UI.check_compliance(view)

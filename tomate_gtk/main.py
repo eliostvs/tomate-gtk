@@ -5,20 +5,18 @@ import logging
 import dbus.mainloop.glib
 from gi.repository import Gdk
 
+from tomate.app import Application, ApplicationModule
 from tomate.config import ConfigModule
+from tomate.event import EventsModule
 from tomate.graph import graph
 from tomate.plugin import PluginModule
 from tomate.session import SessionModule
-from tomate.event import EventsModule
 from tomate.timer import TimerModule
-
-from .app import AppModule, GtkApplication
 from .dialogs import AboutDialogModule, PreferenceDialogModule
-from .indicator import IndicatorModule
 from .utils import parse_options, setup_logging
 from .view import ViewModule
 from .widgets import (AppmenuModule, TaskButtonModule, TimerFrameModule,
-                      ToolbarModule, InfobarModule)
+                      ToolbarModule)
 
 
 def main():
@@ -42,16 +40,14 @@ def main():
         ToolbarModule().add_to(graph)
         TimerFrameModule().add_to(graph)
         TaskButtonModule().add_to(graph)
-        InfobarModule().add_to(graph)
         ViewModule().add_to(graph)
-        IndicatorModule().add_to(graph)
 
         # App
-        AppModule().add_to(graph)
+        ApplicationModule().add_to(graph)
 
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
-        app = GtkApplication.from_graph(graph)
+        app = Application.from_graph(graph)
 
         app.run()
 

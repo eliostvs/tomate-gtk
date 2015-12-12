@@ -4,31 +4,32 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import implements, inject, Module, SingletonScope
+from wiring import implements, inject, Module, SingletonScope, Graph
 
 from tomate.constant import State
 from tomate.event import Subscriber, on, Events
-from tomate.view import IView
+from tomate.view import UI, TrayIcon
 
 logger = logging.getLogger(__name__)
 
 
-@implements(IView)
-class GtkView(Subscriber):
+@implements(UI)
+class GtkUI(Subscriber):
 
     @inject(
         session='tomate.session',
         events='tomate.events',
         config='tomate.config',
+        graph=Graph,
         toolbar='view.toolbar',
         timerframe='view.timerframe',
         taskbutton='view.taskbutton',
-        infobar='view.infobar',
     )
-    def __init__(self, session, events, config, toolbar, timerframe, taskbutton, infobar):
+    def __init__(self, session, events, config, graph, toolbar, timerframe, taskbutton):
         self.config = config
         self.session = session
         self.event = events.View
+        self.graph = graph
 
         self.window = Gtk.Window(
             title='Tomate',
@@ -40,7 +41,6 @@ class GtkView(Subscriber):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
-        box.pack_start(infobar.widget, False, False, 0)
         box.pack_start(timerframe.widget, True, True, 0)
         box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton.widget, True, True, 0)
@@ -79,7 +79,11 @@ class GtkView(Subscriber):
 
         self.event.send(State.hiding)
 
-        return self.window.hide_on_delete()
+        if TrayIcon in self.graph.providers.keys():
+            return self.window.hide_on_delete()
+
+        self.window.iconify()
+        return Gtk.true
 
     @property
     def widget(self):
@@ -88,5 +92,5 @@ class GtkView(Subscriber):
 
 class ViewModule(Module):
     factories = {
-        'tomate.view': (GtkView, SingletonScope)
+        'tomate.view': (GtkUI, SingletonScope)
     }
