@@ -3,42 +3,37 @@ from __future__ import unicode_literals
 import unittest
 
 import six
-from mock import Mock
-from tomate.config import Config
-from tomate.graph import graph
+from mock import Mock, patch
+from wiring import FactoryProvider, SingletonScope, Graph
+
+from tomate.constant import State
 from tomate.view import IView
-from wiring import FactoryProvider, SingletonScope
 
 
+@patch('tomate_gtk.view.GdkPixbuf')
+@patch('tomate_gtk.view.Gtk')
 class TestGtkView(unittest.TestCase):
 
-    def setUp(self):
+    def make_view(self):
+        from tomate_gtk.view import GtkView
+
+        view = GtkView(session=Mock(),
+                       events=Mock(),
+                       config=Mock(),
+                       toolbar=Mock(),
+                       timerframe=Mock(),
+                       taskbutton=Mock(),
+                       infobar=Mock())
+
+        return view
+
+    def test_module(self, Gtk, GdkPixbuf):
         from tomate_gtk.view import ViewModule
-        from tomate_gtk.widgets.taskbutton import TaskButton
-        from tomate_gtk.widgets.timerframe import TimerFrame
-        from tomate_gtk.widgets.toolbar import Toolbar
-        from tomate_gtk.widgets.appmenu import Appmenu
-        from tomate_gtk.widgets.infobar import Infobar
-
-        ViewModule().add_to(graph)
-
-        graph.register_factory('tomate.events', Mock)
-        graph.register_factory('tomate.session', Mock)
-        graph.register_factory('config.parser', Mock)
-        graph.register_factory('tomate.config', Config)
-        graph.register_factory('view.about', Mock)
-        graph.register_factory('view.preference', Mock)
-        graph.register_factory('view.appmenu', Appmenu)
-        graph.register_factory('view.toolbar', Toolbar)
-        graph.register_factory('view.timerframe', TimerFrame)
-        graph.register_factory('view.taskbutton', TaskButton)
-        graph.register_factory('view.infobar', Infobar)
-
-    def test_module(self, *args):
-        from tomate_gtk.view import GtkView, ViewModule
 
         six.assertCountEqual(self, ['tomate.view'], ViewModule.providers.keys())
 
+        graph = Graph()
+        ViewModule().add_to(graph)
         provider = graph.providers['tomate.view']
 
         self.assertIsInstance(provider, FactoryProvider)
@@ -54,10 +49,31 @@ class TestGtkView(unittest.TestCase):
 
         self.assertDictEqual(dependencies, provider.dependencies)
 
-        view = graph.get('tomate.view')
-        self.assertIsInstance(view, GtkView)
+    def test_should_call_gtk_main(self, Gtk, GdkPixbuf):
+        view = self.make_view()
 
-    def test_interface(self):
-        view = graph.get('tomate.view')
+        view.run()
+
+        Gtk.main.assert_called_once_with()
+
+    def test_should_quit_when_timer_is_not_running(self, Gtk, GdkPixbuf):
+        view = self.make_view()
+
+        view.session.timer_is_running.return_value = False
+        view.quit()
+
+        Gtk.main_quit.assert_called_once_with()
+
+    def test_should_hide_when_timer_is_running(self, Gtk, GdkPixbuf):
+        view = self.make_view()
+        view.session.timer_is_running.return_value = True
+
+        view.quit()
+
+        view.event.send.assert_called_with(State.hiding)
+        view.window.hide_on_delete.assert_called_once_with()
+
+    def test_interface(self, Gtk, GdkPixbuf):
+        view = self.make_view()
 
         IView.check_compliance(view)
