@@ -7,7 +7,7 @@ from gi.repository import Gdk
 
 from tomate.app import Application, ApplicationModule
 from tomate.config import ConfigModule
-from tomate.event import EventsModule
+from tomate.event import EventModule
 from tomate.graph import graph
 from tomate.plugin import PluginModule
 from tomate.session import SessionModule
@@ -26,7 +26,7 @@ def main():
 
         # Base
         PluginModule().add_to(graph)
-        EventsModule().add_to(graph)
+        EventModule().add_to(graph)
         ConfigModule().add_to(graph)
         TimerModule().add_to(graph)
         SessionModule().add_to(graph)
