@@ -10,7 +10,6 @@ depends=('desktop-file-utils'
          'gtk-update-icon-cache'
          'gtk3'
          'hicolor-icon-theme'
-         'libappindicator-gtk3'
          'python'
          'python-tomate')
 makedepends=('python-setuptools')
