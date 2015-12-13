@@ -17,7 +17,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_NAME) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) nosetests --with-coverage --cover-erase --cover-package=$(PACKAGE_NAME)
+	$(XDG_DATA_DIRS) $(PYTHONPATH) xvfb-run -a nosetests --with-coverage --cover-erase --cover-package=$(PACKAGE_NAME)
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
