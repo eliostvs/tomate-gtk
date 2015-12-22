@@ -4,7 +4,7 @@ Tomate GTK
 A open source timer for the Pomodoro Technique®.
 
 
-About the technique 
+About the technique
 -------------------
 
 The Pomodoro Technique® is a management technique developed by Francesco Cirillo that helps you keep focused.
@@ -58,7 +58,8 @@ sudo yum install tomate-gtk
 yaourt -S tomate-gtk
 ```
 
-## Features
+Features
+--------
 
 Three task timers (pomodoro, short break and long break) and count pomodoro sessions. 
 You can extend the program through plugins.
@@ -69,9 +70,17 @@ The current plugins are:
 - [Indicator plugin (tomate-indicator-plugin)][indicator-plugin]. Shows the timer countdown in the indicator area and close to tray. (Requires libappindicator)
 - [Launcher plugin (tomate-launcher-plugin)][launcher-plugin]. Shows a countdown bar in the Unity launcher and the total of pomodoro sessions. (Ubuntu only)
 
-### PLugin installation and configuration
+PLugin installation
+-------------------
 
 Install the plugin (ex. `apt-get install tomate-indicator-plugin`) then select it in the *Preferences* > *Extensions* window.
+
+Changelog
+---------
+
+### v0.4.0
+
+- Using the new event system
 
 License
 -------
