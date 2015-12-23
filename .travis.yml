@@ -1,6 +1,9 @@
 sudo: required
 install: true
 
+before_install:
+    - git submodule update
+
 services:
     - docker
 
