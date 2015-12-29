@@ -1,14 +1,10 @@
 sudo: required
-install: true
 
 services:
     - docker
 
 before_install:
     - make docker-build
-
-before_script:
-    - git submodule update
 
 script:
     - make docker-test
