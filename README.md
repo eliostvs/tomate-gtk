@@ -81,6 +81,7 @@ Changelog
 ### v0.4.0
 
 - Using the new event system
+- Python 2/3 compatible
 
 License
 -------
