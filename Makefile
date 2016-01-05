@@ -8,7 +8,7 @@ DOCKER_IMAGE_NAME= $(AUTHOR)/$(PROJECT)
 TOMATE_PATH = $(PROJECT_ROOT)/tomate
 XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local/share:/usr/share
 PYTHONPATH = PYTHONPATH=$(TOMATE_PATH):$(PROJECT_ROOT)
-VERBOSITY=1
+VERBOSITY = 1
 
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__" \) -print0 | xargs -0 rm -rf
