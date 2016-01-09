@@ -31,28 +31,33 @@ class GtkUI(Subscriber):
         self.event = events.View
         self.graph = graph
 
-        self.window = Gtk.Window(
-            title='Tomate',
-            icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
-            window_position=Gtk.WindowPosition.CENTER,
-            resizable=False
-        )
-        self.window.set_size_request(350, -1)
+        self.window = self._build_window(taskbutton, timerframe, toolbar)
+        self.window.show_all()
 
+        self.session.change_task()
+
+    def _build_window(self, taskbutton, timerframe, toolbar):
+        window = Gtk.Window(
+                title='Tomate',
+                icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
+                window_position=Gtk.WindowPosition.CENTER,
+                resizable=False
+        )
+        
+        window.set_size_request(350, -1)
+        
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
         box.pack_start(timerframe.widget, True, True, 0)
         box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton.widget, True, True, 0)
-
-        self.window.connect('delete-event', self.on_window_delete_event)
-
-        self.window.add(box)
-
-        self.window.show_all()
-
-        self.session.change_task()
-
+        
+        window.add(box)
+        
+        window.connect('delete-event', self.on_window_delete_event)
+        
+        return window
+        
     def on_window_delete_event(self, window, event):
         return self.quit()
 
@@ -83,6 +88,7 @@ class GtkUI(Subscriber):
             return self.window.hide_on_delete()
 
         self.window.iconify()
+        
         return Gtk.true
 
     @property
