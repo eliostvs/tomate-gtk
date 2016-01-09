@@ -85,8 +85,6 @@ fi
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/*/*.*
-%{_datadir}/icons/ubuntu-mono-light/
-%{_datadir}/icons/ubuntu-mono-dark/
 %{python_sitelib}/*
 
 %doc AUTHORS COPYING README.md
