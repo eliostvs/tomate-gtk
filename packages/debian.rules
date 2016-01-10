@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-DEB_BUILD_OPTIONS='nocheck'
-
 %:
 	dh $@ --with python2,python3
+
+override_dh_auto_test:
