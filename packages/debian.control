@@ -18,7 +18,7 @@ Depends: ${misc:Depends},
  python-setuptools,
  python-tomate (>= 0.3.0)
 Description: Gtk version from Tomate pomodoro timer.
-This package installs the library for Python 2.
+ This package installs the library for Python 2.
 
 
 Package: tomate3-gtk
@@ -31,4 +31,4 @@ Depends: ${misc:Depends},
  python-setuptools,
  python-tomate (>= 0.3.0)
 Description: Gtk version from Tomate pomodoro timer.
-This package installs the library for Python 3.
+ This package installs the library for Python 3.
