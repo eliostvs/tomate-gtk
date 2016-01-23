@@ -1,4 +1,4 @@
 [submodule "tomate"]
 	path = tomate
 	url = https://github.com/eliostvs/tomate.git
-	branch = develop
+	branch = master
