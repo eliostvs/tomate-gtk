@@ -1,18 +1,17 @@
-FROM ubuntu:14.04
+FROM eliostvs/tomate
 
-RUN apt-get install -y -qq wget
+ENV PROJECT /code/
 
-RUN wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_14.04/Release.key | apt-key add -
-RUN echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_14.04/ ./' > /etc/apt/sources.list.d/tomate.list
-
-COPY ./ /code/
-
-RUN apt-get update -qq && cat /code/packages.txt | xargs apt-get -yqq install
+RUN apt-get update -qq && apt-get install -yq \
+    dbus-x11 \
+    gir1.2-gdkpixbuf-2.0 \
+    gir1.2-gtk-3.0 \
+    xvfb
 
 RUN apt-get clean
 
-WORKDIR /code/
+COPY . $PROJECT
+WORKDIR $PROJECT
 
-ENTRYPOINT ["paver"]
-
-CMD ["run"]
+ENTRYPOINT ["make"]
+CMD ["test"]

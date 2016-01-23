@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
 
-from .appmenu import AppmenuProvider
-from .taskbutton import TaskButtonProvider
-from .timerframe import TimerFrameProvider
-from .toolbar import ToolbarProvider
+from .appmenu import AppmenuModule
+from .taskbutton import TaskButtonModule
+from .timerframe import TimerFrameModule
+from .toolbar import ToolbarModule
 
 __all__ = [
-    'AppmenuProvider',
-    'TaskButtonProvider',
-    'TimerFrameProvider',
-    'ToolbarProvider',
+    'AppmenuModule',
+    'TaskButtonModule',
+    'TimerFrameModule',
+    'ToolbarModule',
 ]

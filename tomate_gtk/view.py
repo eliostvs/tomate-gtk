@@ -4,60 +4,60 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import implements, inject, Module, SingletonScope
+from wiring import implements, inject, Module, SingletonScope, Graph
 
-from tomate.view import IView
-from tomate.signals import subscribe
+from tomate.constant import State
+from tomate.event import Subscriber, on, Events
+from tomate.view import UI, TrayIcon
 
 logger = logging.getLogger(__name__)
 
 
-@implements(IView)
-class GtkView(Gtk.Window):
+@implements(UI)
+class GtkUI(Subscriber):
 
-    subscriptions = (
-        ('setting_changed', 'on_setting_changed'),
-        ('session_ended', 'show'),
+    @inject(
+        session='tomate.session',
+        events='tomate.events',
+        config='tomate.config',
+        graph=Graph,
+        toolbar='view.toolbar',
+        timerframe='view.timerframe',
+        taskbutton='view.taskbutton',
     )
-
-    @subscribe
-    @inject(session='tomate.session',
-            signals='tomate.signals',
-            config='tomate.config',
-            toolbar='view.toolbar',
-            timerframe='view.timerframe',
-            taskbutton='view.taskbutton')
-    def __init__(self, session, signals, config, toolbar, timerframe, taskbutton):
+    def __init__(self, session, events, config, graph, toolbar, timerframe, taskbutton):
         self.config = config
         self.session = session
-        self.signals = signals
+        self.event = events.View
+        self.graph = graph
 
-        Gtk.Window.__init__(
-            self,
-            title='Tomate',
-            icon=GdkPixbuf.Pixbuf.new_from_file(
-                self.config.get_icon_path('tomate', 22)
-            ),
-            window_position=Gtk.WindowPosition.CENTER,
-            resizable=False
-        )
-        self.set_size_request(350, -1)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        box.pack_start(toolbar, False, False, 0)
-        box.pack_start(timerframe, True, True, 0)
-        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL),
-                       False, False, 8)
-        box.pack_start(taskbutton, True, True, 0)
-
-        self.connect('delete-event', self.on_window_delete_event)
-
-        self.add(box)
-
-        self.show_all()
+        self.window = self._build_window(taskbutton, timerframe, toolbar)
+        self.window.show_all()
 
         self.session.change_task()
 
+    def _build_window(self, taskbutton, timerframe, toolbar):
+        window = Gtk.Window(
+                title='Tomate',
+                icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
+                window_position=Gtk.WindowPosition.CENTER,
+                resizable=False
+        )
+        
+        window.set_size_request(350, -1)
+        
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        box.pack_start(toolbar.widget, False, False, 0)
+        box.pack_start(timerframe.widget, True, True, 0)
+        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
+        box.pack_start(taskbutton.widget, True, True, 0)
+        
+        window.add(box)
+        
+        window.connect('delete-event', self.on_window_delete_event)
+        
+        return window
+        
     def on_window_delete_event(self, window, event):
         return self.quit()
 
@@ -71,24 +71,32 @@ class GtkView(Gtk.Window):
         else:
             Gtk.main_quit()
 
+    @on(Events.Session, [State.finished])
     def show(self, *args, **kwargs):
-        logger.debug('Emiting signal view_showed')
+        logger.debug('View is showing')
 
-        self.signals.emit('view_showed')
-        return self.present_with_time(time.time())
+        self.event.send(State.showing)
+
+        return self.window.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
-        logger.debug('Emiting signal view_hid')
+        logger.debug('View is hiding')
 
-        self.signals.emit('view_hid')
-        return self.hide_on_delete()
+        self.event.send(State.hiding)
 
-    def on_setting_changed(self, *args, **kwargs):
-        if kwargs.get('section') == 'timer':
-            self.session.change_task()
+        if TrayIcon in self.graph.providers.keys():
+            return self.window.hide_on_delete()
+
+        self.window.iconify()
+        
+        return Gtk.true
+
+    @property
+    def widget(self):
+        return self.window
 
 
-class ViewProvider(Module):
+class ViewModule(Module):
     factories = {
-        'tomate.view': (GtkView, SingletonScope)
+        'tomate.view': (GtkUI, SingletonScope)
     }

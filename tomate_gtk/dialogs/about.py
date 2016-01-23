@@ -18,8 +18,7 @@ class AboutDialog(Gtk.AboutDialog):
             modal=True,
             program_name='Tomate Gtk',
             title='Tomate Gtk',
-            transient_for=self.get_toplevel(),
-            version='0.3.0',
+            version='0.4.0',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
         )
@@ -28,11 +27,12 @@ class AboutDialog(Gtk.AboutDialog):
 
         self.connect("response", self.on_dialog_response)
 
-    def on_dialog_response(self, widget, parameter):
+    @staticmethod
+    def on_dialog_response(widget, parameter):
         widget.hide()
 
 
-class AboutDialogProvider(Module):
+class AboutDialogModule(Module):
     factories = {
         'view.about': (AboutDialog, SingletonScope)
     }

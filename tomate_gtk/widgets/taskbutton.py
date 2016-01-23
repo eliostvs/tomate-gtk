@@ -6,31 +6,21 @@ from locale import gettext as _
 
 from wiring import inject, Module, SingletonScope
 
-from tomate.enums import Task
-from tomate.signals import subscribe
-
+from tomate.constant import Task, State
+from tomate.event import Subscriber, Events, on
 from .modebutton import ModeButton
 
 locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
 
 
-class TaskButton(ModeButton):
+class TaskButton(Subscriber):
 
-    subscriptions = (
-        ('session_started', 'disable'),
-        ('session_interrupted', 'enable'),
-        ('session_ended', 'change_selected'),
-        ('session_ended', 'enable'),
-    )
-
-    @subscribe
     @inject(session='tomate.session')
     def __init__(self, session=None):
         self.session = session
 
-        ModeButton.__init__(
-            self,
+        self.modebutton = ModeButton(
             can_focus=False,
             homogeneous=True,
             margin_bottom=12,
@@ -40,32 +30,39 @@ class TaskButton(ModeButton):
             spacing=0,
         )
 
-        self.append_text(_('Pomodoro'))
-        self.append_text(_('Short Break'))
-        self.append_text(_('Long Break'))
-        self.set_selected(0)
+        self.modebutton.append_text(_('Pomodoro'))
+        self.modebutton.append_text(_('Short Break'))
+        self.modebutton.append_text(_('Long Break'))
+        self.modebutton.set_selected(0)
 
-        self.connect('mode_changed', self.on_mode_changed)
+        self.modebutton.connect('mode_changed', self.on_mode_changed)
 
     def on_mode_changed(self, widget, index):
-        task = Task.get_by_index(index)
+        task = Task.by_index(index)
         self.session.change_task(task=task)
 
-    def change_selected(self, *args, **kwargs):
+    @on(Events.Session, [State.finished])
+    def change_selected(self, sender=None, **kwargs):
         task = kwargs.get('task', Task.pomodoro)
 
         logger.debug('task changed %s', task)
 
-        self.set_selected(task.value)
+        self.modebutton.set_selected(task.value)
 
-    def disable(self, *args, **kwargs):
-        self.set_sensitive(False)
+    @on(Events.Session, [State.started])
+    def disable(self, sender=None, **kwargs):
+        self.modebutton.set_sensitive(False)
 
-    def enable(self, *args, **kwargs):
-        self.set_sensitive(True)
+    @on(Events.Session, [State.stopped, State.stopped])
+    def enable(self, sender=None, **kwargs):
+        self.modebutton.set_sensitive(True)
+
+    @property
+    def widget(self):
+        return self.modebutton
 
 
-class TaskButtonProvider(Module):
+class TaskButtonModule(Module):
 
     factories = {
         'view.taskbutton': (TaskButton, SingletonScope)

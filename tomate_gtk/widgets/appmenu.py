@@ -4,17 +4,18 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from wiring import inject, Module, SingletonScope
+from wiring import inject, Module, SingletonScope, Graph
 
 locale.textdomain('tomate')
 
 
 class Appmenu(Gtk.ToolItem):
 
-    @inject(about='view.about', preference='view.preference')
-    def __init__(self, about, preference):
+    @inject(about='view.about', preference='view.preference', graph=Graph)
+    def __init__(self, about, preference, graph):
         self.about = about
         self.preference = preference
+        self.graph = graph
 
         Gtk.ToolItem.__init__(self)
 
@@ -37,14 +38,20 @@ class Appmenu(Gtk.ToolItem):
         menu.show_all()
 
     def on_preferences_menu_activate(self, widget):
+        self.preference.set_transient_for(self.toplevel)
         self.preference.refresh_plugin()
         self.preference.run()
 
     def on_about_menu_activate(self, widget):
+        self.about.set_transient_for(self.toplevel)
         self.about.run()
 
+    @property
+    def toplevel(self):
+        return self.graph.get('tomate.view').widget
 
-class AppmenuProvider(Module):
+
+class AppmenuModule(Module):
     factories = {
         'view.appmenu': (Appmenu, SingletonScope)
     }

@@ -19,7 +19,7 @@
 %define module_name %{real_name}_gtk
 
 Name: %{real_name}-gtk
-Version: 0.3.0
+Version: 0.4.0
 Release: 0
 License: GPL-3.0+
 Summary: Tomate Pomodoro Timer (GTK+ Interface)
@@ -33,19 +33,17 @@ BuildRequires: python-setuptools
 
 Requires: dbus-x11
 Requires: python-setuptools
-Requires: python-tomate >= 0.3.0
+Requires: python-tomate >= 0.4.0
 
 %if 0%{?fedora}
 BuildArch: noarch
 Requires: gtk3
-Requires: libappindicator-gtk3
 %endif
 
 %if 0%{?suse_version}
 BuildArchitectures: noarch
 BuildRequires: desktop-file-utils
 BuildRequires: hicolor-icon-theme
-Requires: typelib-1_0-AppIndicator3-0_1
 Requires: typelib-1_0-Gtk-3_0
 %endif
 
@@ -87,8 +85,6 @@ fi
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/*/*.*
-%{_datadir}/icons/ubuntu-mono-light/
-%{_datadir}/icons/ubuntu-mono-dark/
 %{python_sitelib}/*
 
 %doc AUTHORS COPYING README.md

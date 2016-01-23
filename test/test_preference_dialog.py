@@ -2,25 +2,28 @@ from __future__ import unicode_literals
 
 import unittest
 
+import six
 from mock import Mock
 from tomate.graph import graph
-from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
-                                           PreferenceDialogProvider,
-                                           TimerDurationStack)
 from wiring import FactoryProvider, SingletonScope
+
+from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
+                                           PreferenceDialogModule,
+                                           TimerDurationStack)
 
 
 class TestAboutDialog(unittest.TestCase):
 
-    def test_provider_module(self, *args):
+    def test_module(self, *args):
         providers = [
             'view.preference',
             'view.preference.extension',
             'view.preference.duration',
         ]
-        self.assertEqual(providers, PreferenceDialogProvider.providers.keys())
 
-        PreferenceDialogProvider().add_to(graph)
+        six.assertCountEqual(self, providers, PreferenceDialogModule.providers.keys())
+
+        PreferenceDialogModule().add_to(graph)
 
         # Extension Stack
         provider = graph.providers['view.preference.extension']
