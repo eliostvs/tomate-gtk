@@ -4,7 +4,8 @@ Priority: optional
 Build-Depends: debhelper (>= 9),
  dh-python,
  python-all,
- python-setuptools
+ python-setuptools,
+ update-desktop-database
 Maintainer: Elio Esteves Duarte <elio.esteves.duarte@gmail.com>
 Standards-Version: 3.9.5
 X-Python-Version: >= 2.7

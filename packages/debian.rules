@@ -2,4 +2,4 @@
 override_dh_auto_test:
 
 %:
-	dh $@ --with python2 --buildsystem=pybuild
+	dh $@ --with python2 --buildsystem=pybuild --after-install update-desktop-database -q

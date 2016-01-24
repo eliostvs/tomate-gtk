@@ -23,7 +23,7 @@ If you have installed the program using the **old ppa repository** uninstall the
     RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
     sudo wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key | sudo apt-key add -
     sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
-    sudo apt-get update && sudo apt-get install tomate-gtk # tomate3-gtk for python3
+    sudo apt-get update && sudo apt-get install tomate-gtk
 
 ### Debian 8+
 
@@ -70,7 +70,7 @@ The current plugins are:
 PLugin installation
 -------------------
 
-1. Install the plugin. (ex. `apt-get install tomate-indicator-plugin # tomate3-indicator-plugin for python3`) 
+1. Install the plugin. (ex. `apt-get install tomate-indicator-plugin`) 
 2. Click in the *Appmenu* > *Preferences* > *Extensions* and enable the plugin.
 
 Bugs and Suggetions
