@@ -1,6 +1,6 @@
 Format: 1.0
 Source: tomate-gtk
-Binary: tomate-gtk
+Binary: tomate-gtk, tomate3-gtk
 Architecture: all
 Version: 0.4.0
 Maintainer: Elio Esteves Duarte <elio.esteves.duarte@gmail.com>
