@@ -17,7 +17,7 @@ Package: tomate-gtk
 Architecture: all
 Depends: ${misc:Depends},
  ${python:Depends},
- python-pkg-resources,
+ python-setuptools,
  dbus-x11,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-gtk-3.0,
@@ -29,7 +29,7 @@ Package: tomate3-gtk
 Architecture: all
 Depends: ${misc:Depends},
  ${python3:Depends},
- python3-pkg-resources,
+ python3-setuptools,
  dbus-x11,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-gtk-3.0,
