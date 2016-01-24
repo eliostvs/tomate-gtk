@@ -1,5 +1,8 @@
 sudo: required
 
+env:
+  - OSB_API_URL: https://api.opensuse.org:443/trigger/runservice
+
 services:
     - docker
 
@@ -8,3 +11,11 @@ before_install:
 
 script:
     - make docker-test
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
+after_success:
+  - curl -X POST -H "Authorization: Token $OBS_TOKEN" "$OBS_API_URL"
