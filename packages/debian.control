@@ -4,13 +4,10 @@ Priority: optional
 Build-Depends: debhelper (>= 9),
  dh-python,
  python-all,
- python-setuptools,
- python3-all,
- python3-setuptools
+ python-setuptools
 Maintainer: Elio Esteves Duarte <elio.esteves.duarte@gmail.com>
 Standards-Version: 3.9.5
 X-Python-Version: >= 2.7
-X-Python3-Version: >= 3.2
 Homepage: https://github.com/eliostvs/tomate-gtk
 
 Package: tomate-gtk
@@ -23,16 +20,3 @@ Depends: ${misc:Depends},
  gir1.2-gtk-3.0,
  python-tomate (>= 0.4.2)
 Description: Gtk version from Tomate pomodoro timer.
- This package installs the library for Python 2.
-
-Package: tomate3-gtk
-Architecture: all
-Depends: ${misc:Depends},
- ${python3:Depends},
- python3-setuptools,
- dbus-x11,
- gir1.2-gdkpixbuf-2.0,
- gir1.2-gtk-3.0,
- python3-tomate (>= 0.4.2)
-Description: Gtk version from Tomate pomodoro timer.
- This package installs the library for Python 3.
