@@ -18,5 +18,5 @@ Depends: ${misc:Depends},
  dbus-x11,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-gtk-3.0,
- python-tomate (>= 0.4.2)
+ python-tomate (>= 0.5.0)
 Description: Gtk version from Tomate pomodoro timer.
