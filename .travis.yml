@@ -1,7 +1,7 @@
 sudo: required
 
 env:
-  - OBS_API_URL=https://api.opensuse.org:443/trigger/runservice
+  - "OBS_API_URL=https://api.opensuse.org:443/trigger/runservice"
 
 services:
     - docker
@@ -18,4 +18,4 @@ notifications:
     on_failure: always
 
 after_success:
-  - curl -s -X POST -H "Authorization: Token ${OBS_TOKEN}" ${OBS_API_URL}
+  - "curl -s -X POST -H 'Authorization: Token $OBS_TOKEN' $OBS_API_URL"
