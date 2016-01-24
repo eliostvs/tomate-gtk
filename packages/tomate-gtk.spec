@@ -19,7 +19,7 @@
 %define module_name %{real_name}_gtk
 
 Name: %{real_name}-gtk
-Version: 0.4.0
+Version: 0.4.1
 Release: 0
 License: GPL-3.0+
 Summary: Tomate Pomodoro Timer (GTK+ Interface)
@@ -33,7 +33,7 @@ BuildRequires: python-setuptools
 
 Requires: dbus-x11
 Requires: python-setuptools
-Requires: python-tomate >= 0.4.0
+Requires: python-tomate >= 0.4.1
 
 %if 0%{?fedora}
 BuildArch: noarch
