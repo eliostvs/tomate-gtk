@@ -20,8 +20,7 @@ Depends: ${misc:Depends},
  dbus-x11,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-gtk-3.0,
- python-setuptools,
- python-tomate (>= 0.4.0)
+ python-tomate (>= 0.4.2)
 Description: Gtk version from Tomate pomodoro timer.
  This package installs the library for Python 2.
 
@@ -29,7 +28,7 @@ Description: Gtk version from Tomate pomodoro timer.
 Package: tomate3-gtk
 Architecture: all
 Depends: ${misc:Depends},
- python-all ( >= 3.2),
+ python3-all ( >= 3.2),
  dbus-x11,
  gir1.2-gdkpixbuf-2.0,
  gir1.2-gtk-3.0,
