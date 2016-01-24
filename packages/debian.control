@@ -24,7 +24,6 @@ Depends: ${misc:Depends},
 Description: Gtk version from Tomate pomodoro timer.
  This package installs the library for Python 2.
 
-
 Package: tomate3-gtk
 Architecture: all
 Depends: ${misc:Depends},
