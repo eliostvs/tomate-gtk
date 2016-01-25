@@ -81,6 +81,10 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
+### v0.5.0
+
+- Bugs fixed
+
 ### v0.4.0
 
 - Using the new event system
