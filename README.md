@@ -34,7 +34,7 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 ### Opensuse 13.2+
 
-    RELEASE=`cat /etc/SuSE-release | sed -n "s/VERSION = \(.*\)$/\1/p"`
+    RELEASE=`cat /etc/SuSE-release | sed -n "s/VERSION = \(.*\)$/\1/p"` # If you use tumbleweed release is Tumbleweed
     sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_$RELEASE/home:eliostvs:tomate.repo
     sudo zypper install tomate-gtk
 
@@ -46,7 +46,7 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 or 
 
-    RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
+    RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'
     sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
     sudo dnf install tomate-gtk
 
