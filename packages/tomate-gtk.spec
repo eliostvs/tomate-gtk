@@ -31,11 +31,11 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 BuildRequires: python-devel
 BuildRequires: python-setuptools
 
-Requires: dbus-x11
 Requires: python-setuptools
 Requires: python-tomate >= 0.5.0
 
 %if 0%{?fedora}
+Requires: dbus-x11
 BuildArch: noarch
 Requires: gtk3
 %endif
@@ -45,6 +45,7 @@ BuildArchitectures: noarch
 BuildRequires: desktop-file-utils
 BuildRequires: hicolor-icon-theme
 Requires: typelib-1_0-Gtk-3_0
+Requires: dbus-1-x11
 %endif
 
 %description
