@@ -1,5 +1,0 @@
-#!/usr/bin/make -f
-override_dh_auto_test:
-
-%:
-	dh $@ --with python2 --buildsystem=pybuild
