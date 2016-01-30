@@ -84,7 +84,7 @@ Changelog
 ### v0.5.0
 
 - Remove linux package metadata
-- Fix Gtk warning
+- Fix Gtk warnings
 
 ### v0.4.0
 
