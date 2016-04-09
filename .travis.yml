@@ -1,9 +1,5 @@
 sudo: required
 
-env:
-  global:
-    - "OBS_API_URL=https://api.opensuse.org:443/trigger/runservice"
-
 services:
     - docker
 
@@ -19,4 +15,4 @@ notifications:
     on_failure: always
 
 after_success:
-  - curl -s -X POST -H 'Authorization: Token $OBS_TOKEN' $OBS_API_URL
+ - test $TRAVIS_BRANCH != 'master' && make trigger-build PROJECT=home:eliostvs:test TOKEN=$OBS_TOKEN
