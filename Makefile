@@ -21,7 +21,9 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) xvfb-run -a py.test $(PACKAGE_DIR) --cov-report term-missing --cov=$(PACKAGE_DIR) -v
+	$(XDG_DATA_DIRS) $(PYTHONPATH) xvfb-run -a py.test -v \
+	    --cov-report term-missing --cov=$(PACKAGE_DIR) \
+	    --flake8
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \

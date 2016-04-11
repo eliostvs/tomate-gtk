@@ -44,7 +44,7 @@ setup(
     license='GPL-3',
     long_description=open('README.md').read(),
     name='tomate-gtk',
-    packages=find_packages(exclude=['tomate']),
+    packages=find_packages(exclude=['tomate', 'tests']),
     data_files=find_data_files(DATA_FILES, 'tomate-gtk'),
     url='https://github.com/eliostvs/tomate-gtk',
     version='0.5.0',

@@ -4,11 +4,10 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import implements, inject, Module, SingletonScope, Graph
-
 from tomate.constant import State
 from tomate.event import Subscriber, on, Events
 from tomate.view import UI, TrayIcon
+from wiring import implements, inject, Module, SingletonScope, Graph
 
 logger = logging.getLogger(__name__)
 
@@ -41,23 +40,22 @@ class GtkUI(Subscriber):
                 title='Tomate',
                 icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
                 window_position=Gtk.WindowPosition.CENTER,
-                resizable=False
-        )
-        
+                resizable=False)
+
         window.set_size_request(350, -1)
-        
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
         box.pack_start(timerframe.widget, True, True, 0)
         box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton.widget, True, True, 0)
-        
+
         window.add(box)
-        
+
         window.connect('delete-event', self.on_window_delete_event)
-        
+
         return window
-        
+
     def on_window_delete_event(self, window, event):
         return self.quit()
 
@@ -88,7 +86,7 @@ class GtkUI(Subscriber):
             return self.window.hide_on_delete()
 
         self.window.iconify()
-        
+
         return Gtk.true
 
     @property
