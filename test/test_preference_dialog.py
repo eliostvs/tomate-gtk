@@ -9,7 +9,7 @@ from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
                                            TimerDurationStack)
 
 
-def test_module():
+def test_preference_module():
     config = Mock(**{'get_int.return_value': 25})
     graph.register_instance('tomate.config', config)
     graph.register_factory('tomate.plugin', Mock)

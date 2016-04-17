@@ -18,7 +18,6 @@ def setup_module():
 
 
 def test_toolbar_module():
-
     assert ['view.toolbar'] == ToolbarModule.providers.keys()
 
     provider = graph.providers['view.toolbar']
@@ -26,7 +25,8 @@ def test_toolbar_module():
     assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
 
-    assert {'session': 'tomate.session', 'appmenu': 'view.appmenu'} == provider.dependencies
+    assert provider.dependencies == {'session': 'tomate.session',
+                                     'appmenu': 'view.appmenu'}
 
     toolbar = graph.get('view.toolbar')
 

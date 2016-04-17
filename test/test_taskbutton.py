@@ -8,7 +8,7 @@ from wiring import FactoryProvider, SingletonScope
 from tomate_gtk.widgets.taskbutton import TaskButton, TaskButtonModule
 
 
-def test_module():
+def test_taskbutton_module():
     assert TaskButtonModule.providers.keys() == ['view.taskbutton']
 
     TaskButtonModule().add_to(graph)
