@@ -44,3 +44,6 @@ docker-all: docker-clean docker-build docker-test
 
 docker-enter:
 	docker run --rm -v $(PACKAGE_ROOT):/code -it --entrypoint="bash" $(DOCKER_IMAGE_NAME)
+
+trigger-build:
+	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
