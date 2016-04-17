@@ -81,6 +81,10 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
+## v0.5.1
+- Using py.test
+- Add trayicon menu
+
 ### v0.5.0
 
 - Remove linux package metadata
