@@ -1,90 +1,84 @@
 from __future__ import unicode_literals
 
-import unittest
-
-import six
+import pytest
 from mock import Mock, patch
-from wiring import FactoryProvider, SingletonScope, Graph
-
 from tomate.constant import State
 from tomate.view import UI, TrayIcon
+from wiring import FactoryProvider, SingletonScope, Graph
 
 
-@patch('tomate_gtk.view.GdkPixbuf')
+@pytest.fixture()
 @patch('tomate_gtk.view.Gtk')
-class TestGtkView(unittest.TestCase):
+@patch('tomate_gtk.view.GdkPixbuf')
+def gtkui(Gtk, GdkPixBuf):
+    from tomate_gtk.view import GtkUI
 
-    def make_view(self):
-        from tomate_gtk.view import GtkUI
+    return GtkUI(session=Mock(),
+                 events=Mock(),
+                 config=Mock(),
+                 graph=Mock(),
+                 toolbar=Mock(),
+                 timerframe=Mock(),
+                 taskbutton=Mock())
 
-        view = GtkUI(session=Mock(),
-                     events=Mock(),
-                     config=Mock(),
-                     graph=Mock(),
-                     toolbar=Mock(),
-                     timerframe=Mock(),
-                     taskbutton=Mock())
 
-        return view
+def test_module():
+    from tomate_gtk.view import ViewModule
 
-    def test_module(self, Gtk, GdkPixbuf):
-        from tomate_gtk.view import ViewModule
+    assert ViewModule.providers.keys() == ['tomate.view']
 
-        six.assertCountEqual(self, ['tomate.view'], ViewModule.providers.keys())
+    graph = Graph()
+    ViewModule().add_to(graph)
+    provider = graph.providers['tomate.view']
 
-        graph = Graph()
-        ViewModule().add_to(graph)
-        provider = graph.providers['tomate.view']
+    assert isinstance(provider, FactoryProvider)
+    assert SingletonScope == provider.scope
 
-        self.assertIsInstance(provider, FactoryProvider)
-        self.assertEqual(provider.scope, SingletonScope)
+    dependencies = dict(session='tomate.session',
+                        events='tomate.events',
+                        config='tomate.config',
+                        graph=Graph,
+                        toolbar='view.toolbar',
+                        timerframe='view.timerframe',
+                        taskbutton='view.taskbutton')
 
-        dependencies = dict(session='tomate.session',
-                            events='tomate.events',
-                            config='tomate.config',
-                            graph=Graph,
-                            toolbar='view.toolbar',
-                            timerframe='view.timerframe',
-                            taskbutton='view.taskbutton')
+    assert provider.dependencies == dependencies
 
-        self.assertDictEqual(dependencies, provider.dependencies)
 
-    def test_should_call_gtk_main(self, Gtk, GdkPixbuf):
-        view = self.make_view()
+@patch('tomate_gtk.view.Gtk')
+def test_should_call_gtk_main(Gtk, gtkui):
+    gtkui.run()
 
-        view.run()
+    Gtk.main.assert_called_once_with()
 
-        Gtk.main.assert_called_once_with()
 
-    def test_should_quit_when_timer_is_not_running(self, Gtk, GdkPixbuf):
-        view = self.make_view()
+@patch('tomate_gtk.view.Gtk')
+def test_should_quit_when_timer_is_not_running(Gtk, gtkui):
+    gtkui.session.timer_is_running.return_value = False
+    gtkui.quit()
 
-        view.session.timer_is_running.return_value = False
-        view.quit()
+    Gtk.main_quit.assert_called_once_with()
 
-        Gtk.main_quit.assert_called_once_with()
 
-    def test_should_minimize_when_timer_is_running_and_trayicon_is_not_in_providers(self, Gtk, GdkPixbuf):
-        view = self.make_view()
-        view.session.timer_is_running.return_value = True
-        view.graph.providers = {}
+def test_should_minimize_when_timer_is_running_and_trayicon_is_not_in_providers(gtkui):
+    gtkui.session.timer_is_running.return_value = True
+    gtkui.graph.providers = {}
 
-        view.quit()
+    gtkui.quit()
 
-        view.event.send.assert_called_with(State.hiding)
-        view.window.iconify.assert_called_once_with()
+    gtkui.event.send.assert_called_with(State.hiding)
+    gtkui.window.iconify.assert_called_once_with()
 
-    def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(self, Gtk, GdkPixbuf):
-        view = self.make_view()
-        view.session.timer_is_running.return_value = True
-        view.graph.providers = {TrayIcon: ''}
 
-        view.quit()
+def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(gtkui):
+    gtkui.session.timer_is_running.return_value = True
+    gtkui.graph.providers = {TrayIcon: ''}
 
-        view.event.send.assert_called_with(State.hiding)
-        view.window.hide_on_delete.assert_called_once_with()
+    gtkui.quit()
 
-    def test_interface(self, Gtk, GdkPixbuf):
-        view = self.make_view()
+    gtkui.event.send.assert_called_with(State.hiding)
+    gtkui.window.hide_on_delete.assert_called_once_with()
 
-        UI.check_compliance(view)
+
+def test_interface_compliance(gtkui):
+    UI.check_compliance(gtkui)
