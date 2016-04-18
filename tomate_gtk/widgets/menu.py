@@ -6,7 +6,7 @@ from locale import gettext as _
 from gi.repository import Gtk
 from tomate.constant import State
 from tomate.event import Events, on
-from wiring import inject
+from wiring import inject, Module, SingletonScope
 
 logger = logging.getLogger(__name__)
 
@@ -59,3 +59,9 @@ class Menu(object):
     @property
     def widget(self):
         return self.menu
+
+
+class MenuModule(Module):
+    factories = {
+        'trayicon.menu': (Menu, SingletonScope)
+    }

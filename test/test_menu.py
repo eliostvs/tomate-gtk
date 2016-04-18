@@ -5,6 +5,9 @@ from mock import Mock
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
 from tomate.graph import graph
+from wiring import FactoryProvider, Graph, SingletonScope
+
+from tomate_gtk.widgets import MenuModule
 
 
 @pytest.fixture()
@@ -18,7 +21,7 @@ def view(window_is_visible=False):
 def menu(view):
     graph.providers.clear()
 
-    from tomate_gtk.widgets import Menu
+    from tomate_gtk.widgets.menu import Menu
 
     return Menu(view)
 
@@ -94,3 +97,25 @@ class TestIntegrationMenu:
         result = Events.View.send(State.hiding)
 
         assert len(result) == 0
+
+
+def test_menu_module():
+    from tomate_gtk.widgets.menu import Menu
+
+    assert MenuModule.providers.keys() == ['trayicon.menu']
+
+    graph = Graph()
+    MenuModule().add_to(graph)
+
+    provider = graph.providers['trayicon.menu']
+
+    assert 'trayicon.menu' in graph.providers.keys()
+
+    assert isinstance(provider, FactoryProvider)
+    assert provider.scope == SingletonScope
+
+    assert provider.dependencies == {'view': 'tomate.view'}
+
+    graph.register_instance('tomate.view', Mock())
+
+    assert isinstance(graph.get('trayicon.menu'), Menu)
