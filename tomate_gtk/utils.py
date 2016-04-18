@@ -31,10 +31,3 @@ def parse_options():
     )
 
     return parser.parse_args()
-
-
-def rounded_percent(percent):
-    """
-    The icons show 5% steps, so we have to round.
-    """
-    return percent - percent % 5
