@@ -102,14 +102,14 @@ class TestIntegrationMenu:
 def test_menu_module():
     from tomate_gtk.widgets.menu import Menu
 
-    assert MenuModule.providers.keys() == ['trayicon.menu']
+    assert MenuModule.providers.keys() == ['view.menu']
 
     graph = Graph()
     MenuModule().add_to(graph)
 
-    provider = graph.providers['trayicon.menu']
+    provider = graph.providers['view.menu']
 
-    assert 'trayicon.menu' in graph.providers.keys()
+    assert 'view.menu' in graph.providers.keys()
 
     assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
@@ -118,4 +118,4 @@ def test_menu_module():
 
     graph.register_instance('tomate.view', Mock())
 
-    assert isinstance(graph.get('trayicon.menu'), Menu)
+    assert isinstance(graph.get('view.menu'), Menu)

@@ -6,7 +6,7 @@ RUN apt-get update -qq && apt-get install -yq \
     gir1.2-gtk-3.0 \
     xvfb
 
-WORKDIR PROJECT /code/
+WORKDIR /code/
 
 ENTRYPOINT ["make"]
 

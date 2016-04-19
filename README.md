@@ -83,7 +83,7 @@ Changelog
 
 ## v0.5.1
 - Using py.test
-- Add trayicon menu
+- Add view menu
 
 ### v0.5.0
 

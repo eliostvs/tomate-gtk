@@ -63,5 +63,5 @@ class Menu(object):
 
 class MenuModule(Module):
     factories = {
-        'trayicon.menu': (Menu, SingletonScope)
+        'view.menu': (Menu, SingletonScope)
     }
