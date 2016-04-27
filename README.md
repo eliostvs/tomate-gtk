@@ -81,7 +81,8 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
-## v0.5.1
+## v0.6.0
+
 - Using py.test
 - Add view menu
 
