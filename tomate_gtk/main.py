@@ -21,7 +21,7 @@ from .dialogs import AboutDialogModule, PreferenceDialogModule
 from .utils import parse_options, setup_logging
 from .view import ViewModule
 from .widgets import (AppmenuModule, TaskButtonModule, TimerFrameModule,
-                      ToolbarModule, MenuModule)
+                      ToolbarModule, TrayIconMenuModule)
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
         TimerFrameModule().add_to(graph)
         TaskButtonModule().add_to(graph)
         ViewModule().add_to(graph)
-        MenuModule().add_to(graph)
+        TrayIconMenuModule().add_to(graph)
 
         # App
         ApplicationModule().add_to(graph)

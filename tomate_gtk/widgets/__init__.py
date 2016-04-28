@@ -4,12 +4,12 @@ from .appmenu import AppmenuModule
 from .taskbutton import TaskButtonModule
 from .timerframe import TimerFrameModule
 from .toolbar import ToolbarModule
-from .menu import MenuModule
+from .trayicon_menu import TrayIconMenuModule
 
 __all__ = [
     'AppmenuModule',
     'TaskButtonModule',
     'TimerFrameModule',
     'ToolbarModule',
-    'MenuModule',
+    'TrayIconMenuModule',
 ]

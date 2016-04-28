@@ -61,7 +61,7 @@ class Menu(object):
         return self.menu
 
 
-class MenuModule(Module):
+class TrayIconMenuModule(Module):
     factories = {
-        'view.menu': (Menu, SingletonScope)
+        'trayicon.menu': (Menu, SingletonScope)
     }
