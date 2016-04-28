@@ -3,14 +3,13 @@ Tomate GTK
 
 A open source timer for the Pomodoro Technique®.
 
-
 About the technique
 -------------------
 
 The Pomodoro Technique® is a management technique developed by Francesco Cirillo that helps you keep focused.
 Read more about it at the [official website](http://pomodorotechnique.com/).
 
-Pomodoro Technique® and Pomodoro™ are registered and filed trademarks owned by Francesco Cirillo. 
+Pomodoro Technique® and Pomodoro™ are registered and filed trademarks owned by Francesco Cirillo.
 Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 
 Installation
@@ -27,7 +26,7 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 ### Debian 8+
 
-    RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1\.0/p' /etc/os-release`  
+    RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1\.0/p' /etc/os-release`
     sudo wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/Release.key | sudo apt-key add -
     sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
     sudo apt-get update && sudo apt-get install tomate-gtk
@@ -44,7 +43,7 @@ If you have installed the program using the **old ppa repository** uninstall the
     sudo yum-config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
     sudo yum install tomate-gtk
 
-or 
+or
 
     RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'
     sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
@@ -54,24 +53,16 @@ or
 
     yaourt -S tomate-gtk
 
-Features
---------
+Plugins
+-------
 
-Three task timers (pomodoro, short break and long break) and count pomodoro sessions. 
-You can extend the program through plugins.
-The current plugins are:
+- [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends.
+- [Notify plugin (tomate-notify-plugin)][notify-plugin] Shows a OSD notification.
+- [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the indicator area (requires libappindicator).
+- [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the status area.
+- [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
 
-- [Alarm plugin (tomate-alarm-plugin)][alarm-plugin]. Plays a sound when the session ends.
-- [Notify plugin (tomate-notify-plugin)][notify-plugin]. Shows a notification in the beginning and ending of a session.
-- [Indicator plugin (tomate-indicator-plugin)][indicator-plugin]. Shows the timer countdown in the indicator area when window is closed. (Requires libappindicator)
-- [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin]. Shows the timer countdown in the status area when window is closed.
-- [Launcher plugin (tomate-launcher-plugin)][launcher-plugin]. Shows a countdown bar in the Unity launcher and the total of pomodoro sessions. (Ubuntu only)
-
-PLugin installation
--------------------
-
-1. Install the plugin. (ex. `apt-get install tomate-indicator-plugin`) 
-2. Click in the *Appmenu* > *Preferences* > *Extensions* and enable the plugin.
+All plugins are in the repositories.
 
 Bugs and Suggetions
 -------------------
@@ -84,7 +75,7 @@ Changelog
 ## v0.6.0
 
 - Using py.test
-- Add view menu
+- Add trayicon menu widget
 
 ### v0.5.0
 
