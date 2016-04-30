@@ -6,11 +6,10 @@ import pytest
 from mock import Mock, patch
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from tomate.graph import graph
 from wiring import FactoryProvider, Graph, SingletonScope
-from util import refresh_gui
 
 from tomate_gtk.widgets import MenuModule
+from util import refresh_gui
 
 
 @pytest.fixture
@@ -24,19 +23,25 @@ def about():
 
 
 @pytest.fixture()
-def view(window_is_visible=False):
-    return Mock(**{'widget.get_visible.return_value': window_is_visible})
+def view():
+    return Mock(**{'widget.get_visible.return_value': False})
 
 
 @pytest.fixture()
-def menu(view, about, preference):
-    from tomate_gtk.widgets.menu import Menu
+def proxy(view):
+    mock = Mock()
+    mock.return_value = view
 
-    graph.providers.clear()
+    return mock
+
+
+@pytest.fixture()
+def menu(proxy, about, preference):
+    from tomate_gtk.widgets.menu import Menu
 
     Events.View.receivers.clear()
 
-    return Menu(view, about, preference)
+    return Menu(about, preference, proxy)
 
 
 def method_called(result):
@@ -68,7 +73,7 @@ def test_should_create_hide_item(Gtk):
 
     Menu(Mock(), Mock(), Mock())
 
-    Gtk.MenuItem.assert_any_call(_('Hide'), visible=False, no_show_all=True)
+    Gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
 
 
 def test_should_call_view_hide_item_activate(view, menu):
@@ -81,19 +86,9 @@ def test_should_call_view_hide_item_activate(view, menu):
     assert menu.show_item.get_visible()
 
 
-def test_hide_item_should_be_true_when_view_is_visible(about, preference):
-    this_view = view(window_is_visible=True)
-    this_menu = menu(this_view, about, preference)
-
-    assert this_view.widget.get_visible()
-    assert this_menu.hide_item.get_visible()
-    assert not this_menu.show_item.get_visible()
-
-
-def test_show_item_should_be_true_when_view_is_not_visible(view, menu):
-    assert not view.widget.get_visible()
-    assert not menu.hide_item.get_visible()
-    assert menu.show_item.get_visible()
+def test_hide_item_should_be_true_when_view_is_visible(menu):
+    assert menu.hide_item.get_visible()
+    assert not menu.show_item.get_visible()
 
 
 def test_should_call_activate_hide_item_when_view_shows(menu):
@@ -155,7 +150,7 @@ def test_should_create_preference_item(Gtk):
     Gtk.MenuItem.assert_any_call(_('Preferences'))
 
 
-def test_should_run_preference_widget_on_preference_item_activate(menu, view, about, preference):
+def test_should_run_preference_widget_on_preference_item_activate(menu, view, preference):
     menu.preference_item.activate()
     refresh_gui()
 
@@ -179,12 +174,12 @@ def test_menu_module():
     assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
 
-    assert provider.dependencies == {'view': 'tomate.view',
+    assert provider.dependencies == {'proxy': 'tomate.proxy',
                                      'about': 'view.about',
                                      'preference': 'view.preference'}
 
     graph.register_instance('view.about', Mock())
     graph.register_instance('view.preference', Mock())
-    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('tomate.proxy', Mock())
 
     assert isinstance(graph.get('view.menu'), Menu)

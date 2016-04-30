@@ -6,16 +6,16 @@ from locale import gettext as _
 from gi.repository import Gtk
 from tomate.constant import State
 from tomate.event import Events, on
-from wiring import inject, Module, SingletonScope
+from wiring import inject, Graph, Module, SingletonScope
 
 logger = logging.getLogger(__name__)
 
 
 class Menu(object):
 
-    @inject(view='tomate.view', about='view.about', preference='view.preference')
-    def __init__(self, view, about, preference):
-        self.view = view
+    @inject(about='view.about', preference='view.preference', proxy='tomate.proxy')
+    def __init__(self, about, preference, proxy):
+        self.view = proxy('tomate.view')
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
@@ -23,7 +23,7 @@ class Menu(object):
         self.show_item.connect('activate', self._on_show_item_activate)
         self.widget.add(self.show_item)
 
-        self.hide_item = Gtk.MenuItem(_('Hide'), visible=False, no_show_all=True)
+        self.hide_item = Gtk.MenuItem(_('Hide'), visible=True)
         self.hide_item.connect('activate', self._on_hide_item_activate)
         self.widget.add(self.hide_item)
 
@@ -35,15 +35,7 @@ class Menu(object):
         self.preference_item.connect('activate', self._on_preference_item_activate, preference)
         self.widget.add(self.preference_item)
 
-        self._update_menus()
-
         self.widget.show_all()
-
-    def _update_menus(self):
-        if self.view.widget.get_visible():
-            self.activate_hide_item()
-        else:
-            self.activate_show_item()
 
     def _on_hide_item_activate(self, widget):
         self.activate_show_item()
