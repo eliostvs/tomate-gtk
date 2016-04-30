@@ -28,6 +28,8 @@ class Menu(object):
         self.preference_item.connect('activate', self._on_preference_item_activate, preference)
         self.widget.add(self.preference_item)
 
+        self.widget.show_all()
+
     def _on_about_item_activate(self, widget, about):
         about.set_transient_for(self.toplevel)
         about.run()
