@@ -118,14 +118,17 @@ class TestTrayIconMenu(object):
 
         Gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
 
-    def test_should_call_view_hide_item_activate(self, view, trayicon_menu):
+    def test_should_call_view_hide_when_hide_item_activate(self, view, trayicon_menu):
         trayicon_menu.hide_item.activate()
         refresh_gui()
 
         view.hide.assert_called_once()
 
-        assert not trayicon_menu.hide_item.get_visible()
-        assert trayicon_menu.show_item.get_visible()
+    def test_should_call_view_show_when_show_item_activate(self, view, trayicon_menu):
+        trayicon_menu.show_item.activate()
+        refresh_gui()
+
+        view.show.assert_called_once()
 
     def test_hide_item_should_be_true_when_view_is_visible(self, trayicon_menu):
         assert trayicon_menu.hide_item.get_visible()

@@ -52,11 +52,11 @@ class GtkUI(Subscriber):
 
         window.add(box)
 
-        window.connect('delete-event', self.on_window_delete_event)
+        window.connect('delete-event', self._on_window_delete_event)
 
         return window
 
-    def on_window_delete_event(self, window, event):
+    def _on_window_delete_event(self, window, event):
         return self.quit()
 
     def run(self, *args, **kwargs):
