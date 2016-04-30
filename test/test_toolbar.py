@@ -11,9 +11,10 @@ from tomate_gtk.widgets.toolbar import Toolbar, ToolbarModule
 
 def setup_module():
     graph.register_instance('tomate.menu', Gtk.Menu())
-    graph.register_instance('view.menu', Gtk.Menu())
+    graph.register_instance('view.menu', Mock(widget=Gtk.Menu()))
     graph.register_instance('tomate.session', Mock())
     graph.register_factory('view.appmenu', Appmenu)
+
     ToolbarModule().add_to(graph)
 
 

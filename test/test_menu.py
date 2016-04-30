@@ -44,125 +44,128 @@ def menu(proxy, about, preference):
     return Menu(about, preference, proxy)
 
 
+@pytest.fixture()
+def trayicon_menu(view):
+    from tomate_gtk.widgets.menu import TrayIconMenu
+
+    Events.View.receivers.clear()
+
+    return TrayIconMenu(view)
+
+
 def method_called(result):
     return result[0][0]
 
 
-@patch('tomate_gtk.widgets.menu.Gtk')
-def test_should_create_show_item(Gtk):
-    from tomate_gtk.widgets.menu import Menu
+class TestMenu(object):
 
-    Menu(Mock(), Mock(), Mock())
+    @patch('tomate_gtk.widgets.menu.Gtk')
+    def test_should_create_preference_item(self, Gtk):
+        from tomate_gtk.widgets.menu import Menu
 
-    Gtk.MenuItem.assert_any_call(_('Show'), visible=False, no_show_all=True)
+        Menu(Mock(), Mock(), Mock)
 
+        Gtk.MenuItem.assert_any_call(_('Preferences'))
 
-def test_should_call_plugin_view_when_menu_activate(view, menu):
-    menu.show_item.activate()
-    refresh_gui()
+    def test_should_run_preference_widget_on_preference_item_activate(self, menu, view, preference):
+        menu.preference_item.activate()
+        refresh_gui()
 
-    view.show.assert_called_once()
+        preference.set_transient_for.assert_called_once_with(view.widget)
+        preference.refresh_plugin.assert_called_once_winth()
+        preference.run.assert_called_once_with()
 
-    assert menu.hide_item.get_visible()
-    assert not menu.show_item.get_visible()
+    @patch('tomate_gtk.widgets.menu.Gtk')
+    def test_should_create_about_item(self, Gtk):
+        from tomate_gtk.widgets.menu import Menu
 
+        Menu(Mock(), Mock(), Mock)
 
-@patch('tomate_gtk.widgets.menu.Gtk')
-def test_should_create_hide_item(Gtk):
-    from tomate_gtk.widgets.menu import Menu
+        Gtk.MenuItem.assert_any_call(_('About'))
 
-    Menu(Mock(), Mock(), Mock())
+    def test_should_run_preference_widget_on_about_item_activate(self, menu, view, about):
+        menu.about_item.activate()
+        refresh_gui()
 
-    Gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
-
-
-def test_should_call_view_hide_item_activate(view, menu):
-    menu.hide_item.activate()
-    refresh_gui()
-
-    view.hide.assert_called_once()
-
-    assert not menu.hide_item.get_visible()
-    assert menu.show_item.get_visible()
+        about.set_transient_for.assert_called_once_with(view.widget)
+        about.run.assert_called_once_with()
 
 
-def test_hide_item_should_be_true_when_view_is_visible(menu):
-    assert menu.hide_item.get_visible()
-    assert not menu.show_item.get_visible()
+class TestTrayIconMenu(object):
 
+    @patch('tomate_gtk.widgets.menu.Gtk')
+    def test_should_create_show_item(self, Gtk):
+        from tomate_gtk.widgets.menu import TrayIconMenu
 
-def test_should_call_activate_hide_item_when_view_shows(menu):
-    connect_events(menu)
+        TrayIconMenu(Mock())
 
-    result = Events.View.send(State.showing)
+        Gtk.MenuItem.assert_any_call(_('Show'), visible=False, no_show_all=True)
 
-    assert len(result) == 1
-    assert menu.activate_hide_item == method_called(result)
+    def test_should_call_plugin_view_when_menu_activate(self, view, trayicon_menu):
+        trayicon_menu.show_item.activate()
+        refresh_gui()
 
+        view.show.assert_called_once()
 
-def test_should_call_activate_show_item_view_hides(menu):
-    connect_events(menu)
+        assert trayicon_menu.hide_item.get_visible()
+        assert not trayicon_menu.show_item.get_visible()
 
-    result = Events.View.send(State.hiding)
+    @patch('tomate_gtk.widgets.menu.Gtk')
+    def test_should_create_hide_item(self, Gtk):
+        from tomate_gtk.widgets.menu import TrayIconMenu
 
-    assert len(result) == 1
-    assert menu.activate_show_item == method_called(result)
+        TrayIconMenu(Mock())
 
+        Gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
 
-def test_should_not_call_menu_after_deactivate(menu):
-    assert len(Events.View.receivers) == 0
+    def test_should_call_view_hide_item_activate(self, view, trayicon_menu):
+        trayicon_menu.hide_item.activate()
+        refresh_gui()
 
-    connect_events(menu)
+        view.hide.assert_called_once()
 
-    assert len(Events.View.receivers) == 2
+        assert not trayicon_menu.hide_item.get_visible()
+        assert trayicon_menu.show_item.get_visible()
 
-    disconnect_events(menu)
+    def test_hide_item_should_be_true_when_view_is_visible(self, trayicon_menu):
+        assert trayicon_menu.hide_item.get_visible()
+        assert not trayicon_menu.show_item.get_visible()
 
-    result = Events.View.send(State.hiding)
+    def test_should_call_activate_hide_item_when_view_shows(self, trayicon_menu):
+        connect_events(trayicon_menu)
 
-    assert len(result) == 0
+        result = Events.View.send(State.showing)
 
+        assert len(result) == 1
+        assert trayicon_menu.activate_hide_item == method_called(result)
 
-@patch('tomate_gtk.widgets.menu.Gtk')
-def test_should_create_about_item(Gtk):
-    from tomate_gtk.widgets.menu import Menu
+    def test_should_call_activate_show_item_view_hides(self, trayicon_menu):
+        connect_events(trayicon_menu)
 
-    Menu(Mock(), Mock(), Mock)
+        result = Events.View.send(State.hiding)
 
-    Gtk.MenuItem.assert_any_call(_('About'))
+        assert len(result) == 1
+        assert trayicon_menu.activate_show_item == method_called(result)
 
+    def test_should_not_call_menu_after_deactivate(self, trayicon_menu):
+        assert len(Events.View.receivers) == 0
+        Events.View.receivers.clear()
 
-def test_should_run_about_widget_on_about_item_activate(menu, view, about):
-    menu.about_item.activate()
+        connect_events(trayicon_menu)
 
-    refresh_gui()
+        assert len(Events.View.receivers) == 2
 
-    about.run.assert_called_once_with()
-    about.set_transient_for.assert_called_once_with(view.widget)
+        disconnect_events(trayicon_menu)
 
+        result = Events.View.send(State.hiding)
 
-@patch('tomate_gtk.widgets.menu.Gtk')
-def test_should_create_preference_item(Gtk):
-    from tomate_gtk.widgets.menu import Menu
-
-    Menu(Mock(), Mock(), Mock)
-
-    Gtk.MenuItem.assert_any_call(_('Preferences'))
-
-
-def test_should_run_preference_widget_on_preference_item_activate(menu, view, preference):
-    menu.preference_item.activate()
-    refresh_gui()
-
-    preference.set_transient_for.assert_called_once_with(view.widget)
-    preference.refresh_plugin.assert_called_once_winth()
-    preference.run.assert_called_once_with()
+        assert len(result) == 0
 
 
 def test_menu_module():
-    from tomate_gtk.widgets.menu import Menu
+    from tomate_gtk.widgets.menu import TrayIconMenu
 
-    assert MenuModule.providers.keys() == ['view.menu']
+    assert sorted(MenuModule.providers.keys()) == sorted(['view.menu', 'trayicon.menu'])
 
     graph = Graph()
     MenuModule().add_to(graph)
@@ -178,8 +181,6 @@ def test_menu_module():
                                      'about': 'view.about',
                                      'preference': 'view.preference'}
 
-    graph.register_instance('view.about', Mock())
-    graph.register_instance('view.preference', Mock())
-    graph.register_instance('tomate.proxy', Mock())
+    graph.register_instance('tomate.view', Mock())
 
-    assert isinstance(graph.get('view.menu'), Menu)
+    assert isinstance(graph.get('trayicon.menu'), TrayIconMenu)

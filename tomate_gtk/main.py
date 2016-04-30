@@ -57,11 +57,11 @@ def main():
         # App
         ApplicationModule().add_to(graph)
 
-        graph.validate()
-
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
         app = Application.from_graph(graph)
+
+        graph.validate()
 
         app.run()
 
