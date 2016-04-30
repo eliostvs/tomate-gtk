@@ -1,19 +1,19 @@
 from __future__ import unicode_literals
 
+from gi.repository import Gtk
 from mock import Mock
 from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope, Graph
+from wiring import FactoryProvider, SingletonScope
 
 from tomate_gtk.widgets.appmenu import Appmenu
 from tomate_gtk.widgets.toolbar import Toolbar, ToolbarModule
 
 
 def setup_module():
-    graph.register_factory('view.preference', Mock)
-    graph.register_factory('view.about', Mock)
-    graph.register_factory('tomate.session', Mock)
+    graph.register_instance('tomate.menu', Gtk.Menu())
+    graph.register_instance('view.menu', Gtk.Menu())
+    graph.register_instance('tomate.session', Mock())
     graph.register_factory('view.appmenu', Appmenu)
-    graph.register_instance(Graph, graph)
     ToolbarModule().add_to(graph)
 
 

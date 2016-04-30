@@ -16,10 +16,9 @@ class Toolbar(Subscriber):
 
     @inject(session='tomate.session', appmenu='view.appmenu')
     def __init__(self, session, appmenu):
-        self.appmenu = appmenu
         self.session = session
 
-        self.toolbar = Gtk.Toolbar(
+        self.widget = Gtk.Toolbar(
             icon_size=Gtk.IconSize.LARGE_TOOLBAR,
             orientation=Gtk.Orientation.HORIZONTAL,
             toolbar_style=Gtk.ToolbarStyle.ICONS,
@@ -28,29 +27,29 @@ class Toolbar(Subscriber):
         self.start_button = Gtk.ToolButton(stock_id='gtk-media-play',
                                            tooltip_text=_('Starts the session'))
         self.start_button.connect('clicked', self.on_start_button_clicked)
-        self.toolbar.insert(self.start_button, -1)
+        self.widget.insert(self.start_button, -1)
 
         self.stop_button = Gtk.ToolButton(stock_id='gtk-media-stop',
                                           tooltip_text=_('Interrupt the session'),
                                           visible=False,
                                           no_show_all=True)
         self.stop_button.connect('clicked', self.on_stop_button_clicked)
-        self.toolbar.insert(self.stop_button, -1)
+        self.widget.insert(self.stop_button, -1)
 
         self.reset_button = Gtk.ToolButton(stock_id='gtk-refresh',
                                            sensitive=False,
                                            tooltip_text=_('Resets the count '
                                                           'of the pomodoros'))
         self.reset_button.connect('clicked', self.on_reset_button_clicked)
-        self.toolbar.insert(self.reset_button, -1)
+        self.widget.insert(self.reset_button, -1)
 
         separator = Gtk.SeparatorToolItem(draw=False)
         separator.set_expand(True)
-        self.toolbar.insert(separator, -1)
+        self.widget.insert(separator, -1)
 
-        self.toolbar.insert(self.appmenu, -1)
+        self.widget.insert(appmenu, -1)
 
-        style = self.toolbar.get_style_context()
+        style = self.widget.get_style_context()
         style.add_class(Gtk.STYLE_CLASS_PRIMARY_TOOLBAR)
 
     def on_start_button_clicked(self, widget):
@@ -82,10 +81,6 @@ class Toolbar(Subscriber):
     @on(Events.Session, [State.started, State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
-
-    @property
-    def widget(self):
-        return self.toolbar
 
 
 class ToolbarModule(Module):

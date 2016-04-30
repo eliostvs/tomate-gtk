@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class TimerFrame(Subscriber):
 
     def __init__(self):
-        self.frame = Gtk.Frame(
+        self.widget = Gtk.Frame(
             margin_bottom=2,
             margin_left=12,
             margin_right=12,
@@ -36,7 +36,7 @@ class TimerFrame(Subscriber):
         box.pack_start(self.timer_label, True, True, 0)
         box.pack_start(self.sessions_label, False, False, 0)
 
-        self.frame.add(box)
+        self.widget.add(box)
 
         self.update_session(0)
 
@@ -60,10 +60,6 @@ class TimerFrame(Subscriber):
         self.sessions_label.set_markup(markup)
 
         logger.debug('session label update %s', sessions)
-
-    @property
-    def widget(self):
-        return self.frame
 
 
 class TimerFrameModule(Module):
