@@ -72,17 +72,17 @@ Bugs and suggestions should be reported [here][bugs].
 Change Logs
 -----------
 
-## v0.6.0
+## 0.6.0
 
 - Using py.test
 - Add trayicon menu widget
 
-### v0.5.0
+### 0.5.0
 
 - Remove linux package metadata
 - Fix Gtk warnings
 
-### v0.4.0
+### 0.4.0
 
 - Using the new event system
 - Python 2/3 compatible (only for Ubuntu/Debian/Arch)
