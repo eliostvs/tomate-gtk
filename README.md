@@ -75,7 +75,7 @@ Change Logs
 ## 0.6.0
 
 - Using py.test
-- Add trayicon menu widget
+- Add menu widget
 
 ### 0.5.0
 
