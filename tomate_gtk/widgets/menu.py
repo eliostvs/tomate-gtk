@@ -68,12 +68,12 @@ class TrayIconMenu(object):
     def _on_show_item_activate(self, widget):
         return self.view.show()
 
-    @on(Events.View, [State.showing])
+    @on(Events.View, [State.showed])
     def activate_hide_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(True)
         self.show_item.set_visible(False)
 
-    @on(Events.View, [State.hiding])
+    @on(Events.View, [State.hid])
     def activate_show_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(False)
         self.show_item.set_visible(True)

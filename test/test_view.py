@@ -66,7 +66,7 @@ def test_should_minimize_when_timer_is_running_and_trayicon_is_not_in_providers(
 
     gtkui.quit()
 
-    gtkui.event.send.assert_called_with(State.hiding)
+    gtkui.event.send.assert_called_with(State.hid)
     gtkui.window.iconify.assert_called_once_with()
 
 
@@ -76,7 +76,7 @@ def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(gtkui):
 
     gtkui.quit()
 
-    gtkui.event.send.assert_called_with(State.hiding)
+    gtkui.event.send.assert_called_with(State.hid)
     gtkui.window.hide_on_delete.assert_called_once_with()
 
 

@@ -71,16 +71,16 @@ class GtkUI(Subscriber):
 
     @on(Events.Session, [State.finished])
     def show(self, *args, **kwargs):
-        logger.debug('View is showing')
+        self.event.send(State.showed)
 
-        self.event.send(State.showing)
+        logger.debug('view showed')
 
         return self.window.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
-        logger.debug('View is hiding')
+        self.event.send(State.hid)
 
-        self.event.send(State.hiding)
+        logger.debug('view hid')
 
         if TrayIcon in self.graph.providers.keys():
             return self.window.hide_on_delete()
