@@ -18,11 +18,11 @@ def test_preference_module():
 
     providers = [
         'view.preference',
-        'view.preference.extension',
         'view.preference.duration',
+        'view.preference.extension',
     ]
 
-    assert PreferenceDialogModule.providers.keys() == providers
+    assert sorted(PreferenceDialogModule.providers.keys()) == providers
 
     PreferenceDialogModule().add_to(graph)
 

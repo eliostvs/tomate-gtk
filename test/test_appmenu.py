@@ -9,7 +9,7 @@ from tomate_gtk.widgets.appmenu import Appmenu, AppmenuModule
 
 
 def test_module():
-    assert AppmenuModule.providers.keys() == ['view.appmenu']
+    assert list(AppmenuModule.providers.keys()) == ['view.appmenu']
 
     AppmenuModule().add_to(graph)
 

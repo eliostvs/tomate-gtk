@@ -19,7 +19,7 @@ def setup_module():
 
 
 def test_toolbar_module():
-    assert ['view.toolbar'] == ToolbarModule.providers.keys()
+    assert list(ToolbarModule.providers.keys()) == ['view.toolbar']
 
     provider = graph.providers['view.toolbar']
 

@@ -25,7 +25,7 @@ def gtkui(Gtk, GdkPixBuf):
 def test_module():
     from tomate_gtk.view import ViewModule
 
-    assert ViewModule.providers.keys() == ['tomate.view']
+    assert list(ViewModule.providers.keys()) == ['tomate.view']
 
     graph = Graph()
     ViewModule().add_to(graph)

@@ -10,7 +10,7 @@ from tomate_gtk.dialogs.about import AboutDialog, AboutDialogModule
 
 def test_module():
 
-    assert AboutDialogModule.providers.keys() == ['view.about']
+    assert list(AboutDialogModule.providers.keys()) == ['view.about']
 
     AboutDialogModule().add_to(graph)
 

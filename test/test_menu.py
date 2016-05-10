@@ -72,7 +72,7 @@ class TestMenu(object):
         refresh_gui()
 
         preference.set_transient_for.assert_called_once_with(view.widget)
-        preference.refresh_plugin.assert_called_once_winth()
+        preference.refresh_plugin.assert_called_once_with()
         preference.run.assert_called_once_with()
 
     @patch('tomate_gtk.widgets.menu.Gtk')
@@ -105,7 +105,7 @@ class TestTrayIconMenu(object):
         trayicon_menu.show_item.activate()
         refresh_gui()
 
-        view.show.assert_called_once()
+        view.show.assert_called_once_with()
 
         assert trayicon_menu.hide_item.get_visible()
         assert not trayicon_menu.show_item.get_visible()
@@ -122,13 +122,13 @@ class TestTrayIconMenu(object):
         trayicon_menu.hide_item.activate()
         refresh_gui()
 
-        view.hide.assert_called_once()
+        view.hide.assert_called_once_with()
 
     def test_should_call_view_show_when_show_item_activate(self, view, trayicon_menu):
         trayicon_menu.show_item.activate()
         refresh_gui()
 
-        view.show.assert_called_once()
+        view.show.assert_called_once_with()
 
     def test_hide_item_should_be_true_when_view_is_visible(self, trayicon_menu):
         assert trayicon_menu.hide_item.get_visible()
