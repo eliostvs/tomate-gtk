@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class Menu(object):
 
-    @inject(about='view.about', preference='view.preference', proxy='tomate.proxy')
+    @inject(about='view.about', preference='view.preference', lazy_proxy='tomate.proxy')
     def __init__(self, about, preference, lazy_proxy):
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
