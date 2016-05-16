@@ -54,7 +54,7 @@ def test_should_call_gtk_main(Gtk, gtkui):
 
 @patch('tomate_gtk.view.Gtk')
 def test_should_quit_when_timer_is_not_running(Gtk, gtkui):
-    gtkui.session.timer_is_running.return_value = False
+    gtkui.session.is_running.return_value = False
     gtkui.quit()
 
     Gtk.main_quit.assert_called_once_with()

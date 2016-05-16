@@ -63,7 +63,7 @@ class GtkUI(Subscriber):
         Gtk.main()
 
     def quit(self, *args, **kwargs):
-        if self.session.timer_is_running():
+        if self.session.is_running():
             return self.hide()
 
         else:

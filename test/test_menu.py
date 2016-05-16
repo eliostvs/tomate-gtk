@@ -180,7 +180,7 @@ def test_menu_module():
     assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
 
-    assert provider.dependencies == {'proxy': 'tomate.proxy',
+    assert provider.dependencies == {'lazy_proxy': 'tomate.proxy',
                                      'about': 'view.about',
                                      'preference': 'view.preference'}
 
