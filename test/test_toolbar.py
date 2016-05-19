@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 
-import unittest
-
-import six
+from gi.repository import Gtk
 from mock import Mock
 from tomate.graph import graph
 from wiring import FactoryProvider, SingletonScope
@@ -11,25 +9,26 @@ from tomate_gtk.widgets.appmenu import Appmenu
 from tomate_gtk.widgets.toolbar import Toolbar, ToolbarModule
 
 
-class TestToolbar(unittest.TestCase):
-    def setUp(self):
-        graph.register_factory('view.preference', Mock)
-        graph.register_factory('view.about', Mock)
-        graph.register_factory('tomate.session', Mock)
-        graph.register_factory('tomate.appmenu', Appmenu)
-        ToolbarModule().add_to(graph)
+def setup_module():
+    graph.register_instance('tomate.menu', Gtk.Menu())
+    graph.register_instance('view.menu', Mock(widget=Gtk.Menu()))
+    graph.register_instance('tomate.session', Mock())
+    graph.register_factory('view.appmenu', Appmenu)
 
-    def test_module(self):
-        six.assertCountEqual(self, ['view.toolbar'], ToolbarModule.providers.keys())
+    ToolbarModule().add_to(graph)
 
-        provider = graph.providers['view.toolbar']
 
-        self.assertIsInstance(provider, FactoryProvider)
-        self.assertEqual(provider.scope, SingletonScope)
+def test_toolbar_module():
+    assert list(ToolbarModule.providers.keys()) == ['view.toolbar']
 
-        self.assertDictEqual({'session': 'tomate.session', 'appmenu': 'view.appmenu'},
-                             provider.dependencies)
+    provider = graph.providers['view.toolbar']
 
-        toolbar = graph.get('view.toolbar')
+    assert isinstance(provider, FactoryProvider)
+    assert provider.scope == SingletonScope
 
-        self.assertIsInstance(toolbar, Toolbar)
+    assert provider.dependencies == {'session': 'tomate.session',
+                                     'appmenu': 'view.appmenu'}
+
+    toolbar = graph.get('view.toolbar')
+
+    assert isinstance(toolbar, Toolbar)
