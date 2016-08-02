@@ -40,12 +40,12 @@ If you have installed the program using the **old ppa repository** uninstall the
 ### Fedora 22+
 
     RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
-    sudo yum-config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
+    sudo yum config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
     sudo yum install tomate-gtk
 
 or
 
-    RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'
+    RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
     sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
     sudo dnf install tomate-gtk
 
