@@ -62,7 +62,8 @@ Plugins
 - [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the status area **when the timer is running**.
 - [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
 
-All plugins are in the repositories.
+All plugins are in the repositories and need to be installed seperatly. 
+For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu. 
 
 Bugs and Suggetions
 -------------------
