@@ -56,13 +56,15 @@ or
 Plugins
 -------
 
+All plugins are in the repositories and need to be installed seperatly.
+For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu.
+
 - [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends.
 - [Notify plugin (tomate-notify-plugin)][notify-plugin] Shows a OSD notification.
 - [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the indicator area **when the timer is running** (requires libappindicator).
 - [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the status area **when the timer is running**.
 - [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
 
-All plugins are in the repositories.
 
 Bugs and Suggetions
 -------------------
@@ -72,7 +74,7 @@ Bugs and suggestions should be reported [here][bugs].
 Change Logs
 -----------
 
-## 0.6.0
+### 0.6.0
 
 - Using py.test
 - Add menu widget
