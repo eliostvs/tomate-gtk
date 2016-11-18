@@ -5,16 +5,16 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject, Module, SingletonScope
+from wiring import inject
+from wiring.scanning import register
 
 locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
 
 
+@register.factory('view.preference')
 class PreferenceDialog(Gtk.Dialog):
-
-    @inject(duration='view.preference.duration',
-            extension='view.preference.extension')
+    @inject(duration='view.preference.duration', extension='view.preference.extension')
     def __init__(self, duration, extension):
         self.extension = extension
         self.duration = duration
@@ -65,8 +65,8 @@ class PreferenceDialog(Gtk.Dialog):
         self.extension.refresh()
 
 
+@register.factory('view.preference.duration')
 class TimerDurationStack(Gtk.Grid):
-
     @inject(config='tomate.config')
     def __init__(self, config):
         self.config = config
@@ -129,8 +129,8 @@ class TimerDurationStack(Gtk.Grid):
         self.config.set('Timer', option, value)
 
 
+@register.factory('view.preference.extension')
 class ExtensionStack(Gtk.TreeView):
-
     @inject(plugin='tomate.plugin', config='tomate.config')
     def __init__(self, plugin, config):
         self.plugin = plugin
@@ -142,8 +142,8 @@ class ExtensionStack(Gtk.TreeView):
 
         self._store = Gtk.ListStore(bool,  # active
                                     GdkPixbuf.Pixbuf,  # icon
-                                    str,   # name
-                                    str,   # detail
+                                    str,  # name
+                                    str,  # detail
                                     object)  # plugin
 
         self.set_model(self._store)
@@ -205,7 +205,6 @@ class ExtensionStack(Gtk.TreeView):
 
 
 class GridPlugin(object):
-
     ACTIVE = 0
     TITLE = 2
 
@@ -235,11 +234,3 @@ class GridPlugin(object):
                 ).format(name=plugin.name,
                          version=plugin.version,
                          description=plugin.description)
-
-
-class PreferenceDialogModule(Module):
-    factories = {
-        'view.preference.extension': (ExtensionStack, SingletonScope),
-        'view.preference.duration': (TimerDurationStack, SingletonScope),
-        'view.preference': (PreferenceDialog, SingletonScope),
-    }

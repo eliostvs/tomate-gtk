@@ -5,17 +5,17 @@ from locale import gettext as _
 
 from gi.repository import Gtk
 from tomate.constant import State
-from tomate.event import Events, on
-from wiring import inject, Graph, Module, SingletonScope
+from tomate.event import on, View
+from wiring import inject
+from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
 
+@register.factory('view.menu')
 class Menu(object):
-
     @inject(about='view.about', preference='view.preference', lazy_proxy='tomate.proxy')
     def __init__(self, about, preference, lazy_proxy):
-
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
         self.view = lazy_proxy('tomate.view')
@@ -44,8 +44,8 @@ class Menu(object):
         return self.view.widget
 
 
+@register.factory('trayicon.menu')
 class TrayIconMenu(object):
-
     @inject(view='tomate.view')
     def __init__(self, view):
         self.view = view
@@ -68,19 +68,12 @@ class TrayIconMenu(object):
     def _on_show_item_activate(self, widget):
         return self.view.show()
 
-    @on(Events.View, [State.showed])
+    @on(View, [State.showed])
     def activate_hide_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(True)
         self.show_item.set_visible(False)
 
-    @on(Events.View, [State.hid])
+    @on(View, [State.hid])
     def activate_show_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(False)
         self.show_item.set_visible(True)
-
-
-class MenuModule(Module):
-    factories = {
-        'trayicon.menu': (TrayIconMenu, SingletonScope),
-        'view.menu': (Menu, SingletonScope)
-    }

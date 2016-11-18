@@ -1,21 +1,15 @@
 from __future__ import unicode_literals
 
-
 from mock import Mock
-from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope
 
-from tomate_gtk.widgets.taskbutton import TaskButton, TaskButtonModule
+from tomate_gtk.widgets.taskbutton import TaskButton
 
 
-def test_taskbutton_module():
-    assert list(TaskButtonModule.providers.keys()) == ['view.taskbutton']
+def test_taskbutton_module(graph):
+    assert 'view.taskbutton' in graph.providers
 
-    TaskButtonModule().add_to(graph)
     provider = graph.providers['view.taskbutton']
 
-    assert isinstance(provider, FactoryProvider)
-    assert provider.scope == SingletonScope
     assert provider.dependencies == {'session': 'tomate.session'}
 
     graph.register_factory('tomate.session', Mock)

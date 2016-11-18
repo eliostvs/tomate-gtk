@@ -4,16 +4,16 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from wiring import inject, Module, SingletonScope
-
 from tomate.constant import State
-from tomate.event import Subscriber, Events, on
+from tomate.event import Subscriber, Session, on
+from wiring import inject
+from wiring.scanning import register
 
 locale.textdomain('tomate')
 
 
+@register.factory('view.toolbar')
 class Toolbar(Subscriber):
-
     @inject(session='tomate.session', appmenu='view.appmenu')
     def __init__(self, session, appmenu):
         self.session = session
@@ -61,7 +61,7 @@ class Toolbar(Subscriber):
     def on_reset_button_clicked(self, widget):
         self.session.reset()
 
-    @on(Events.Session, [State.started])
+    @on(Session, [State.started])
     def enable_stop_button(self, *args, **kwargs):
         self.start_button.set_visible(False)
 
@@ -69,7 +69,7 @@ class Toolbar(Subscriber):
 
         self.reset_button.set_sensitive(False)
 
-    @on(Events.Session, [State.stopped, State.finished])
+    @on(Session, [State.stopped, State.finished])
     def enable_start_button(self, *args, **kwargs):
         self.start_button.set_visible(True)
 
@@ -78,12 +78,6 @@ class Toolbar(Subscriber):
         sensitive = bool(kwargs.get('sessions'))
         self.reset_button.set_sensitive(sensitive)
 
-    @on(Events.Session, [State.started, State.reset])
+    @on(Session, [State.started, State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
-
-
-class ToolbarModule(Module):
-    factories = {
-        'view.toolbar': (Toolbar, SingletonScope)
-    }

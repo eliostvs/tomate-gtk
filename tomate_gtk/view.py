@@ -5,16 +5,17 @@ import time
 
 from gi.repository import GdkPixbuf, Gtk
 from tomate.constant import State
-from tomate.event import Subscriber, on, Events
+from tomate.event import Subscriber, on, Session
 from tomate.view import UI, TrayIcon
-from wiring import implements, inject, Module, SingletonScope, Graph
+from wiring import implements, inject, Graph
+from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
 
+@register.factory('tomate.view')
 @implements(UI)
 class GtkUI(Subscriber):
-
     @inject(
         session='tomate.session',
         events='tomate.events',
@@ -37,10 +38,10 @@ class GtkUI(Subscriber):
 
     def _build_window(self, taskbutton, timerframe, toolbar):
         window = Gtk.Window(
-                title='Tomate',
-                icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
-                window_position=Gtk.WindowPosition.CENTER,
-                resizable=False)
+            title='Tomate',
+            icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
+            window_position=Gtk.WindowPosition.CENTER,
+            resizable=False)
 
         window.set_size_request(350, -1)
 
@@ -69,7 +70,7 @@ class GtkUI(Subscriber):
         else:
             Gtk.main_quit()
 
-    @on(Events.Session, [State.finished])
+    @on(Session, [State.finished])
     def show(self, *args, **kwargs):
         self.event.send(State.showed)
 
@@ -92,9 +93,3 @@ class GtkUI(Subscriber):
     @property
     def widget(self):
         return self.window
-
-
-class ViewModule(Module):
-    factories = {
-        'tomate.view': (GtkUI, SingletonScope)
-    }

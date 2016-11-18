@@ -3,17 +3,16 @@ from __future__ import unicode_literals
 import logging
 
 from gi.repository import Gtk
-from wiring import Module, SingletonScope
-
 from tomate.constant import State
-from tomate.event import Subscriber, Events, on
+from tomate.event import Subscriber, Session, Timer, on
 from tomate.utils import format_time_left
+from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
 
+@register.factory('view.timerframe')
 class TimerFrame(Subscriber):
-
     def __init__(self):
         self.widget = Gtk.Frame(
             margin_bottom=2,
@@ -40,8 +39,8 @@ class TimerFrame(Subscriber):
 
         self.update_session(0)
 
-    @on(Events.Timer, [State.changed])
-    @on(Events.Session, [State.stopped, State.changed])
+    @on(Timer, [State.changed])
+    @on(Session, [State.stopped, State.changed])
     def update_timer(self, sender=None, **kwargs):
         time_left = format_time_left(kwargs.get('time_left', 25 * 60))
 
@@ -50,7 +49,7 @@ class TimerFrame(Subscriber):
 
         logger.debug('timer label update %s', time_left)
 
-    @on(Events.Session, [State.changed, State.finished])
+    @on(Session, [State.changed, State.finished])
     def update_session(self, *args, **kwargs):
         sessions = kwargs.get('sessions', 0)
 
@@ -60,9 +59,3 @@ class TimerFrame(Subscriber):
         self.sessions_label.set_markup(markup)
 
         logger.debug('session label update %s', sessions)
-
-
-class TimerFrameModule(Module):
-    factories = {
-        'view.timerframe': (TimerFrame, SingletonScope)
-    }

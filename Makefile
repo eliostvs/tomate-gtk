@@ -25,6 +25,9 @@ test: clean
 	    --cov-report term-missing --cov=$(PACKAGE_DIR) \
 	    --flake8
 
+lint:
+	flake8
+
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
 	-v $(PACKAGE_ROOT):/code \
@@ -39,6 +42,9 @@ docker-build:
 
 docker-test:
 	docker run --rm -it -v $(PACKAGE_ROOT):/code $(DOCKER_IMAGE_NAME)
+
+docker-lint:
+	docker run --rm -v $(PACKAGE_ROOT):/code $(DOCKER_IMAGE_NAME) lint
 
 docker-all: docker-clean docker-build docker-test
 

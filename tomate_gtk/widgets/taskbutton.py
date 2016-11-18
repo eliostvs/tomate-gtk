@@ -4,18 +4,19 @@ import locale
 import logging
 from locale import gettext as _
 
-from wiring import inject, Module, SingletonScope
-
 from tomate.constant import Task, State
-from tomate.event import Subscriber, Events, on
+from tomate.event import Subscriber, Session, on
+from wiring import inject
+from wiring.scanning import register
+
 from .modebutton import ModeButton
 
 locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
 
 
+@register.factory('view.taskbutton')
 class TaskButton(Subscriber):
-
     @inject(session='tomate.session')
     def __init__(self, session=None):
         self.session = session
@@ -41,7 +42,7 @@ class TaskButton(Subscriber):
         task = Task.by_index(index)
         self.session.change_task(task=task)
 
-    @on(Events.Session, [State.finished])
+    @on(Session, [State.finished])
     def change_selected(self, sender=None, **kwargs):
         task = kwargs.get('task', Task.pomodoro)
 
@@ -49,21 +50,14 @@ class TaskButton(Subscriber):
 
         self.modebutton.set_selected(task.value)
 
-    @on(Events.Session, [State.started])
+    @on(Session, [State.started])
     def disable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(False)
 
-    @on(Events.Session, [State.stopped, State.stopped])
+    @on(Session, [State.stopped, State.stopped])
     def enable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(True)
 
     @property
     def widget(self):
         return self.modebutton
-
-
-class TaskButtonModule(Module):
-
-    factories = {
-        'view.taskbutton': (TaskButton, SingletonScope)
-    }

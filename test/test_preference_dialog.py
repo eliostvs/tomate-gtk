@@ -2,10 +2,8 @@ from __future__ import unicode_literals
 
 from mock import Mock
 from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope
 
 from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
-                                           PreferenceDialogModule,
                                            TimerDurationStack)
 
 
@@ -16,35 +14,19 @@ def test_preference_module():
     graph.register_factory('view.preference.extension', ExtensionStack)
     graph.register_factory('view.preference.duration', TimerDurationStack)
 
-    providers = [
-        'view.preference',
-        'view.preference.duration',
-        'view.preference.extension',
-    ]
-
-    assert sorted(PreferenceDialogModule.providers.keys()) == providers
-
-    PreferenceDialogModule().add_to(graph)
-
     # Extension Stack
     provider = graph.providers['view.preference.extension']
 
-    assert isinstance(provider, FactoryProvider)
-    assert provider.scope == SingletonScope
     assert provider.dependencies == {'config': 'tomate.config', 'plugin': 'tomate.plugin'}
 
     # Duration Stack
     provider = graph.providers['view.preference.duration']
 
-    assert isinstance(provider, FactoryProvider)
-    assert provider.scope == SingletonScope
     assert provider.dependencies == {'config': 'tomate.config'}
 
     # Preference Dialog
     provider = graph.providers['view.preference']
 
-    assert isinstance(provider, FactoryProvider)
-    assert provider.scope == SingletonScope
     assert provider.dependencies == {'extension': 'view.preference.extension',
                                      'duration': 'view.preference.duration'}
 

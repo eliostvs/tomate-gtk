@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject, Module, SingletonScope
+from wiring import inject
+from wiring.scanning import register
 
 
+@register.factory('view.about')
 class AboutDialog(Gtk.AboutDialog):
-
     @inject(config='tomate.config')
     def __init__(self, config):
         Gtk.AboutDialog.__init__(
@@ -30,9 +31,3 @@ class AboutDialog(Gtk.AboutDialog):
     @staticmethod
     def on_dialog_response(widget, parameter):
         widget.hide()
-
-
-class AboutDialogModule(Module):
-    factories = {
-        'view.about': (AboutDialog, SingletonScope)
-    }

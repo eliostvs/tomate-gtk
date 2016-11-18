@@ -6,9 +6,7 @@ import pytest
 from mock import Mock, patch
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from wiring import FactoryProvider, Graph, SingletonScope
 
-from tomate_gtk.widgets import MenuModule
 from util import refresh_gui
 
 
@@ -39,7 +37,7 @@ def proxy(view):
 def menu(proxy, about, preference):
     from tomate_gtk.widgets.menu import Menu
 
-    Events.View.receivers.clear()
+    Events['View'].receivers.clear()
 
     return Menu(about, preference, proxy)
 
@@ -48,7 +46,7 @@ def menu(proxy, about, preference):
 def trayicon_menu(view):
     from tomate_gtk.widgets.menu import TrayIconMenu
 
-    Events.View.receivers.clear()
+    Events['View'].receivers.clear()
 
     return TrayIconMenu(view)
 
@@ -58,7 +56,6 @@ def method_called(result):
 
 
 class TestMenu(object):
-
     @patch('tomate_gtk.widgets.menu.Gtk')
     def test_should_create_preference_item(self, Gtk):
         from tomate_gtk.widgets.menu import Menu
@@ -92,7 +89,6 @@ class TestMenu(object):
 
 
 class TestTrayIconMenu(object):
-
     @patch('tomate_gtk.widgets.menu.Gtk')
     def test_should_create_show_item(self, Gtk):
         from tomate_gtk.widgets.menu import TrayIconMenu
@@ -137,7 +133,7 @@ class TestTrayIconMenu(object):
     def test_should_call_activate_hide_item_when_view_shows(self, trayicon_menu):
         connect_events(trayicon_menu)
 
-        result = Events.View.send(State.showed)
+        result = Events['View'].send(State.showed)
 
         assert len(result) == 1
         assert trayicon_menu.activate_hide_item == method_called(result)
@@ -145,40 +141,33 @@ class TestTrayIconMenu(object):
     def test_should_call_activate_show_item_view_hides(self, trayicon_menu):
         connect_events(trayicon_menu)
 
-        result = Events.View.send(State.hid)
+        result = Events['View'].send(State.hid)
 
         assert len(result) == 1
         assert trayicon_menu.activate_show_item == method_called(result)
 
     def test_should_not_call_menu_after_deactivate(self, trayicon_menu):
-        assert len(Events.View.receivers) == 0
-        Events.View.receivers.clear()
+        assert len(Events['View'].receivers) == 0
+        Events['View'].receivers.clear()
 
         connect_events(trayicon_menu)
 
-        assert len(Events.View.receivers) == 2
+        assert len(Events['View'].receivers) == 2
 
         disconnect_events(trayicon_menu)
 
-        result = Events.View.send(State.hid)
+        result = Events['View'].send(State.hid)
 
         assert len(result) == 0
 
 
-def test_menu_module():
+def test_menu_module(graph):
     from tomate_gtk.widgets.menu import TrayIconMenu
 
-    assert sorted(MenuModule.providers.keys()) == sorted(['view.menu', 'trayicon.menu'])
-
-    graph = Graph()
-    MenuModule().add_to(graph)
+    assert 'view.menu' in graph.providers
+    assert 'trayicon.menu' in graph.providers
 
     provider = graph.providers['view.menu']
-
-    assert 'view.menu' in graph.providers.keys()
-
-    assert isinstance(provider, FactoryProvider)
-    assert provider.scope == SingletonScope
 
     assert provider.dependencies == {'lazy_proxy': 'tomate.proxy',
                                      'about': 'view.about',

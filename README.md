@@ -66,13 +66,17 @@ For example `sudo apt-get install tomate-indicator-plugin` will install the indi
 - [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
 
 
-Bugs and Suggetions
+Bugs and Suggestions
 -------------------
 
 Bugs and suggestions should be reported [here][bugs].
 
 Change Logs
 -----------
+
+### 0.7.0
+
+- Using wiring.scanning
 
 ### 0.6.0
 
