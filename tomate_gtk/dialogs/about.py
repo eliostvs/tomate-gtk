@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject
+from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 
-@register.factory('view.about')
+@register.factory('view.about', scope=SingletonScope)
 class AboutDialog(Gtk.AboutDialog):
     @inject(config='tomate.config')
     def __init__(self, config):

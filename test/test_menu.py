@@ -6,7 +6,9 @@ import pytest
 from mock import Mock, patch
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
+from wiring import SingletonScope
 
+from tomate_gtk.widgets.menu import TrayIconMenu, Menu
 from util import refresh_gui
 
 
@@ -162,16 +164,25 @@ class TestTrayIconMenu(object):
 
 
 def test_menu_module(graph):
-    from tomate_gtk.widgets.menu import TrayIconMenu
-
     assert 'view.menu' in graph.providers
+
+    provider = graph.providers['view.menu']
+
+    assert provider.scope == SingletonScope
+
+    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('view.preference', Mock())
+    graph.register_instance('tomate.proxy', Mock())
+
+    assert isinstance(graph.get('view.menu'), Menu)
+
+
+def test_trayicon_module(graph):
     assert 'trayicon.menu' in graph.providers
 
     provider = graph.providers['view.menu']
 
-    assert provider.dependencies == {'lazy_proxy': 'tomate.proxy',
-                                     'about': 'view.about',
-                                     'preference': 'view.preference'}
+    assert provider.scope == SingletonScope
 
     graph.register_instance('tomate.view', Mock())
 

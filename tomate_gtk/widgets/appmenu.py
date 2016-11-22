@@ -3,13 +3,13 @@ from __future__ import unicode_literals
 import locale
 
 from gi.repository import Gtk
-from wiring import inject
+from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 locale.textdomain('tomate')
 
 
-@register.factory('view.appmenu')
+@register.factory('view.appmenu', scope=SingletonScope)
 class Appmenu(Gtk.ToolItem):
     @inject(menu='view.menu')
     def __init__(self, menu):

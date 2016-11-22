@@ -6,13 +6,13 @@ from locale import gettext as _
 from gi.repository import Gtk
 from tomate.constant import State
 from tomate.event import on, View
-from wiring import inject
+from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
 
-@register.factory('view.menu')
+@register.factory('view.menu', scope=SingletonScope)
 class Menu(object):
     @inject(about='view.about', preference='view.preference', lazy_proxy='tomate.proxy')
     def __init__(self, about, preference, lazy_proxy):
@@ -44,7 +44,7 @@ class Menu(object):
         return self.view.widget
 
 
-@register.factory('trayicon.menu')
+@register.factory('trayicon.menu', scope=SingletonScope)
 class TrayIconMenu(object):
     @inject(view='tomate.view')
     def __init__(self, view):

@@ -5,14 +5,14 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject
+from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
 
 
-@register.factory('view.preference')
+@register.factory('view.preference', scope=SingletonScope)
 class PreferenceDialog(Gtk.Dialog):
     @inject(duration='view.preference.duration', extension='view.preference.extension')
     def __init__(self, duration, extension):
@@ -65,7 +65,7 @@ class PreferenceDialog(Gtk.Dialog):
         self.extension.refresh()
 
 
-@register.factory('view.preference.duration')
+@register.factory('view.preference.duration', scope=SingletonScope)
 class TimerDurationStack(Gtk.Grid):
     @inject(config='tomate.config')
     def __init__(self, config):
@@ -129,7 +129,7 @@ class TimerDurationStack(Gtk.Grid):
         self.config.set('Timer', option, value)
 
 
-@register.factory('view.preference.extension')
+@register.factory('view.preference.extension', scope=SingletonScope)
 class ExtensionStack(Gtk.TreeView):
     @inject(plugin='tomate.plugin', config='tomate.config')
     def __init__(self, plugin, config):

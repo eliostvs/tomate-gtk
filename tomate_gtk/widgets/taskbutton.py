@@ -6,7 +6,7 @@ from locale import gettext as _
 
 from tomate.constant import Task, State
 from tomate.event import Subscriber, Session, on
-from wiring import inject
+from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 from .modebutton import ModeButton
@@ -15,7 +15,7 @@ locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
 
 
-@register.factory('view.taskbutton')
+@register.factory('view.taskbutton', scope=SingletonScope)
 class TaskButton(Subscriber):
     @inject(session='tomate.session')
     def __init__(self, session=None):

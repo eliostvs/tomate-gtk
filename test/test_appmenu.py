@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from gi.repository import Gtk
 from mock import Mock
+from wiring import SingletonScope
 
 from tomate_gtk.widgets.appmenu import Appmenu
 
@@ -11,10 +12,8 @@ def test_module(graph):
 
     provider = graph.providers['view.appmenu']
 
-    assert provider.dependencies == {'menu': 'view.menu'}
+    assert provider.scope == SingletonScope
 
-    menu = Mock(widget=Gtk.Menu())
-
-    graph.register_instance('view.menu', menu)
+    graph.register_instance('view.menu', Mock(widget=Gtk.Menu()))
 
     assert isinstance(graph.get('view.appmenu'), Appmenu)
