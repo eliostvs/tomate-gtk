@@ -3,8 +3,12 @@ from __future__ import unicode_literals
 import logging
 import sys
 
-import dbus.mainloop.glib
 import gi
+
+gi.require_version('Gdk', '3.0')
+gi.require_version('Gtk', '3.0')
+
+import dbus.mainloop.glib
 import six
 from gi.repository import Gdk
 from tomate.app import Application
@@ -12,9 +16,6 @@ from tomate.graph import graph
 from wiring.scanning import scan_to_graph
 
 from .utils import parse_options, setup_logging
-
-gi.require_version('Gdk', '3.0')
-gi.require_version('Gtk', '3.0')
 
 logger = logging.getLogger(__name__)
 
