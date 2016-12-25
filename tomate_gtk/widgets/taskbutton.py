@@ -4,11 +4,11 @@ import locale
 import logging
 from locale import gettext as _
 
-from tomate.constant import Task, State
-from tomate.event import Subscriber, Session, on
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
+from tomate.constant import Task, State
+from tomate.event import Subscriber, on, Events
 from .modebutton import ModeButton
 
 locale.textdomain('tomate')
@@ -42,7 +42,7 @@ class TaskButton(Subscriber):
         task = Task.by_index(index)
         self.session.change_task(task=task)
 
-    @on(Session, [State.finished])
+    @on(Events.Session, [State.finished])
     def change_selected(self, sender=None, **kwargs):
         task = kwargs.get('task', Task.pomodoro)
 
@@ -50,11 +50,11 @@ class TaskButton(Subscriber):
 
         self.modebutton.set_selected(task.value)
 
-    @on(Session, [State.started])
+    @on(Events.Session, [State.started])
     def disable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(False)
 
-    @on(Session, [State.stopped, State.stopped])
+    @on(Events.Session, [State.stopped, State.stopped])
     def enable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(True)
 

@@ -5,7 +5,7 @@ from locale import gettext as _
 
 from gi.repository import Gtk
 from tomate.constant import State
-from tomate.event import on, View
+from tomate.event import on, Events
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -68,12 +68,12 @@ class TrayIconMenu(object):
     def _on_show_item_activate(self, widget):
         return self.view.show()
 
-    @on(View, [State.showed])
+    @on(Events.View, [State.showed])
     def activate_hide_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(True)
         self.show_item.set_visible(False)
 
-    @on(View, [State.hid])
+    @on(Events.View, [State.hid])
     def activate_show_item(self, sender=None, **kwargs):
         self.hide_item.set_visible(False)
         self.show_item.set_visible(True)

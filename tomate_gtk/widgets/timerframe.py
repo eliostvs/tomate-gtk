@@ -4,7 +4,7 @@ import logging
 
 from gi.repository import Gtk
 from tomate.constant import State
-from tomate.event import Subscriber, Session, Timer, on
+from tomate.event import Subscriber, Events, on
 from tomate.utils import format_time_left
 from wiring import SingletonScope
 from wiring.scanning import register
@@ -43,8 +43,8 @@ class TimerFrame(Subscriber):
 
         self.update_session(0)
 
-    @on(Timer, [State.changed])
-    @on(Session, [State.stopped, State.changed])
+    @on(Events.Timer, [State.changed])
+    @on(Events.Session, [State.stopped, State.changed])
     def update_timer(self, sender=None, **kwargs):
         time_left = kwargs.get('time_left', DEFAULT_TIME_LEFT)
 
@@ -52,7 +52,7 @@ class TimerFrame(Subscriber):
 
         logger.debug('timer label update %s', time_left)
 
-    @on(Session, [State.changed, State.finished])
+    @on(Events.Session, [State.changed, State.finished])
     def update_session(self, *args, **kwargs):
         sessions = kwargs.get('sessions', DEFAULT_SESSIONS)
 

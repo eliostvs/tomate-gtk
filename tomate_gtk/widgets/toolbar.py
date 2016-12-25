@@ -5,7 +5,7 @@ from locale import gettext as _
 
 from gi.repository import Gtk
 from tomate.constant import State
-from tomate.event import Subscriber, Session, on
+from tomate.event import Subscriber, Events, on
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -61,7 +61,7 @@ class Toolbar(Subscriber):
     def on_reset_button_clicked(self, widget):
         self.session.reset()
 
-    @on(Session, [State.started])
+    @on(Events.Session, [State.started])
     def enable_stop_button(self, *args, **kwargs):
         self.start_button.set_visible(False)
 
@@ -69,7 +69,7 @@ class Toolbar(Subscriber):
 
         self.reset_button.set_sensitive(False)
 
-    @on(Session, [State.stopped, State.finished])
+    @on(Events.Session, [State.stopped, State.finished])
     def enable_start_button(self, *args, **kwargs):
         self.start_button.set_visible(True)
 
@@ -78,6 +78,6 @@ class Toolbar(Subscriber):
         sensitive = bool(kwargs.get('sessions'))
         self.reset_button.set_sensitive(sensitive)
 
-    @on(Session, [State.started, State.reset])
+    @on(Events.Session, [State.started, State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
