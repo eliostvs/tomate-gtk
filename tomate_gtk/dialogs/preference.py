@@ -187,7 +187,8 @@ class ExtensionStack(Gtk.Box):
         if treeiter is not None:
             plugin = self.get_selected_plugin()
 
-            if hasattr(plugin, 'has_settings') and plugin.has_settings:
+            if getattr(plugin.plugin_object, 'has_settings', False) is True:
+                logger.debug('Activating settings fro plugin %s', plugin.name)
                 self.plugin_settings_button.set_sensitive(True)
             else:
                 self.plugin_settings_button.set_sensitive(False)

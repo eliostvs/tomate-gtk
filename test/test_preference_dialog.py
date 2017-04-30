@@ -52,7 +52,7 @@ def plugin():
 
 def test_deactive_plugin_settings_button_when_plugin_when_has_not_settings(plugin_manager, config, lazy_proxy, plugin):
     plugin.plugin_object.is_activated = True
-    plugin.has_settings = False
+    plugin.plugin_object.is_activated = False
     setup_plugin_manager(plugin_manager, plugin)
 
     extension_stack = ExtensionStack(plugin_manager, config, lazy_proxy)
@@ -64,7 +64,7 @@ def test_deactive_plugin_settings_button_when_plugin_when_has_not_settings(plugi
 
 def test_activate_plugin_settings_button_when_plugin_has_settings(plugin_manager, config, lazy_proxy, plugin):
     plugin.plugin_object.is_activated = True
-    plugin.has_settings = True
+    plugin.plugin_object.has_settings = True
     setup_plugin_manager(plugin_manager, plugin)
 
     extension_stack = ExtensionStack(plugin_manager, config, lazy_proxy)
