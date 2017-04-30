@@ -36,7 +36,7 @@ class Menu(object):
 
     def _on_preference_item_activate(self, widget, preference):
         preference.set_transient_for(self.toplevel)
-        preference.refresh_plugin()
+        preference.refresh_plugins()
         preference.run()
 
     @property

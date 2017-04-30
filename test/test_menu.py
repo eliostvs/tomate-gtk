@@ -71,7 +71,7 @@ class TestMenu(object):
         refresh_gui()
 
         preference.set_transient_for.assert_called_once_with(view.widget)
-        preference.refresh_plugin.assert_called_once_with()
+        preference.refresh_plugins.assert_called_once_with()
         preference.run.assert_called_once_with()
 
     @patch('tomate_gtk.widgets.menu.Gtk')

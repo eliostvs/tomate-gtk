@@ -33,7 +33,7 @@ class PreferenceDialog(Gtk.Dialog):
         self.connect('response', lambda widget, response: widget.hide())
 
         stack = Gtk.Stack()
-        stack.add_titled(self.duration, 'timer', _('Timer'))
+        stack.add_titled(self.duration.widget, 'timer', _('Timer'))
 
         scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         scrolledwindow.add_with_viewport(self.extension.widget)
@@ -55,7 +55,11 @@ class PreferenceDialog(Gtk.Dialog):
 
         self.get_content_area().add(vbox)
 
-    def refresh_plugin(self):
+    @property
+    def widget(self):
+        return self
+
+    def refresh_plugins(self):
         self.extension.refresh()
 
 
@@ -114,22 +118,26 @@ class TimerDurationStack(Gtk.Grid):
         spinbutton.set_hexpand(True)
         spinbutton.set_halign(Gtk.Align.START)
         spinbutton.set_value(self.config.get_int('Timer', option))
-        spinbutton.connect('value-changed', self.on_spinbutton_value_changed, option)
+        spinbutton.connect('value-changed', self._on_spinbutton_value_changed, option)
 
         return label, spinbutton
 
-    def on_spinbutton_value_changed(self, widget, option):
+    def _on_spinbutton_value_changed(self, widget, option):
         value = str(widget.get_value_as_int())
         self.config.set('Timer', option, value)
+
+    @property
+    def widget(self):
+        return self
 
 
 @register.factory('view.preference.extension', scope=SingletonScope)
 class ExtensionStack(Gtk.Box):
     @inject(plugin='tomate.plugin', config='tomate.config', lazy_proxy='tomate.proxy')
     def __init__(self, plugin, config, lazy_proxy):
-        self.plugin = plugin
+        self.plugin_manager = plugin
         self.config = config
-        self.view = lazy_proxy('tomate.view')
+        self.preference_dialog = lazy_proxy('view.preference')
 
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL,
                          spacing=5,
@@ -139,7 +147,7 @@ class ExtensionStack(Gtk.Box):
                          margin_top=5)
 
         self.tree_view = Gtk.TreeView(headers_visible=False)
-        self.tree_view.get_selection().connect('changed', self.on_tree_view_changed)
+        self.tree_view.get_selection().connect('changed', self._on_tree_view_changed)
         self.tree_view.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         self._store = Gtk.ListStore(bool,  # active
@@ -151,7 +159,7 @@ class ExtensionStack(Gtk.Box):
         self.tree_view.set_model(self._store)
 
         renderer = Gtk.CellRendererToggle()
-        renderer.connect('toggled', self.on_plugin_toggled)
+        renderer.connect('toggled', self._on_plugin_toggled)
         column = Gtk.TreeViewColumn('Active', renderer, active=0)
         self.tree_view.append_column(column)
 
@@ -165,7 +173,7 @@ class ExtensionStack(Gtk.Box):
 
         self.plugin_settings_button = Gtk.Button.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU)
         self.plugin_settings_button.set_sensitive(False)
-        self.plugin_settings_button.connect('clicked', self.on_plugin_settings_clicked)
+        self.plugin_settings_button.connect('clicked', self._on_plugin_settings_clicked)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
@@ -175,7 +183,20 @@ class ExtensionStack(Gtk.Box):
 
         self.show_all()
 
-    def on_tree_view_changed(self, selection):
+    @property
+    def widget(self):
+        return self
+
+    def refresh(self):
+        self._clear()
+
+        for plugin in self.plugin_manager.getAllPlugins():
+            self._add_plugin(plugin)
+
+        if self._there_are_plugins:
+            self._select_first_plugin()
+
+    def _on_tree_view_changed(self, selection):
         _, treeiter = selection.get_selected()
 
         if treeiter is not None:
@@ -192,57 +213,48 @@ class ExtensionStack(Gtk.Box):
 
         grid_plugin = GridPlugin.from_iter(self._store, treeiter)
 
-        plugin = self.plugin.getPluginByName(grid_plugin.name)
+        plugin = self.plugin_manager.getPluginByName(grid_plugin.name)
         return plugin
 
     @property
-    def toplevel(self):
-        return self.view.widget
+    def _toplevel(self):
+        return self.preference_dialog.widget
 
-    def refresh(self):
-        self.clear()
-
-        for plugin in self.plugin.getAllPlugins():
-            self.add_plugin(plugin)
-
-        if self.there_are_plugins:
-            self.select_first_plugin()
-
-    def on_plugin_toggled(self, _, path):
+    def _on_plugin_toggled(self, _, path):
         grid_plugin = GridPlugin.from_path(self._store, path)
         grid_plugin.toggle()
 
         if grid_plugin.is_enable:
-            self.activate_plugin(grid_plugin.name)
+            self._activate_plugin(grid_plugin.name)
 
         else:
-            self.deactivate_plugin(grid_plugin.name)
+            self._deactivate_plugin(grid_plugin.name)
 
-    def on_plugin_settings_clicked(self, _):
+    def _on_plugin_settings_clicked(self, _):
         plugin = self.get_selected_plugin()
 
         widget = plugin.plugin_object.settings_window()
-        widget.set_transient_for(self.toplevel)
+        widget.set_transient_for(self._toplevel)
         widget.run()
 
-    def deactivate_plugin(self, plugin_name):
-        self.plugin.deactivatePluginByName(plugin_name)
+    def _deactivate_plugin(self, plugin_name):
+        self.plugin_manager.deactivatePluginByName(plugin_name)
         self.plugin_settings_button.set_sensitive(False)
 
-    def activate_plugin(self, plugin_name):
-        self.plugin.activatePluginByName(plugin_name)
+    def _activate_plugin(self, plugin_name):
+        self.plugin_manager.activatePluginByName(plugin_name)
 
-    def clear(self):
+    def _clear(self):
         self._store.clear()
 
-    def select_first_plugin(self):
+    def _select_first_plugin(self):
         self.tree_view.get_selection().select_iter(self._store.get_iter_first())
 
     @property
-    def there_are_plugins(self):
+    def _there_are_plugins(self):
         return bool(len(self._store))
 
-    def add_plugin(self, plugin):
+    def _add_plugin(self, plugin):
         iconname = getattr(plugin, 'icon', 'tomate-plugin')
         iconpath = self.config.get_icon_path(iconname, 16)
 
@@ -253,10 +265,6 @@ class ExtensionStack(Gtk.Box):
                             plugin))
 
         logger.debug('plugin %s added', plugin.name)
-
-    @property
-    def widget(self):
-        return self
 
 
 class GridPlugin(object):

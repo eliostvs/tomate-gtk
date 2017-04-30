@@ -10,6 +10,12 @@ PYTHONPATH=PYTHONPATH=$(TOMATE_PATH):$(PACKAGE_ROOT)
 PROJECT = home:eliostvs:tomate
 OBS_API_URL = https://api.opensuse.org:443/trigger/runservice?project=$(PROJECT)&package=$(PACKAGE)
 
+ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
+	TEST_PREFIX = xvfb-run -a
+else
+	TEST_PREFIX =
+endif
+
 submodule:
 	git submodule init
 	git submodule update --recursive --remote
@@ -21,7 +27,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) py.test -v \
+	$(XDG_DATA_DIRS) $(PYTHONPATH) $(TEST_PREFIX) py.test -v \
 	    --cov-report term-missing --cov=$(PACKAGE_DIR) \
 	    --flake8
 

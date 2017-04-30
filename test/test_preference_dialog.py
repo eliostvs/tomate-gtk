@@ -79,7 +79,7 @@ def test_show_plugin_settings(plugin_manager, config, lazy_proxy, plugin):
     plugin.has_settings = True
     setup_plugin_manager(plugin_manager, plugin)
     view = Mock(widget='widget')
-    lazy_proxy.side_effect = lambda name: view if name == 'tomate.view' else None
+    lazy_proxy.side_effect = lambda name: view if name == 'view.preference' else None
 
     extension_stack = ExtensionStack(plugin_manager, config, lazy_proxy)
     extension_stack.refresh()
