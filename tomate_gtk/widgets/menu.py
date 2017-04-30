@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 class Menu(object):
     @inject(about='view.about', preference='view.preference', lazy_proxy='tomate.proxy')
     def __init__(self, about, preference, lazy_proxy):
-        self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
-
         self.view = lazy_proxy('tomate.view')
+
+        self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
         self.about_item = Gtk.MenuItem(_('About'))
         self.about_item.connect('activate', self._on_about_item_activate, about)

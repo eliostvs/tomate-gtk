@@ -21,7 +21,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) xvfb-run -a py.test -v \
+	$(XDG_DATA_DIRS) $(PYTHONPATH) py.test -v \
 	    --cov-report term-missing --cov=$(PACKAGE_DIR) \
 	    --flake8
 

@@ -23,7 +23,6 @@ class PreferenceDialog(Gtk.Dialog):
             self,
             _('Preferences'),
             None,
-            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
             modal=True,
             resizable=False,
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
@@ -36,8 +35,8 @@ class PreferenceDialog(Gtk.Dialog):
         stack = Gtk.Stack()
         stack.add_titled(self.duration, 'timer', _('Timer'))
 
-        scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.OUT)
-        scrolledwindow.add_with_viewport(self.extension)
+        scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
+        scrolledwindow.add_with_viewport(self.extension.widget)
 
         stack.add_titled(scrolledwindow, 'extension', _('Extensions'))
 
@@ -130,15 +129,23 @@ class TimerDurationStack(Gtk.Grid):
 
 
 @register.factory('view.preference.extension', scope=SingletonScope)
-class ExtensionStack(Gtk.TreeView):
-    @inject(plugin='tomate.plugin', config='tomate.config')
-    def __init__(self, plugin, config):
+class ExtensionStack(Gtk.Box):
+    @inject(plugin='tomate.plugin', config='tomate.config', lazy_proxy='tomate.proxy')
+    def __init__(self, plugin, config, lazy_proxy):
         self.plugin = plugin
         self.config = config
+        self.view = lazy_proxy('tomate.view')
 
-        Gtk.TreeView.__init__(self, headers_visible=False)
+        Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL,
+                         spacing=5,
+                         margin_left=5,
+                         margin_right=5,
+                         margin_bottom=5,
+                         margin_top=5)
 
-        self.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
+        self.tree_view = Gtk.TreeView(headers_visible=False)
+        self.tree_view.get_selection().connect('changed', self.on_tree_view_changed)
+        self.tree_view.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         self._store = Gtk.ListStore(bool,  # active
                                     GdkPixbuf.Pixbuf,  # icon
@@ -146,20 +153,56 @@ class ExtensionStack(Gtk.TreeView):
                                     str,  # detail
                                     object)  # plugin
 
-        self.set_model(self._store)
+        self.tree_view.set_model(self._store)
 
         renderer = Gtk.CellRendererToggle()
         renderer.connect('toggled', self.on_plugin_toggled)
         column = Gtk.TreeViewColumn('Active', renderer, active=0)
-        self.append_column(column)
+        self.tree_view.append_column(column)
 
         renderer = Gtk.CellRendererPixbuf()
         column = Gtk.TreeViewColumn('Icon', renderer, pixbuf=1)
-        self.append_column(column)
+        self.tree_view.append_column(column)
 
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn('Detail', renderer, markup=3)
-        self.append_column(column)
+        self.tree_view.append_column(column)
+
+        self.plugin_settings_button = Gtk.Button.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU)
+        self.plugin_settings_button.set_sensitive(False)
+        self.plugin_settings_button.connect('clicked', self.on_plugin_settings_clicked)
+
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
+                       sensitive=False)
+        hbox.pack_end(self.plugin_settings_button, False, True, 0)
+
+        self.pack_start(self.tree_view, True, True, 0)
+        self.pack_start(hbox, False, True, 0)
+
+        self.show_all()
+
+    def on_tree_view_changed(self, selection):
+        _, treeiter = selection.get_selected()
+
+        if treeiter is not None:
+            plugin = self.get_selected_plugin()
+
+            if hasattr(plugin, 'has_settings') and plugin.has_settings:
+                self.plugin_settings_button.set_sensitive(True)
+            else:
+                self.plugin_settings_button.set_sensitive(False)
+
+    def get_selected_plugin(self):
+        _, treeiter = self.tree_view.get_selection().get_selected()
+
+        grid_plugin = GridPlugin.from_iter(self._store, treeiter)
+
+        plugin = self.plugin.getPluginByName(grid_plugin.name)
+        return plugin
+
+    @property
+    def toplevel(self):
+        return self.view.widget
 
     def refresh(self):
         self.clear()
@@ -170,22 +213,35 @@ class ExtensionStack(Gtk.TreeView):
         if self.there_are_plugins:
             self.select_first_plugin()
 
-    def on_plugin_toggled(self, widget, path):
-        plugin = GridPlugin(self._store, path)
+    def on_plugin_toggled(self, _, path):
+        grid_plugin = GridPlugin.from_path(self._store, path)
+        grid_plugin.toggle()
 
-        plugin.toggle()
-
-        if plugin.is_enable:
-            self.plugin.activatePluginByName(plugin.name)
+        if grid_plugin.is_enable:
+            self.activate_plugin(grid_plugin.name)
 
         else:
-            self.plugin.deactivatePluginByName(plugin.name)
+            self.deactivate_plugin(grid_plugin.name)
+
+    def on_plugin_settings_clicked(self, _):
+        plugin = self.get_selected_plugin()
+
+        widget = plugin.settings_window()
+        widget.set_transient_for(self.toplevel)
+        widget.run()
+
+    def deactivate_plugin(self, plugin_name):
+        self.plugin.deactivatePluginByName(plugin_name)
+        self.plugin_settings_button.set_sensitive(False)
+
+    def activate_plugin(self, plugin_name):
+        self.plugin.activatePluginByName(plugin_name)
 
     def clear(self):
         self._store.clear()
 
     def select_first_plugin(self):
-        self.get_selection().select_iter(self._store.get_iter_first())
+        self.tree_view.get_selection().select_iter(self._store.get_iter_first())
 
     @property
     def there_are_plugins(self):
@@ -203,25 +259,37 @@ class ExtensionStack(Gtk.TreeView):
 
         logger.debug('plugin %s added', plugin.name)
 
+    @property
+    def widget(self):
+        return self
+
 
 class GridPlugin(object):
     ACTIVE = 0
     TITLE = 2
 
-    def __init__(self, treestore, treepath):
+    def __init__(self, value):
+        self._value = value
+
+    @staticmethod
+    def from_iter(treestore, treeiter):
+        return GridPlugin(treestore[treeiter])
+
+    @staticmethod
+    def from_path(treestore, treepath):
         treeiter = treestore.get_iter(treepath)
-        self._instance = treestore[treeiter]
+        return GridPlugin(treestore[treeiter])
 
     @property
     def name(self):
-        return self._instance[self.TITLE]
+        return self._value[self.TITLE]
 
     @property
     def is_enable(self):
-        return self._instance[self.ACTIVE]
+        return self._value[self.ACTIVE]
 
     def toggle(self):
-        self._instance[self.ACTIVE] = not self._instance[self.ACTIVE]
+        self._value[self.ACTIVE] = not self._value[self.ACTIVE]
 
     @staticmethod
     def pixbuf(iconpath):

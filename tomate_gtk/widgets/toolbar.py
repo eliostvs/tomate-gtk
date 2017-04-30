@@ -4,10 +4,11 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from tomate.constant import State
-from tomate.event import Subscriber, Events, on
 from wiring import inject, SingletonScope
 from wiring.scanning import register
+
+from tomate.constant import State
+from tomate.event import Subscriber, Events, on
 
 locale.textdomain('tomate')
 
