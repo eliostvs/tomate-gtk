@@ -30,7 +30,7 @@ class PreferenceDialog(Gtk.Dialog):
 
         self.set_size_request(350, 200)
 
-        self.connect('response', self.on_dialog_response)
+        self.connect('response', lambda widget, response: widget.hide())
 
         stack = Gtk.Stack()
         stack.add_titled(self.duration, 'timer', _('Timer'))
@@ -47,18 +47,13 @@ class PreferenceDialog(Gtk.Dialog):
 
         separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
 
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
-        box.pack_start(switcher, True, True, 0)
-        box.pack_start(separator, True, True, 0)
-        box.pack_start(stack, True, True, 0)
-        box.show_all()
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        vbox.pack_start(switcher, True, True, 0)
+        vbox.pack_start(separator, True, True, 0)
+        vbox.pack_start(stack, True, True, 0)
+        vbox.show_all()
 
-        content_area = self.get_content_area()
-        content_area.add(box)
-
-    @staticmethod
-    def on_dialog_response(widget, parameter):
-        widget.hide()
+        self.get_content_area().add(vbox)
 
     def refresh_plugin(self):
         self.extension.refresh()
@@ -172,7 +167,7 @@ class ExtensionStack(Gtk.Box):
         self.plugin_settings_button.set_sensitive(False)
         self.plugin_settings_button.connect('clicked', self.on_plugin_settings_clicked)
 
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
 
         self.pack_start(self.tree_view, True, True, 0)
