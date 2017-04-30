@@ -172,8 +172,7 @@ class ExtensionStack(Gtk.Box):
         self.plugin_settings_button.set_sensitive(False)
         self.plugin_settings_button.connect('clicked', self.on_plugin_settings_clicked)
 
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,
-                       sensitive=False)
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
 
         self.pack_start(self.tree_view, True, True, 0)
@@ -188,7 +187,7 @@ class ExtensionStack(Gtk.Box):
             plugin = self.get_selected_plugin()
 
             if getattr(plugin.plugin_object, 'has_settings', False) is True:
-                logger.debug('Activating settings fro plugin %s', plugin.name)
+                logger.debug('Activating settings for plugin %s', plugin.name)
                 self.plugin_settings_button.set_sensitive(True)
             else:
                 self.plugin_settings_button.set_sensitive(False)

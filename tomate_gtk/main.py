@@ -5,8 +5,7 @@ import sys
 
 import gi
 
-gi.require_version('Gdk', '3.0')
-gi.require_version('Gtk', '3.0')
+gi.require_versions({'Gdk': '3.0', 'Gtk': '3.0'})
 
 import dbus.mainloop.glib
 import six

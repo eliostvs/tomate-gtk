@@ -6,7 +6,6 @@ import time
 from gi.repository import GdkPixbuf, Gtk
 from wiring import implements, inject, Graph, SingletonScope
 from wiring.scanning import register
-
 from tomate.constant import State
 from tomate.event import Subscriber, on, Events
 from tomate.view import UI, TrayIcon

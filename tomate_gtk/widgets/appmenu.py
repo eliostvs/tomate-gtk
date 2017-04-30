@@ -16,7 +16,7 @@ class Appmenu(Gtk.ToolItem):
         Gtk.ToolItem.__init__(self)
 
         button = Gtk.MenuButton(popup=menu.widget)
-        icon = Gtk.Image.new_from_stock('gtk-properties', Gtk.IconSize.LARGE_TOOLBAR)
+        icon = Gtk.Image.new_from_stock(Gtk.STOCK_PREFERENCES, Gtk.IconSize.LARGE_TOOLBAR)
         button.add(icon)
 
         self.add(button)
