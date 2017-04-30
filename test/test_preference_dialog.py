@@ -86,9 +86,8 @@ def test_show_plugin_settings(plugin_manager, config, lazy_proxy, plugin):
     extension_stack.plugin_settings_button.emit('clicked')
     refresh_gui(0)
 
-    plugin.settings_window.asser_caled_once_with(None)
-    plugin.settings_window.return_value.set_transient_for('widget')
-    plugin.settings_window.return_value.run.assert_called_once_with()
+    plugin.plugin_object.settings_window.return_value.set_transient_for('widget')
+    plugin.plugin_object.settings_window.return_value.run.assert_called_once_with()
 
 
 def setup_plugin_manager(plugin_manager, plugin):
