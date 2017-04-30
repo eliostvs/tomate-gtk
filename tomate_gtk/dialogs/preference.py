@@ -226,7 +226,7 @@ class ExtensionStack(Gtk.Box):
     def on_plugin_settings_clicked(self, _):
         plugin = self.get_selected_plugin()
 
-        widget = plugin.settings_window()
+        widget = plugin.plugin_object.settings_window()
         widget.set_transient_for(self.toplevel)
         widget.run()
 
