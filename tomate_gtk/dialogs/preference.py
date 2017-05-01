@@ -77,7 +77,7 @@ class TimerDurationStack(Gtk.Grid):
             row_spacing=6,
         )
 
-        section = self._add_section(_('Duration:'))
+        section = self._add_section(_('Duration'))
         self.attach(section, 0, 0, 1, 1)
 
         # Pomodoro Duration
