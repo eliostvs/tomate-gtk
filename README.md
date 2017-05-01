@@ -77,6 +77,7 @@ Change Logs
 ### 0.7.0
 
 - Using wiring.scanning
+- Show plugin settings
 
 ### 0.6.0
 
