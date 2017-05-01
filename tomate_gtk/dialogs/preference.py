@@ -4,7 +4,7 @@ import locale
 import logging
 from locale import gettext as _
 
-from gi.repository import GdkPixbuf, Gtk
+from gi.repository import GdkPixbuf, Gtk, Pango
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -144,17 +144,15 @@ class ExtensionStack(Gtk.Box):
                          margin_bottom=5,
                          margin_top=5)
 
-        self.tree_view = Gtk.TreeView(headers_visible=False)
-        self.tree_view.get_selection().connect('changed', self._on_tree_view_changed)
-        self.tree_view.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
-
         self._store = Gtk.ListStore(bool,  # active
                                     GdkPixbuf.Pixbuf,  # icon
                                     str,  # name
                                     str,  # detail
                                     object)  # plugin
 
-        self.tree_view.set_model(self._store)
+        self.tree_view = Gtk.TreeView(headers_visible=False, model=self._store)
+        self.tree_view.get_selection().connect('changed', self._on_tree_view_changed)
+        self.tree_view.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         renderer = Gtk.CellRendererToggle()
         renderer.connect('toggled', self._on_plugin_toggled)
@@ -165,7 +163,7 @@ class ExtensionStack(Gtk.Box):
         column = Gtk.TreeViewColumn('Icon', renderer, pixbuf=1)
         self.tree_view.append_column(column)
 
-        renderer = Gtk.CellRendererText()
+        renderer = Gtk.CellRendererText(wrap_mode=Pango.WrapMode.WORD, wrap_width=200)
         column = Gtk.TreeViewColumn('Detail', renderer, markup=3)
         self.tree_view.append_column(column)
 
