@@ -2,7 +2,7 @@ PACKAGE = tomate-gtk
 AUTHOR = eliostvs
 PACKAGE_ROOT = $(CURDIR)
 PACKAGE_DIR = tomate_gtk
-DOCKER_IMAGE_NAME= $(AUTHOR)/$(PACKAGE)
+DOCKER_IMAGE_NAME= $(AUTHOR)/tomate
 DATA_PATH = $(PACKAGE_ROOT)/data
 TOMATE_PATH = $(PACKAGE_ROOT)/tomate
 XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local/share:/usr/share
