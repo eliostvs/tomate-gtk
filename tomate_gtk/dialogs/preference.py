@@ -27,10 +27,8 @@ class PreferenceDialog(Gtk.Dialog):
             resizable=False,
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
-
-        self.set_size_request(350, 200)
-
         self.connect('response', lambda widget, response: widget.hide())
+        self.set_size_request(350, 200)
 
         stack = Gtk.Stack()
         stack.add_titled(self.duration.widget, 'timer', _('Timer'))
