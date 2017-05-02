@@ -4,12 +4,15 @@ import pytest
 from mock import Mock
 from util import refresh_gui
 from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
 
 from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
                                            TimerDurationStack)
 
 
-def test_preference_extension_module(graph, config):
+def test_preference_extension_module(graph, config, plugin_manager, lazy_proxy):
+    scan_to_graph(['tomate_gtk.dialogs.preference'], graph)
+
     assert 'view.preference.extension' in graph.providers
 
     provider = graph.providers['view.preference.extension']
@@ -18,7 +21,9 @@ def test_preference_extension_module(graph, config):
     assert isinstance(graph.get('view.preference.extension'), ExtensionStack)
 
 
-def test_preference_duration_module(graph):
+def test_preference_duration_module(graph, config):
+    scan_to_graph(['tomate_gtk.dialogs.preference'], graph)
+
     assert 'view.preference.duration' in graph.providers
 
     provider = graph.providers['view.preference.duration']
@@ -28,6 +33,8 @@ def test_preference_duration_module(graph):
 
 
 def test_preference_module(graph, config):
+    scan_to_graph(['tomate_gtk.dialogs.preference'], graph)
+
     assert 'view.preference' in graph.providers
 
     provider = graph.providers['view.preference']

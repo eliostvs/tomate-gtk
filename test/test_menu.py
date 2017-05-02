@@ -4,12 +4,13 @@ from locale import gettext as _
 
 import pytest
 from mock import Mock, patch
+from util import refresh_gui
+from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
+
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from wiring import SingletonScope
-
 from tomate_gtk.widgets.menu import TrayIconMenu, Menu
-from util import refresh_gui
 
 
 @pytest.fixture
@@ -163,7 +164,12 @@ class TestTrayIconMenu(object):
         assert len(result) == 0
 
 
-def test_menu_module(graph):
+def test_menu_module(graph, config, lazy_proxy):
+    graph.register_instance('view.about', Mock())
+    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('view.preference', Mock())
+    scan_to_graph(['tomate_gtk.widgets.menu'], graph)
+
     assert 'view.menu' in graph.providers
 
     provider = graph.providers['view.menu']
@@ -178,6 +184,8 @@ def test_menu_module(graph):
 
 
 def test_trayicon_module(graph):
+    scan_to_graph(['tomate_gtk.widgets.menu'], graph)
+
     assert 'trayicon.menu' in graph.providers
 
     provider = graph.providers['view.menu']

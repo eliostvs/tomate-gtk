@@ -3,12 +3,15 @@ from __future__ import unicode_literals
 from gi.repository import Gtk
 from mock import Mock
 from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
 
 from tomate_gtk.widgets.appmenu import Appmenu
 from tomate_gtk.widgets.toolbar import Toolbar
 
 
 def test_toolbar_module(graph):
+    scan_to_graph(['tomate_gtk.widgets.toolbar'], graph)
+
     assert 'view.toolbar' in graph.providers
 
     graph.register_instance('tomate.menu', Gtk.Menu())

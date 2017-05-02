@@ -4,10 +4,11 @@ import logging
 from locale import gettext as _
 
 from gi.repository import Gtk
-from tomate.constant import State
-from tomate.event import on, Events
 from wiring import inject, SingletonScope
 from wiring.scanning import register
+
+from tomate.constant import State
+from tomate.event import on, Events
 
 logger = logging.getLogger(__name__)
 

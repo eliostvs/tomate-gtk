@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 import pytest
 from mock import Mock, patch
+from wiring import Graph, SingletonScope
+from wiring.scanning import scan_to_graph
+
 from tomate.constant import State
 from tomate.view import UI, TrayIcon
-from wiring import Graph, SingletonScope
 
 
 @pytest.fixture()
@@ -22,7 +24,9 @@ def gtkui(Gtk, GdkPixBuf):
                  taskbutton=Mock())
 
 
-def test_module(graph):
+def test_view_module(graph):
+    scan_to_graph(['tomate_gtk.view'], graph)
+
     assert 'tomate.view' in graph.providers
 
     provider = graph.providers['tomate.view']

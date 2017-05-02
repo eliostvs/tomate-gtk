@@ -15,7 +15,7 @@ Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 Installation
 ------------
 
-### Ubuntu 14.04+
+### Ubuntu 16.04+
 
 If you have installed the program using the **old ppa repository** uninstall the old version first.
 
@@ -31,13 +31,13 @@ If you have installed the program using the **old ppa repository** uninstall the
     sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
     sudo apt-get update && sudo apt-get install tomate-gtk
 
-### Opensuse 13.2+
+### Opensuse 42.2+
 
     RELEASE=`cat /etc/SuSE-release | sed -n "s/VERSION = \(.*\)$/\1/p"` # If you use tumbleweed release is Tumbleweed
     sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_$RELEASE/home:eliostvs:tomate.repo
     sudo zypper install tomate-gtk
 
-### Fedora 22+
+### Fedora 24+
 
     RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
     sudo yum config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
@@ -64,7 +64,7 @@ For example `sudo apt-get install tomate-indicator-plugin` will install the indi
 - [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the indicator area **when the timer is running** (requires libappindicator).
 - [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the status area **when the timer is running**.
 - [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
-
+- [Exec plugin (tomate-exec-plugin)][exec-plugin] Run commands when the timer starts, stops or finishes.
 
 Bugs and Suggestions
 -------------------
@@ -78,6 +78,7 @@ Change Logs
 
 - Using wiring.scanning
 - Show plugin settings
+- Python 3 only
 
 ### 0.6.0
 
@@ -115,4 +116,5 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 [indicator-plugin]: https://github.com/eliostvs/tomate-indicator-plugin
 [statusicon-plugin]: https://github.com/eliostvs/tomate-statusicon-plugin
 [launcher-plugin]: https://github.com/eliostvs/tomate-launcher-plugin
+[exec-plugin]: https://github.com/eliostvs/tomate-exec-plugin
 [bugs]: https://github.com/eliostvs/tomate-gtk/issues

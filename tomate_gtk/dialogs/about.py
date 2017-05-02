@@ -25,9 +25,4 @@ class AboutDialog(Gtk.AboutDialog):
         )
 
         self.set_property('authors', ['Elio Esteves Duarte', ])
-
-        self.connect("response", self.on_dialog_response)
-
-    @staticmethod
-    def on_dialog_response(widget, parameter):
-        widget.hide()
+        self.connect("response", lambda widget, _: widget.hide())

@@ -9,6 +9,7 @@ XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local
 PYTHONPATH=PYTHONPATH=$(TOMATE_PATH):$(PACKAGE_ROOT)
 PROJECT = home:eliostvs:tomate
 OBS_API_URL = https://api.opensuse.org:443/trigger/runservice?project=$(PROJECT)&package=$(PACKAGE)
+DEBUG = TOMATE_DEBUG=true
 WORK_DIR=/code
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
@@ -28,7 +29,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) $(TEST_PREFIX) pytest -v --cov=$(PACKAGE_DIR)
+	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest -v --cov=$(PACKAGE_DIR)
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
