@@ -42,7 +42,7 @@ setup(
     include_package_data=True,
     keywords='pomodoro,tomate',
     license='GPL-3',
-    long_description=open('README.md').read(),
+    long_description=open('README.md', 'r', 'utf-8').read(),
     name='tomate-gtk',
     packages=find_packages(exclude=['tomate', 'tests']),
     data_files=find_data_files(DATA_FILES, 'tomate-gtk'),
