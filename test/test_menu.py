@@ -40,7 +40,7 @@ def proxy(view):
 def menu(proxy, about, preference):
     from tomate_gtk.widgets.menu import Menu
 
-    Events['View'].receivers.clear()
+    Events.View.receivers.clear()
 
     return Menu(about, preference, proxy)
 
@@ -49,7 +49,7 @@ def menu(proxy, about, preference):
 def trayicon_menu(view):
     from tomate_gtk.widgets.menu import TrayIconMenu
 
-    Events['View'].receivers.clear()
+    Events.View.receivers.clear()
 
     return TrayIconMenu(view)
 
@@ -136,7 +136,7 @@ class TestTrayIconMenu(object):
     def test_should_call_activate_hide_item_when_view_shows(self, trayicon_menu):
         connect_events(trayicon_menu)
 
-        result = Events['View'].send(State.showed)
+        result = Events.View.send(State.showed)
 
         assert len(result) == 1
         assert trayicon_menu.activate_hide_item == method_called(result)
@@ -144,22 +144,22 @@ class TestTrayIconMenu(object):
     def test_should_call_activate_show_item_view_hides(self, trayicon_menu):
         connect_events(trayicon_menu)
 
-        result = Events['View'].send(State.hid)
+        result = Events.View.send(State.hid)
 
         assert len(result) == 1
         assert trayicon_menu.activate_show_item == method_called(result)
 
     def test_should_not_call_menu_after_deactivate(self, trayicon_menu):
-        assert len(Events['View'].receivers) == 0
-        Events['View'].receivers.clear()
+        assert len(Events.View.receivers) == 0
+        Events.View.receivers.clear()
 
         connect_events(trayicon_menu)
 
-        assert len(Events['View'].receivers) == 2
+        assert len(Events.View.receivers) == 2
 
         disconnect_events(trayicon_menu)
 
-        result = Events['View'].send(State.hid)
+        result = Events.View.send(State.hid)
 
         assert len(result) == 0
 
