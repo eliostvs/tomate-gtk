@@ -47,7 +47,7 @@ setup(
     packages=find_packages(exclude=['tomate', 'tests']),
     data_files=find_data_files(DATA_FILES, 'tomate-gtk'),
     url='https://github.com/eliostvs/tomate-gtk',
-    version='0.6.0',
+    version='0.7.0',
     zip_safe=False,
     entry_points={
         'console_scripts': [
