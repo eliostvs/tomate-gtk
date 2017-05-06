@@ -31,19 +31,13 @@ If you have installed the program using the **old ppa repository** uninstall the
     sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
     sudo apt-get update && sudo apt-get install tomate-gtk
 
-### Opensuse 42.2+
+### Opensuse Tumbleweed
 
     RELEASE=`cat /etc/SuSE-release | sed -n "s/VERSION = \(.*\)$/\1/p"` # If you use tumbleweed release is Tumbleweed
     sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_$RELEASE/home:eliostvs:tomate.repo
     sudo zypper install tomate-gtk
 
 ### Fedora 24+
-
-    RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
-    sudo yum config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
-    sudo yum install tomate-gtk
-
-or
 
     RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
     sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
