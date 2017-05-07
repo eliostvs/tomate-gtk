@@ -33,8 +33,7 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 ### Opensuse Tumbleweed
 
-    RELEASE=`cat /etc/SuSE-release | sed -n "s/VERSION = \(.*\)$/\1/p"` # If you use tumbleweed release is Tumbleweed
-    sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_$RELEASE/home:eliostvs:tomate.repo
+    sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_Tumbleweed/home:eliostvs:tomate.repo
     sudo zypper install tomate-gtk
 
 ### Fedora 24+
