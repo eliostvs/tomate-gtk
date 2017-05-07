@@ -45,7 +45,11 @@ class PreferenceDialog(Gtk.Dialog):
 
         separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
+                       spacing=5,
+                       margin_bottom=4,
+                       margin_left=6,
+                       margin_right=6)
         vbox.pack_start(switcher, True, True, 0)
         vbox.pack_start(separator, True, True, 0)
         vbox.pack_start(stack, True, True, 0)
