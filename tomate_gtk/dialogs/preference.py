@@ -178,8 +178,11 @@ class ExtensionStack(Gtk.Box):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
 
+        frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN)
+        frame.add(hbox)
+
         self.pack_start(scrolledwindow, True, True, 0)
-        self.pack_start(hbox, False, True, 0)
+        self.pack_start(frame, False, True, 0)
 
         self.show_all()
 
