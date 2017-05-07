@@ -40,16 +40,15 @@ class PreferenceDialog(Gtk.Dialog):
                                      halign=Gtk.Align.CENTER)
         switcher.set_stack(stack)
 
-        separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,
                        spacing=5,
                        margin_bottom=4,
                        margin_left=6,
                        margin_right=6)
         vbox.pack_start(switcher, True, True, 0)
-        vbox.pack_start(separator, True, True, 0)
+        vbox.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), True, True, 0)
         vbox.pack_start(stack, True, True, 0)
+        vbox.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), True, True, 0)
         vbox.show_all()
 
         self.get_content_area().add(vbox)
@@ -178,11 +177,8 @@ class ExtensionStack(Gtk.Box):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
 
-        frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN)
-        frame.add(hbox)
-
         self.pack_start(scrolledwindow, True, True, 0)
-        self.pack_start(frame, False, True, 0)
+        self.pack_start(hbox, False, True, 0)
 
         self.show_all()
 
