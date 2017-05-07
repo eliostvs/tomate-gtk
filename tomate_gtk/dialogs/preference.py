@@ -33,10 +33,7 @@ class PreferenceDialog(Gtk.Dialog):
         stack = Gtk.Stack()
         stack.add_titled(self.duration.widget, 'timer', _('Timer'))
 
-        scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
-        scrolledwindow.add_with_viewport(self.extension.widget)
-
-        stack.add_titled(scrolledwindow, 'extension', _('Extensions'))
+        stack.add_titled(self.extension.widget, 'extension', _('Extensions'))
 
         switcher = Gtk.StackSwitcher(margin_top=5,
                                      margin_bottom=5,
@@ -175,10 +172,13 @@ class ExtensionStack(Gtk.Box):
         self.plugin_settings_button.set_sensitive(False)
         self.plugin_settings_button.connect('clicked', self._on_plugin_settings_clicked)
 
+        scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
+        scrolledwindow.add_with_viewport(self.tree_view)
+
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)
 
-        self.pack_start(self.tree_view, True, True, 0)
+        self.pack_start(scrolledwindow, True, True, 0)
         self.pack_start(hbox, False, True, 0)
 
         self.show_all()
