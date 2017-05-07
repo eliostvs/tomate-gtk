@@ -22,7 +22,7 @@ class PreferenceDialog(Gtk.Dialog):
         Gtk.Dialog.__init__(
             self,
             _('Preferences'),
-            None,
+            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
             modal=True,
             resizable=False,
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
