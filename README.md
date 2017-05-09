@@ -70,7 +70,7 @@ Change Logs
 ### 0.7.0
 
 - Using wiring.scanning
-- Show plugin settings
+- Add plugin settings
 - Python 3 only
 
 ### 0.6.0
