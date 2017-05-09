@@ -1,20 +1,18 @@
 from __future__ import unicode_literals
 
-from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope
+from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
 
-from tomate_gtk.widgets.timerframe import TimerFrame, TimerFrameModule
+from tomate_gtk.widgets.timerframe import TimerFrame
 
 
-def test_timeframe_module():
+def test_timerframe_module(graph):
+    scan_to_graph(['tomate_gtk.widgets.timerframe'], graph)
 
-    TimerFrameModule.providers.keys() == ['view.timerframe']
-
-    TimerFrameModule().add_to(graph)
+    assert 'view.timerframe' in graph.providers
 
     provider = graph.providers['view.timerframe']
 
-    assert isinstance(provider, FactoryProvider)
-    assert SingletonScope == provider.scope
-    assert provider.dependencies == {}
+    assert provider.scope == SingletonScope
+
     assert isinstance(graph.get('view.timerframe'), TimerFrame)

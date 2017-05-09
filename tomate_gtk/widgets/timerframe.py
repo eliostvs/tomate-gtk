@@ -3,17 +3,20 @@ from __future__ import unicode_literals
 import logging
 
 from gi.repository import Gtk
-from wiring import Module, SingletonScope
-
 from tomate.constant import State
 from tomate.event import Subscriber, Events, on
 from tomate.utils import format_time_left
+from wiring import SingletonScope
+from wiring.scanning import register
+
+DEFAULT_SESSIONS = 0
+DEFAULT_TIME_LEFT = 25 * 60
 
 logger = logging.getLogger(__name__)
 
 
+@register.factory('view.timerframe', scope=SingletonScope)
 class TimerFrame(Subscriber):
-
     def __init__(self):
         self.widget = Gtk.Frame(
             margin_bottom=2,
@@ -43,26 +46,25 @@ class TimerFrame(Subscriber):
     @on(Events.Timer, [State.changed])
     @on(Events.Session, [State.stopped, State.changed])
     def update_timer(self, sender=None, **kwargs):
-        time_left = format_time_left(kwargs.get('time_left', 25 * 60))
+        time_left = kwargs.get('time_left', DEFAULT_TIME_LEFT)
 
-        markup = '<span font="60">{}</span>'.format(time_left)
-        self.timer_label.set_markup(markup)
+        self.timer_label.set_markup(self._time_left_markup(time_left))
 
         logger.debug('timer label update %s', time_left)
 
     @on(Events.Session, [State.changed, State.finished])
     def update_session(self, *args, **kwargs):
-        sessions = kwargs.get('sessions', 0)
+        sessions = kwargs.get('sessions', DEFAULT_SESSIONS)
 
-        markup = ('<span font="12">{0} pomodoros</span>'
-                  .format(sessions))
-
-        self.sessions_label.set_markup(markup)
+        self.sessions_label.set_markup(self._sessions_markup(sessions))
 
         logger.debug('session label update %s', sessions)
 
+    @staticmethod
+    def _time_left_markup(time_left):
+        markup = '<span font="60">{}</span>'.format(format_time_left(time_left))
+        return markup
 
-class TimerFrameModule(Module):
-    factories = {
-        'view.timerframe': (TimerFrame, SingletonScope)
-    }
+    @staticmethod
+    def _sessions_markup(sessions):
+        return '<span font="12">{0} pomodoros</span>'.format(sessions)

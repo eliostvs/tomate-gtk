@@ -2,7 +2,6 @@ from gi.repository import GObject, Gtk
 
 
 class ModeButtonItem(Gtk.ToggleButton):
-
     def __init__(self, index):
         Gtk.ToggleButton.__init__(self, can_focus=False)
 
@@ -10,7 +9,6 @@ class ModeButtonItem(Gtk.ToggleButton):
 
 
 class ModeButton(Gtk.Box):
-
     __gsignals__ = {
         'mode_changed': (GObject.SIGNAL_RUN_FIRST, None, (int,))
     }

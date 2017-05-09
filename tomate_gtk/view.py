@@ -4,30 +4,31 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
+from wiring import implements, inject, Graph, SingletonScope
+from wiring.scanning import register
 from tomate.constant import State
 from tomate.event import Subscriber, on, Events
 from tomate.view import UI, TrayIcon
-from wiring import implements, inject, Module, SingletonScope, Graph
 
 logger = logging.getLogger(__name__)
 
 
+@register.factory('tomate.view', scope=SingletonScope)
 @implements(UI)
 class GtkUI(Subscriber):
-
     @inject(
         session='tomate.session',
-        events='tomate.events',
+        event='tomate.events.view',
         config='tomate.config',
         graph=Graph,
         toolbar='view.toolbar',
         timerframe='view.timerframe',
         taskbutton='view.taskbutton',
     )
-    def __init__(self, session, events, config, graph, toolbar, timerframe, taskbutton):
+    def __init__(self, session, event, config, graph, toolbar, timerframe, taskbutton):
         self.config = config
         self.session = session
-        self.event = events.View
+        self.event = event
         self.graph = graph
 
         self.window = self._build_window(taskbutton, timerframe, toolbar)
@@ -37,10 +38,10 @@ class GtkUI(Subscriber):
 
     def _build_window(self, taskbutton, timerframe, toolbar):
         window = Gtk.Window(
-                title='Tomate',
-                icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
-                window_position=Gtk.WindowPosition.CENTER,
-                resizable=False)
+            title='Tomate',
+            icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
+            window_position=Gtk.WindowPosition.CENTER,
+            resizable=False)
 
         window.set_size_request(350, -1)
 
@@ -92,9 +93,3 @@ class GtkUI(Subscriber):
     @property
     def widget(self):
         return self.window
-
-
-class ViewModule(Module):
-    factories = {
-        'tomate.view': (GtkUI, SingletonScope)
-    }

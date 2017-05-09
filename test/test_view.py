@@ -2,9 +2,11 @@ from __future__ import unicode_literals
 
 import pytest
 from mock import Mock, patch
+from wiring import Graph, SingletonScope
+from wiring.scanning import scan_to_graph
+
 from tomate.constant import State
 from tomate.view import UI, TrayIcon
-from wiring import FactoryProvider, SingletonScope, Graph
 
 
 @pytest.fixture()
@@ -14,7 +16,7 @@ def gtkui(Gtk, GdkPixBuf):
     from tomate_gtk.view import GtkUI
 
     return GtkUI(session=Mock(),
-                 events=Mock(),
+                 event=Mock(),
                  config=Mock(),
                  graph=Mock(),
                  toolbar=Mock(),
@@ -22,20 +24,17 @@ def gtkui(Gtk, GdkPixBuf):
                  taskbutton=Mock())
 
 
-def test_module():
-    from tomate_gtk.view import ViewModule
+def test_view_module(graph):
+    scan_to_graph(['tomate_gtk.view'], graph)
 
-    assert list(ViewModule.providers.keys()) == ['tomate.view']
+    assert 'tomate.view' in graph.providers
 
-    graph = Graph()
-    ViewModule().add_to(graph)
     provider = graph.providers['tomate.view']
 
-    assert isinstance(provider, FactoryProvider)
-    assert SingletonScope == provider.scope
+    assert provider.scope == SingletonScope
 
     dependencies = dict(session='tomate.session',
-                        events='tomate.events',
+                        event='tomate.events.view',
                         config='tomate.config',
                         graph=Graph,
                         toolbar='view.toolbar',

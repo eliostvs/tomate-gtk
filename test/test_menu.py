@@ -4,12 +4,13 @@ from locale import gettext as _
 
 import pytest
 from mock import Mock, patch
+from util import refresh_gui
+from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
+
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from wiring import FactoryProvider, Graph, SingletonScope
-
-from tomate_gtk.widgets import MenuModule
-from util import refresh_gui
+from tomate_gtk.widgets.menu import TrayIconMenu, Menu
 
 
 @pytest.fixture
@@ -58,7 +59,6 @@ def method_called(result):
 
 
 class TestMenu(object):
-
     @patch('tomate_gtk.widgets.menu.Gtk')
     def test_should_create_preference_item(self, Gtk):
         from tomate_gtk.widgets.menu import Menu
@@ -72,7 +72,7 @@ class TestMenu(object):
         refresh_gui()
 
         preference.set_transient_for.assert_called_once_with(view.widget)
-        preference.refresh_plugin.assert_called_once_with()
+        preference.refresh_plugins.assert_called_once_with()
         preference.run.assert_called_once_with()
 
     @patch('tomate_gtk.widgets.menu.Gtk')
@@ -92,7 +92,6 @@ class TestMenu(object):
 
 
 class TestTrayIconMenu(object):
-
     @patch('tomate_gtk.widgets.menu.Gtk')
     def test_should_create_show_item(self, Gtk):
         from tomate_gtk.widgets.menu import TrayIconMenu
@@ -165,24 +164,33 @@ class TestTrayIconMenu(object):
         assert len(result) == 0
 
 
-def test_menu_module():
-    from tomate_gtk.widgets.menu import TrayIconMenu
+def test_menu_module(graph, config, lazy_proxy):
+    graph.register_instance('view.about', Mock())
+    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('view.preference', Mock())
+    scan_to_graph(['tomate_gtk.widgets.menu'], graph)
 
-    assert sorted(MenuModule.providers.keys()) == sorted(['view.menu', 'trayicon.menu'])
-
-    graph = Graph()
-    MenuModule().add_to(graph)
+    assert 'view.menu' in graph.providers
 
     provider = graph.providers['view.menu']
 
-    assert 'view.menu' in graph.providers.keys()
-
-    assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
 
-    assert provider.dependencies == {'lazy_proxy': 'tomate.proxy',
-                                     'about': 'view.about',
-                                     'preference': 'view.preference'}
+    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('view.preference', Mock())
+    graph.register_instance('tomate.proxy', Mock())
+
+    assert isinstance(graph.get('view.menu'), Menu)
+
+
+def test_trayicon_module(graph):
+    scan_to_graph(['tomate_gtk.widgets.menu'], graph)
+
+    assert 'trayicon.menu' in graph.providers
+
+    provider = graph.providers['view.menu']
+
+    assert provider.scope == SingletonScope
 
     graph.register_instance('tomate.view', Mock())
 

@@ -4,7 +4,8 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from wiring import inject, Module, SingletonScope
+from wiring import inject, SingletonScope
+from wiring.scanning import register
 
 from tomate.constant import State
 from tomate.event import Subscriber, Events, on
@@ -12,8 +13,8 @@ from tomate.event import Subscriber, Events, on
 locale.textdomain('tomate')
 
 
+@register.factory('view.toolbar', scope=SingletonScope)
 class Toolbar(Subscriber):
-
     @inject(session='tomate.session', appmenu='view.appmenu')
     def __init__(self, session, appmenu):
         self.session = session
@@ -81,9 +82,3 @@ class Toolbar(Subscriber):
     @on(Events.Session, [State.started, State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)
-
-
-class ToolbarModule(Module):
-    factories = {
-        'view.toolbar': (Toolbar, SingletonScope)
-    }

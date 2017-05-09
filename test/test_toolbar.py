@@ -2,33 +2,24 @@ from __future__ import unicode_literals
 
 from gi.repository import Gtk
 from mock import Mock
-from tomate.graph import graph
-from wiring import FactoryProvider, SingletonScope
+from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
 
 from tomate_gtk.widgets.appmenu import Appmenu
-from tomate_gtk.widgets.toolbar import Toolbar, ToolbarModule
+from tomate_gtk.widgets.toolbar import Toolbar
 
 
-def setup_module():
+def test_toolbar_module(graph):
+    scan_to_graph(['tomate_gtk.widgets.toolbar'], graph)
+
+    assert 'view.toolbar' in graph.providers
+
     graph.register_instance('tomate.menu', Gtk.Menu())
     graph.register_instance('view.menu', Mock(widget=Gtk.Menu()))
     graph.register_instance('tomate.session', Mock())
     graph.register_factory('view.appmenu', Appmenu)
 
-    ToolbarModule().add_to(graph)
-
-
-def test_toolbar_module():
-    assert list(ToolbarModule.providers.keys()) == ['view.toolbar']
-
     provider = graph.providers['view.toolbar']
-
-    assert isinstance(provider, FactoryProvider)
     assert provider.scope == SingletonScope
 
-    assert provider.dependencies == {'session': 'tomate.session',
-                                     'appmenu': 'view.appmenu'}
-
-    toolbar = graph.get('view.toolbar')
-
-    assert isinstance(toolbar, Toolbar)
+    assert isinstance(graph.get('view.toolbar'), Toolbar)
