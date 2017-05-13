@@ -2,12 +2,23 @@ from __future__ import unicode_literals
 
 import pytest
 from conftest import refresh_gui
+from gi.repository import Gtk
 from mock import Mock
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
                                            TimerDurationStack)
+
+
+@pytest.fixture
+def extension_mock():
+    return Mock(widget=Gtk.Button())
+
+
+@pytest.fixture
+def preference(extension_mock):
+    return PreferenceDialog(Mock(widget=Gtk.Button()), extension_mock)
 
 
 def test_preference_extension_module(graph, config, plugin_manager, lazy_proxy):
@@ -100,3 +111,13 @@ def test_show_plugin_settings(plugin_manager, config, lazy_proxy, plugin):
 def setup_plugin_manager(plugin_manager, plugin):
     plugin_manager.getAllPlugins.return_value = [plugin, ]
     plugin_manager.getPluginByName.side_effect = lambda name: plugin if name == plugin.name else None
+
+
+def test_preference_widget(preference):
+    assert preference.widget is preference
+
+
+def test_refresh_plugins(preference, extension_mock):
+    preference.refresh_plugins()
+
+    extension_mock.refresh.assert_called_once_with()

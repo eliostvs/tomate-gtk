@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import locale
 import logging
 from locale import gettext as _
@@ -24,10 +22,10 @@ class TaskButton(Subscriber):
         self.modebutton = ModeButton(
             can_focus=False,
             homogeneous=True,
-            margin_bottom=12,
+            margin_bottom=16,
             margin_left=12,
             margin_right=12,
-            margin_top=4,
+            margin_top=6,
             spacing=0,
         )
 
@@ -54,7 +52,7 @@ class TaskButton(Subscriber):
     def disable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(False)
 
-    @on(Events.Session, [State.stopped, State.stopped])
+    @on(Events.Session, [State.finished, State.stopped])
     def enable(self, sender=None, **kwargs):
         self.modebutton.set_sensitive(True)
 

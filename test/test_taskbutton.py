@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from mock import Mock
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
