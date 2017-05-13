@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import pytest
-from mock import Mock, patch
 from wiring import Graph, SingletonScope
 from wiring.scanning import scan_to_graph
 
@@ -9,19 +8,21 @@ from tomate.constant import State
 from tomate.view import UI, TrayIcon
 
 
-@pytest.fixture()
-@patch('tomate_gtk.view.Gtk')
-@patch('tomate_gtk.view.GdkPixbuf')
-def gtkui(Gtk, GdkPixBuf):
+@pytest.fixture
+def gtkui(mocker):
+    mocker.patch('tomate_gtk.view.Gtk')
+    mocker.patch('tomate_gtk.view.GdkPixbuf')
+
     from tomate_gtk.view import GtkUI
 
-    return GtkUI(session=Mock(),
-                 event=Mock(),
-                 config=Mock(),
-                 graph=Mock(),
-                 toolbar=Mock(),
-                 timerframe=Mock(),
-                 taskbutton=Mock())
+    return GtkUI(session=mocker.Mock(),
+                 event=mocker.Mock(),
+                 config=mocker.Mock(),
+                 graph=mocker.Mock(),
+                 toolbar=mocker.Mock(),
+                 timerframe=mocker.Mock(),
+                 taskbutton=mocker.Mock(),
+                 infobar=mocker.Mock())
 
 
 def test_view_module(graph):
@@ -39,24 +40,27 @@ def test_view_module(graph):
                         graph=Graph,
                         toolbar='view.toolbar',
                         timerframe='view.timerframe',
-                        taskbutton='view.taskbutton')
+                        taskbutton='view.taskbutton',
+                        infobar='view.infobar')
 
     assert provider.dependencies == dependencies
 
 
-@patch('tomate_gtk.view.Gtk')
-def test_should_call_gtk_main(Gtk, gtkui):
+def test_should_call_gtk_main(mocker, gtkui):
+    gtk = mocker.patch('tomate_gtk.view.Gtk')
+
     gtkui.run()
 
-    Gtk.main.assert_called_once_with()
+    gtk.main.assert_called_once_with()
 
 
-@patch('tomate_gtk.view.Gtk')
-def test_should_quit_when_timer_is_not_running(Gtk, gtkui):
+def test_should_quit_when_timer_is_not_running(mocker, gtkui):
+    gtk = mocker.patch('tomate_gtk.view.Gtk')
+
     gtkui.session.is_running.return_value = False
     gtkui.quit()
 
-    Gtk.main_quit.assert_called_once_with()
+    gtk.main_quit.assert_called_once_with()
 
 
 def test_should_minimize_when_timer_is_running_and_trayicon_is_not_in_providers(gtkui):
@@ -81,3 +85,10 @@ def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(gtkui):
 
 def test_interface_compliance(gtkui):
     UI.check_compliance(gtkui)
+
+
+def test_should_should_window(gtkui, mocker):
+    gtkui.show()
+
+    gtkui.event.send.assert_called_once_with(State.showed)
+    gtkui.window.present_with_time_once(mocker.ANY)

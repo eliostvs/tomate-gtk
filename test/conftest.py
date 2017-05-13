@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
 
 import os
+import time
 
 import pytest
+from gi.repository import Gtk
 from mock import Mock
 
 
@@ -37,3 +39,9 @@ def lazy_proxy(graph):
     mock_proxy = Mock()
     graph.register_instance('tomate.proxy', mock_proxy)
     return mock_proxy
+
+
+def refresh_gui(delay=0):
+    while Gtk.events_pending():
+        Gtk.main_iteration_do(False)
+    time.sleep(delay)

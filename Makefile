@@ -25,7 +25,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest -v --cov=$(PACKAGE_DIR)
+	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest $(file) -v --cov=$(PACKAGE_DIR)
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \

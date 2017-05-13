@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
 import pytest
+from conftest import refresh_gui
 from mock import Mock
-from util import refresh_gui
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
