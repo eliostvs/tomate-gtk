@@ -1,9 +1,6 @@
-from __future__ import unicode_literals
-
 import pytest
 from conftest import refresh_gui
 from gi.repository import Gtk
-from mock import Mock
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
@@ -12,13 +9,13 @@ from tomate_gtk.dialogs.preference import (ExtensionStack, PreferenceDialog,
 
 
 @pytest.fixture
-def extension_mock():
-    return Mock(widget=Gtk.Button())
+def extension_mock(mocker):
+    return mocker.Mock(widget=Gtk.Button())
 
 
 @pytest.fixture
-def preference(extension_mock):
-    return PreferenceDialog(Mock(widget=Gtk.Button()), extension_mock)
+def preference(extension_mock, mocker):
+    return PreferenceDialog(mocker.Mock(widget=Gtk.Button()), extension_mock)
 
 
 def test_preference_extension_module(graph, config, plugin_manager, lazy_proxy):
@@ -43,7 +40,7 @@ def test_preference_duration_module(graph, config):
     assert isinstance(graph.get('view.preference.duration'), TimerDurationStack)
 
 
-def test_preference_module(graph, config):
+def test_preference_module(graph, config, mocker):
     scan_to_graph(['tomate_gtk.dialogs.preference'], graph)
 
     assert 'view.preference' in graph.providers
@@ -53,8 +50,8 @@ def test_preference_module(graph, config):
     assert provider.scope == SingletonScope
 
     graph.register_instance('tomate.config', config)
-    graph.register_factory('tomate.plugin', Mock)
-    graph.register_factory('tomate.proxy', Mock)
+    graph.register_factory('tomate.plugin', mocker.Mock)
+    graph.register_factory('tomate.proxy', mocker.Mock)
     graph.register_factory('view.preference.extension', ExtensionStack)
     graph.register_factory('view.preference.duration', TimerDurationStack)
 
@@ -62,8 +59,8 @@ def test_preference_module(graph, config):
 
 
 @pytest.fixture
-def plugin():
-    plug = Mock(version='1.1.1', description='description')
+def plugin(mocker):
+    plug = mocker.Mock(version='1.1.1', description='description')
     plug.name = 'plugin'
     return plug
 
@@ -92,11 +89,11 @@ def test_activate_plugin_settings_button_when_plugin_has_settings(plugin_manager
     assert extension_stack.plugin_settings_button.get_sensitive() is True
 
 
-def test_show_plugin_settings(plugin_manager, config, lazy_proxy, plugin):
+def test_show_plugin_settings(plugin_manager, config, lazy_proxy, plugin, mocker):
     plugin.plugin_object.is_activated = True
     plugin.has_settings = True
     setup_plugin_manager(plugin_manager, plugin)
-    view = Mock(widget='widget')
+    view = mocker.Mock(widget='widget')
     lazy_proxy.side_effect = lambda name: view if name == 'view.preference' else None
 
     extension_stack = ExtensionStack(plugin_manager, config, lazy_proxy)
