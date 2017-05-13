@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @register.factory('view.taskbutton', scope=SingletonScope)
 class TaskButton(Subscriber):
     @inject(session='tomate.session')
-    def __init__(self, session=None):
+    def __init__(self, session):
         self.session = session
 
         self.modebutton = ModeButton(
@@ -32,7 +32,7 @@ class TaskButton(Subscriber):
         self.modebutton.append_text(_('Pomodoro'))
         self.modebutton.append_text(_('Short Break'))
         self.modebutton.append_text(_('Long Break'))
-        self.modebutton.set_selected(0)
+        self.modebutton.set_selected(Task.pomodoro)
 
         self.modebutton.connect('mode_changed', self.on_mode_changed)
 
