@@ -62,7 +62,7 @@ class PreferenceDialog(Gtk.Dialog):
 
 
 @register.factory('view.preference.duration', scope=SingletonScope)
-class TimerDurationStack(Gtk.Grid):
+class TimerStack(Gtk.Grid):
     @inject(config='tomate.config')
     def __init__(self, config):
         self.config = config
@@ -117,6 +117,8 @@ class TimerDurationStack(Gtk.Grid):
         spinbutton.set_halign(Gtk.Align.START)
         spinbutton.set_value(self.config.get_int('Timer', option))
         spinbutton.connect('value-changed', self._on_spinbutton_value_changed, option)
+
+        setattr(self, option, spinbutton)
 
         return label, spinbutton
 
