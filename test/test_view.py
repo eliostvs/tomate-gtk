@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import pytest
+from gi.repository import Gtk
 from wiring import Graph, SingletonScope
 from wiring.scanning import scan_to_graph
 
@@ -85,6 +86,12 @@ def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(gtkui):
 
 def test_interface_compliance(gtkui):
     UI.check_compliance(gtkui)
+
+
+def test_show_message(gtkui):
+    gtkui.show_message('message', Gtk.MessageType.INFO)
+
+    gtkui.infobar.show_message.assert_called_with('message', Gtk.MessageType.INFO)
 
 
 def test_should_should_window(gtkui, mocker):

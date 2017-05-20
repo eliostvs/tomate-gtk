@@ -31,6 +31,7 @@ class GtkUI(Subscriber):
         self.session = session
         self.event = event
         self.graph = graph
+        self.infobar = infobar.widget
 
         self.window = Gtk.Window(
             title='Tomate',
@@ -42,7 +43,7 @@ class GtkUI(Subscriber):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
-        box.pack_start(infobar.widget, False, False, 0)
+        box.pack_start(self.infobar, False, False, 0)
         box.pack_start(timerframe.widget, True, True, 0)
         box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton.widget, True, True, 0)
@@ -84,6 +85,9 @@ class GtkUI(Subscriber):
         self.window.iconify()
 
         return Gtk.true
+
+    def show_message(self, message, level):
+        self.infobar.show_message(message, level)
 
     @property
     def widget(self):
