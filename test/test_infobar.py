@@ -1,7 +1,7 @@
 import pytest
+from gi.repository import Gtk
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
-from gi.repository import Gtk
 
 from tomate_gtk.widgets.infobar import InfoBar
 
@@ -44,3 +44,16 @@ def test_clear_message(infobar):
 
 def test_get_widget(infobar):
     assert infobar.widget == infobar
+
+
+def test_hide_message_after_some_time(mocker):
+    with mocker.patch('tomate_gtk.widgets.infobar') as mock_glib:
+        from tomate_gtk.widgets.infobar import SECONDS_TO_HIDE
+        infobar = InfoBar()
+
+        infobar.show_message('foo', Gtk.MessageType.INFO)
+
+        assert infobar.label.get_text() == 'foo'
+        assert infobar.get_message_type() == Gtk.MessageType.INFO
+
+        mock_glib.timeout_add_seconds(SECONDS_TO_HIDE, infobar.clear_message_and_hide)

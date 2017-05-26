@@ -1,7 +1,9 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from wiring import SingletonScope
 from wiring.scanning import register
+
+SECONDS_TO_HIDE = 10
 
 
 @register.factory('view.infobar', scope=SingletonScope)
@@ -18,6 +20,7 @@ class InfoBar(Gtk.InfoBar):
         self.label.set_text(message)
         self.set_message_type(message_type)
         self.show_all()
+        GLib.timeout_add_seconds(SECONDS_TO_HIDE, self.clear_message_and_hide)
 
     def clear_message_and_hide(self):
         self.label.set_text('')

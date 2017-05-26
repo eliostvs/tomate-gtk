@@ -103,15 +103,14 @@ class TimerStack(Gtk.Grid):
 
     @staticmethod
     def _add_section(name):
-        section = Gtk.Label('<b>{0}</b>'.format(name), use_markup=True)
+        section = Gtk.Label.new()
+        section.set_markup('<b>{0}</b>'.format(name))
         section.set_halign(Gtk.Align.START)
         return section
 
     def _add_setting(self, label_name, spinbutton, option):
-        label = Gtk.Label(label_name,
-                          margin_left=12,
-                          hexpand=True,
-                          halign=Gtk.Align.END)
+        label = Gtk.Label.new(label_name)
+        label.set_properties(margin_left=12, hexpand=True, halign=Gtk.Align.END)
 
         spinbutton.set_hexpand(True)
         spinbutton.set_halign(Gtk.Align.START)
@@ -174,7 +173,7 @@ class ExtensionStack(Gtk.Box):
         self.plugin_settings_button.connect('clicked', self._on_plugin_settings_clicked)
 
         scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
-        scrolledwindow.add_with_viewport(self.tree_view)
+        scrolledwindow.add(self.tree_view)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5)
         hbox.pack_end(self.plugin_settings_button, False, True, 0)

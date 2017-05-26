@@ -21,11 +21,11 @@ class Menu(object):
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
-        self.about_item = Gtk.MenuItem(_('About'))
+        self.about_item = Gtk.MenuItem.new_with_label(_('About'))
         self.about_item.connect('activate', self._on_about_item_activate, about)
         self.widget.add(self.about_item)
 
-        self.preference_item = Gtk.MenuItem(_('Preferences'))
+        self.preference_item = Gtk.MenuItem.new_with_label(_('Preferences'))
         self.preference_item.connect('activate', self._on_preference_item_activate, preference)
         self.widget.add(self.preference_item)
 
@@ -53,11 +53,13 @@ class TrayIconMenu(object):
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
-        self.show_item = Gtk.MenuItem(_('Show'), visible=False, no_show_all=True)
+        self.show_item = Gtk.MenuItem.new_with_label(_('Show'))
+        self.show_item.set_properties(visible=False, no_show_all=True)
         self.show_item.connect('activate', self._on_show_item_activate)
         self.widget.add(self.show_item)
 
-        self.hide_item = Gtk.MenuItem(_('Hide'), visible=True)
+        self.hide_item = Gtk.MenuItem.new_with_label(_('Hide'))
+        self.hide_item.set_properties(visible=True)
         self.hide_item.connect('activate', self._on_hide_item_activate)
         self.widget.add(self.hide_item)
 

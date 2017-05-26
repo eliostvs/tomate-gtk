@@ -65,7 +65,7 @@ class TestMenu(object):
 
         Menu(mocker.Mock(), mocker.Mock(), mocker.Mock)
 
-        gtk.MenuItem.assert_any_call(_('Preferences'))
+        gtk.MenuItem.new_with_label.assert_any_call(_('Preferences'))
 
     def test_should_run_preference_widget_on_preference_item_activate(self, menu, view, preference):
         menu.preference_item.activate()
@@ -82,7 +82,7 @@ class TestMenu(object):
 
         Menu(mocker.Mock(), mocker.Mock(), mocker.Mock)
 
-        gtk.MenuItem.assert_any_call(_('About'))
+        gtk.MenuItem.new_with_label.assert_any_call(_('About'))
 
     def test_should_run_preference_widget_on_about_item_activate(self, menu, view, about):
         menu.about_item.activate()
@@ -100,7 +100,8 @@ class TestTrayIconMenu(object):
 
         TrayIconMenu(mocker.Mock())
 
-        gtk.MenuItem.assert_any_call(_('Show'), visible=False, no_show_all=True)
+        gtk.MenuItem.new_with_label.assert_any_call(_('Show'))
+        gtk.MenuItem.new_with_label.return_value.set_properties.assert_any_call(visible=False, no_show_all=True)
 
     def test_should_call_plugin_view_when_menu_activate(self, view, trayicon_menu):
         trayicon_menu.show_item.activate()
@@ -119,7 +120,8 @@ class TestTrayIconMenu(object):
 
         TrayIconMenu(mocker.Mock())
 
-        gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
+        gtk.MenuItem.new_with_label.assert_any_call(_('Hide'))
+        gtk.MenuItem.new_with_label.return_value.set_properties.assert_any_call(visible=True)
 
     def test_should_call_view_hide_when_hide_item_activate(self, view, trayicon_menu):
         trayicon_menu.hide_item.activate()
