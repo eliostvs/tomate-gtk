@@ -18,6 +18,10 @@ else
 	TEST_PREFIX =
 endif
 
+submodule:
+	git submodule init;
+	git submodule update;
+
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__"\) -print0 | xargs -0 rm -rf
 
