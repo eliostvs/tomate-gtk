@@ -47,3 +47,4 @@ whoosh_index/
 *.sublime-*
 .cache
 .envrc
+.pytest_cache
