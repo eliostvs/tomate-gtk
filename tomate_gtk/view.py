@@ -24,41 +24,37 @@ class GtkUI(Subscriber):
         toolbar='view.toolbar',
         timerframe='view.timerframe',
         taskbutton='view.taskbutton',
+        infobar='view.infobar'
     )
-    def __init__(self, session, event, config, graph, toolbar, timerframe, taskbutton):
+    def __init__(self, session, event, config, graph, toolbar, timerframe, taskbutton, infobar):
         self.config = config
         self.session = session
         self.event = event
         self.graph = graph
+        self.infobar = infobar.widget
 
-        self.window = self._build_window(taskbutton, timerframe, toolbar)
-        self.window.show_all()
-
-        self.session.change_task()
-
-    def _build_window(self, taskbutton, timerframe, toolbar):
-        window = Gtk.Window(
+        self.window = Gtk.Window(
             title='Tomate',
             icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
             window_position=Gtk.WindowPosition.CENTER,
             resizable=False)
 
-        window.set_size_request(350, -1)
+        self.window.set_size_request(350, -1)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
+        box.pack_start(self.infobar, False, False, 0)
         box.pack_start(timerframe.widget, True, True, 0)
         box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
         box.pack_start(taskbutton.widget, True, True, 0)
 
-        window.add(box)
+        self.window.add(box)
 
-        window.connect('delete-event', self._on_window_delete_event)
+        self.window.connect('delete-event', lambda widget, event: self.quit())
 
-        return window
+        self.window.show_all()
 
-    def _on_window_delete_event(self, window, event):
-        return self.quit()
+        self.session.change_task()
 
     def run(self, *args, **kwargs):
         Gtk.main()
@@ -76,7 +72,7 @@ class GtkUI(Subscriber):
 
         logger.debug('view showed')
 
-        return self.window.present_with_time(time.time())
+        self.window.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
         self.event.send(State.hid)
@@ -89,6 +85,9 @@ class GtkUI(Subscriber):
         self.window.iconify()
 
         return Gtk.true
+
+    def show_message(self, message, level):
+        self.infobar.show_message(message, level)
 
     @property
     def widget(self):

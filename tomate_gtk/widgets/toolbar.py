@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import locale
 from locale import gettext as _
 
@@ -79,6 +77,6 @@ class Toolbar(Subscriber):
         sensitive = bool(kwargs.get('sessions'))
         self.reset_button.set_sensitive(sensitive)
 
-    @on(Events.Session, [State.started, State.reset])
+    @on(Events.Session, [State.reset])
     def disable_reset_button(self, *args, **kwargs):
         self.reset_button.set_sensitive(False)

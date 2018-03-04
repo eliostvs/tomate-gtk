@@ -31,8 +31,6 @@ def main():
 
         app = Application.from_graph(graph)
 
-        graph.validate()
-
         app.run()
 
         if app.is_running():

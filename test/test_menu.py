@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 from locale import gettext as _
 
 import pytest
-from mock import Mock, patch
-from util import refresh_gui
+from conftest import refresh_gui
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
@@ -14,23 +13,23 @@ from tomate_gtk.widgets.menu import TrayIconMenu, Menu
 
 
 @pytest.fixture
-def preference():
-    return Mock()
+def preference(mocker):
+    return mocker.Mock()
 
 
 @pytest.fixture()
-def about():
-    return Mock()
+def about(mocker):
+    return mocker.Mock()
 
 
 @pytest.fixture()
-def view():
-    return Mock(**{'widget.get_visible.return_value': False})
+def view(mocker):
+    return mocker.Mock(**{'widget.get_visible.return_value': False})
 
 
 @pytest.fixture()
-def proxy(view):
-    mock = Mock()
+def proxy(view, mocker):
+    mock = mocker.Mock()
     mock.return_value = view
 
     return mock
@@ -59,13 +58,14 @@ def method_called(result):
 
 
 class TestMenu(object):
-    @patch('tomate_gtk.widgets.menu.Gtk')
-    def test_should_create_preference_item(self, Gtk):
+    def test_should_create_preference_item(self, mocker):
+        gtk = mocker.patch('tomate_gtk.widgets.menu.Gtk')
+
         from tomate_gtk.widgets.menu import Menu
 
-        Menu(Mock(), Mock(), Mock)
+        Menu(mocker.Mock(), mocker.Mock(), mocker.Mock)
 
-        Gtk.MenuItem.assert_any_call(_('Preferences'))
+        gtk.MenuItem.new_with_label.assert_any_call(_('Preferences'))
 
     def test_should_run_preference_widget_on_preference_item_activate(self, menu, view, preference):
         menu.preference_item.activate()
@@ -75,13 +75,14 @@ class TestMenu(object):
         preference.refresh_plugins.assert_called_once_with()
         preference.run.assert_called_once_with()
 
-    @patch('tomate_gtk.widgets.menu.Gtk')
-    def test_should_create_about_item(self, Gtk):
+    def test_should_create_about_item(self, mocker):
+        gtk = mocker.patch('tomate_gtk.widgets.menu.Gtk')
+
         from tomate_gtk.widgets.menu import Menu
 
-        Menu(Mock(), Mock(), Mock)
+        Menu(mocker.Mock(), mocker.Mock(), mocker.Mock)
 
-        Gtk.MenuItem.assert_any_call(_('About'))
+        gtk.MenuItem.new_with_label.assert_any_call(_('About'))
 
     def test_should_run_preference_widget_on_about_item_activate(self, menu, view, about):
         menu.about_item.activate()
@@ -92,16 +93,19 @@ class TestMenu(object):
 
 
 class TestTrayIconMenu(object):
-    @patch('tomate_gtk.widgets.menu.Gtk')
-    def test_should_create_show_item(self, Gtk):
+    def test_should_create_show_item(self, mocker):
+        gtk = mocker.patch('tomate_gtk.widgets.menu.Gtk')
+
         from tomate_gtk.widgets.menu import TrayIconMenu
 
-        TrayIconMenu(Mock())
+        TrayIconMenu(mocker.Mock())
 
-        Gtk.MenuItem.assert_any_call(_('Show'), visible=False, no_show_all=True)
+        gtk.MenuItem.new_with_label.assert_any_call(_('Show'))
+        gtk.MenuItem.new_with_label.return_value.set_properties.assert_any_call(visible=False, no_show_all=True)
 
     def test_should_call_plugin_view_when_menu_activate(self, view, trayicon_menu):
         trayicon_menu.show_item.activate()
+
         refresh_gui()
 
         view.show.assert_called_once_with()
@@ -109,13 +113,15 @@ class TestTrayIconMenu(object):
         assert trayicon_menu.hide_item.get_visible()
         assert not trayicon_menu.show_item.get_visible()
 
-    @patch('tomate_gtk.widgets.menu.Gtk')
-    def test_should_create_hide_item(self, Gtk):
+    def test_should_create_hide_item(self, mocker):
+        gtk = mocker.patch('tomate_gtk.widgets.menu.Gtk')
+
         from tomate_gtk.widgets.menu import TrayIconMenu
 
-        TrayIconMenu(Mock())
+        TrayIconMenu(mocker.Mock())
 
-        Gtk.MenuItem.assert_any_call(_('Hide'), visible=True)
+        gtk.MenuItem.new_with_label.assert_any_call(_('Hide'))
+        gtk.MenuItem.new_with_label.return_value.set_properties.assert_any_call(visible=True)
 
     def test_should_call_view_hide_when_hide_item_activate(self, view, trayicon_menu):
         trayicon_menu.hide_item.activate()
@@ -151,7 +157,6 @@ class TestTrayIconMenu(object):
 
     def test_should_not_call_menu_after_deactivate(self, trayicon_menu):
         assert len(Events.View.receivers) == 0
-        Events.View.receivers.clear()
 
         connect_events(trayicon_menu)
 
@@ -164,10 +169,10 @@ class TestTrayIconMenu(object):
         assert len(result) == 0
 
 
-def test_menu_module(graph, config, lazy_proxy):
-    graph.register_instance('view.about', Mock())
-    graph.register_instance('tomate.view', Mock())
-    graph.register_instance('view.preference', Mock())
+def test_menu_module(graph, mocker):
+    graph.register_instance('view.about', mocker.Mock())
+    graph.register_instance('tomate.view', mocker.Mock())
+    graph.register_instance('view.preference', mocker.Mock())
     scan_to_graph(['tomate_gtk.widgets.menu'], graph)
 
     assert 'view.menu' in graph.providers
@@ -176,14 +181,14 @@ def test_menu_module(graph, config, lazy_proxy):
 
     assert provider.scope == SingletonScope
 
-    graph.register_instance('tomate.view', Mock())
-    graph.register_instance('view.preference', Mock())
-    graph.register_instance('tomate.proxy', Mock())
+    graph.register_instance('tomate.view', mocker.Mock())
+    graph.register_instance('view.preference', mocker.Mock())
+    graph.register_instance('tomate.proxy', mocker.Mock())
 
     assert isinstance(graph.get('view.menu'), Menu)
 
 
-def test_trayicon_module(graph):
+def test_trayicon_module(graph, mocker):
     scan_to_graph(['tomate_gtk.widgets.menu'], graph)
 
     assert 'trayicon.menu' in graph.providers
@@ -192,6 +197,6 @@ def test_trayicon_module(graph):
 
     assert provider.scope == SingletonScope
 
-    graph.register_instance('tomate.view', Mock())
+    graph.register_instance('tomate.view', mocker.Mock())
 
     assert isinstance(graph.get('trayicon.menu'), TrayIconMenu)

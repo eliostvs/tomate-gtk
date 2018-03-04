@@ -28,7 +28,7 @@ class ModeButton(Gtk.Box):
 
     def append_text(self, text):
         button = ModeButtonItem(len(self.__itens))
-        button.add(Gtk.Label(text))
+        button.add(Gtk.Label.new(text))
         button.connect('button_press_event', self.on_button_press_event)
         button.show_all()
 

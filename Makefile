@@ -11,12 +11,17 @@ PROJECT = home:eliostvs:tomate
 OBS_API_URL = https://api.opensuse.org:443/trigger/runservice?project=$(PROJECT)&package=$(PACKAGE)
 DEBUG = TOMATE_DEBUG=true
 WORK_DIR=/code
+CURRENT_VERSION = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	TEST_PREFIX = xvfb-run -a
 else
 	TEST_PREFIX =
 endif
+
+submodule:
+	git submodule init;
+	git submodule update;
 
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__"\) -print0 | xargs -0 rm -rf
@@ -25,7 +30,7 @@ run:
 	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
 
 test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest -v --cov=$(PACKAGE_DIR)
+	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest $(file) -v --cov=$(PACKAGE_DIR)
 
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
@@ -49,3 +54,9 @@ docker-enter:
 
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
+
+release-%:
+	bumpversion --verbose --commit $*
+	git flow release start $(CURRENT_VERSION)
+	git flow release finish -p -m $(CURRENT_VERSION) $(CURRENT_VERSION)
+	git push --tags
