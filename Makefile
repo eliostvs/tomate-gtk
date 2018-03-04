@@ -58,5 +58,5 @@ trigger-build:
 release-%:
 	bumpversion --verbose --commit $*
 	git flow release start $(CURRENT_VERSION)
-	git flow release finish -p -m $(CURRENT_VERSION) $(CURRENT_VERSION)
+	git flow release finish -p $(CURRENT_VERSION)
 	git push --tags
