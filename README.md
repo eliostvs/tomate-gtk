@@ -44,12 +44,12 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 ### Arch
 
-    yaourt -S tomate-gtk
+    pacaur -S tomate-gtk
 
 Plugins
 -------
 
-All plugins are in the repositories and need to be installed seperatly.
+All plugins are in the repositories and need to be installed separately.
 For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu.
 
 - [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends.
@@ -66,6 +66,20 @@ Bugs and suggestions should be reported [here][bugs].
 
 Change Logs
 -----------
+
+### 0.8.0
+
+#### Added
+
+- Show notifications in main widget implementing **show\_message** view interface
+
+#### Fixed
+
+- Reopen from command line
+
+#### Changed
+
+- Arch install instructions
 
 ### 0.7.0
 
