@@ -7,7 +7,6 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('Gtk', '3.0')
 
 import dbus.mainloop.glib
-import six
 from gi.repository import Gdk
 from tomate.app import Application
 from tomate.graph import graph
@@ -37,4 +36,4 @@ def main():
     except Exception as ex:
         logger.error(ex, exc_info=True)
 
-        six.reraise(*sys.exc_info())
+        raise ex
