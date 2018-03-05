@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import pytest
 from gi.repository import Gtk
 from wiring import Graph, SingletonScope
