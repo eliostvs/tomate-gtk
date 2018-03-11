@@ -1,11 +1,12 @@
 import pytest
-from conftest import refresh_gui
 from gi.repository import Gtk
-from wiring import SingletonScope
-from wiring.scanning import scan_to_graph
 
 from tomate.constant import State
 from tomate.event import Session, connect_events
+from wiring import SingletonScope
+from wiring.scanning import scan_to_graph
+
+from conftest import refresh_gui
 from tomate_gtk.widgets.appmenu import Appmenu
 from tomate_gtk.widgets.toolbar import Toolbar
 
