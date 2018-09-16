@@ -44,7 +44,6 @@ class PreferenceDialog(Gtk.Dialog):
                        margin_left=6,
                        margin_right=6)
         vbox.pack_start(switcher, True, True, 0)
-        vbox.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), True, True, 0)
         vbox.pack_start(stack, True, True, 0)
         vbox.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), True, True, 0)
         vbox.show_all()
@@ -211,8 +210,7 @@ class ExtensionStack(Gtk.Box):
 
         grid_plugin = GridPlugin.from_iter(self._store, treeiter)
 
-        plugin = self.plugin_manager.getPluginByName(grid_plugin.name)
-        return plugin
+        return self.plugin_manager.getPluginByName(grid_plugin.name)
 
     @property
     def _toplevel(self):
