@@ -53,7 +53,7 @@ class GtkUI(Subscriber):
 
         self.window.show_all()
 
-        self.session.change_task()
+        taskbutton.change_selected()
 
     def run(self, *args, **kwargs):
         Gtk.main()
