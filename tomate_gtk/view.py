@@ -2,11 +2,11 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import implements, inject, Graph, SingletonScope
-from wiring.scanning import register
 from tomate.constant import State
 from tomate.event import Subscriber, on, Events
 from tomate.view import UI, TrayIcon
+from wiring import implements, inject, Graph, SingletonScope
+from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +35,17 @@ class GtkUI(Subscriber):
             title='Tomate',
             icon=GdkPixbuf.Pixbuf.new_from_file(self.config.get_icon_path('tomate', 22)),
             window_position=Gtk.WindowPosition.CENTER,
-            resizable=False)
+            resizable=False,
+        )
 
         self.window.set_size_request(350, -1)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.pack_start(toolbar.widget, False, False, 0)
         box.pack_start(self.infobar, False, False, 0)
-        box.pack_start(timerframe.widget, True, True, 0)
-        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 8)
-        box.pack_start(taskbutton.widget, True, True, 0)
+        box.pack_start(timerframe.widget, False, False, 6)
+        box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 6)
+        box.pack_start(taskbutton.widget, False, False, 6)
 
         self.window.add(box)
 

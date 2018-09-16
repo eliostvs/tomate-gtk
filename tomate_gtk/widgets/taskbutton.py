@@ -22,11 +22,10 @@ class TaskButton(Subscriber):
         self.modebutton = ModeButton(
             can_focus=False,
             homogeneous=True,
-            margin_bottom=16,
+            margin_bottom=6,
             margin_left=12,
             margin_right=12,
-            margin_top=6,
-            spacing=0,
+            margin_top=0,
         )
 
         self.modebutton.append_text(_('Pomodoro'))

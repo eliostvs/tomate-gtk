@@ -19,15 +19,10 @@ class TaskEntry(Subscriber):
         self.session = session
 
         self.widget = Gtk.Entry(
-            margin_bottom=12,
-            margin_left=12,
-            margin_right=12,
-            margin_top=12,
-            max_length=20,
             placeholder_text=_('Enter task name...'),
             secondary_icon_name='gtk-clear',
-            xalign=0.5,
-            sensitive=True
+            sensitive=True,
+            xalign=0.5
         )
 
         self.widget.set_icon_sensitive(1, False)
@@ -35,7 +30,8 @@ class TaskEntry(Subscriber):
         self.widget.connect('changed', self.on_changed_text)
         self.widget.connect('icon-press', self.on_icon_press)
 
-    def on_icon_press(self, widget, icon_pos, event):
+    @staticmethod
+    def on_icon_press(widget, icon_pos, event):
         widget.set_text('')
         widget.get_toplevel().set_focus(None)
 
