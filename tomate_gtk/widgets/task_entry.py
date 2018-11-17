@@ -19,6 +19,8 @@ class TaskEntry(Subscriber):
         self.session = session
 
         self.widget = Gtk.Entry(
+            margin_left=12,
+            margin_right=12,
             placeholder_text=_('Enter task name...'),
             secondary_icon_name='gtk-clear',
             sensitive=True,

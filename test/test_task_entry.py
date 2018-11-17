@@ -6,7 +6,7 @@ from tomate.event import Session, connect_events
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate_gtk.widgets.taskentry import TaskEntry
+from tomate_gtk.widgets import TaskEntry
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def task_entry(mock_session):
 
 
 def test_task_entry_module(graph, mocker):
-    scan_to_graph(['tomate_gtk.widgets.taskentry', 'tomate'], graph)
+    scan_to_graph(['tomate_gtk.widgets.task_entry', 'tomate'], graph)
 
     assert 'view.taskentry' in graph.providers
 
@@ -56,7 +56,7 @@ def test_task_entry_should_be_disable_when_session_finishes(task_entry):
     assert task_entry.widget.get_sensitive() is True
 
 
-def test_reset_entry_and_lose_focus_when_reset_icon_is_clicked(task_entry, mocker):
+def test_reset_entry_lose_focus_when_reset_icon_is_clicked(task_entry, mocker):
     task_entry.widget.get_toplevel = mocker.Mock()
     task_entry.widget.set_text('foo')
 
