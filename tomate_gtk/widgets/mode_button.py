@@ -10,7 +10,7 @@ class ModeButtonItem(Gtk.ToggleButton):
 
 class ModeButton(Gtk.Box):
     __gsignals__ = {
-        'mode_changed': (GObject.SIGNAL_RUN_FIRST, None, (int,))
+        'mode_changed': (GObject.SignalFlags.RUN_FIRST, None, (int,))
     }
 
     def __init__(self, **kwargs):
