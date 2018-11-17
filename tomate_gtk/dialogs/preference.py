@@ -19,13 +19,13 @@ class PreferenceDialog(Gtk.Dialog):
 
         Gtk.Dialog.__init__(
             self,
-            _("Preferences"),
+            title=_("Preferences"),
             border_width=11,
-            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE),
             modal=True,
             resizable=False,
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
+        self.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         self.connect("response", lambda widget, response: widget.hide())
         self.set_size_request(350, -1)
 
