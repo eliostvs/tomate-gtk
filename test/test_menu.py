@@ -7,7 +7,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from tomate_gtk.widgets.menu import TrayIconMenu, Menu
+from tomate_gtk.widgets import TrayIconMenu, Menu
 
 
 @pytest.fixture
