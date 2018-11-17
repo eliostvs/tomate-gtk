@@ -7,7 +7,7 @@ from wiring.scanning import register
 
 from tomate.constant import Task, State
 from tomate.event import Subscriber, on, Events
-from .modebutton import ModeButton
+from .mode_button import ModeButton
 
 locale.textdomain('tomate')
 logger = logging.getLogger(__name__)
@@ -19,21 +19,20 @@ class TaskButton(Subscriber):
     def __init__(self, session):
         self.session = session
 
-        self.modebutton = ModeButton(
+        self.mode_button = ModeButton(
             can_focus=False,
             homogeneous=True,
-            margin_bottom=6,
+            margin_bottom=12,
             margin_left=12,
             margin_right=12,
-            margin_top=0,
         )
 
-        self.modebutton.append_text(_('Pomodoro'))
-        self.modebutton.append_text(_('Short Break'))
-        self.modebutton.append_text(_('Long Break'))
-        self.modebutton.set_selected(Task.pomodoro)
+        self.mode_button.append_text(_('Pomodoro'))
+        self.mode_button.append_text(_('Short Break'))
+        self.mode_button.append_text(_('Long Break'))
+        self.mode_button.set_selected(Task.pomodoro)
 
-        self.modebutton.connect('mode_changed', self.on_mode_changed)
+        self.mode_button.connect('mode_changed', self.on_mode_changed)
 
     def on_mode_changed(self, widget, index):
         task = Task.by_index(index)
@@ -43,18 +42,18 @@ class TaskButton(Subscriber):
     def change_selected(self, sender=None, **kwargs):
         task = kwargs.get('task', Task.pomodoro)
 
-        logger.debug('task changed %s', task)
+        logger.debug('component=taskButton action=changeSelected session=%s', task)
 
-        self.modebutton.set_selected(task.value)
+        self.mode_button.set_selected(task.value)
 
     @on(Events.Session, [State.started])
     def disable(self, sender=None, **kwargs):
-        self.modebutton.set_sensitive(False)
+        self.mode_button.set_sensitive(False)
 
     @on(Events.Session, [State.finished, State.stopped])
     def enable(self, sender=None, **kwargs):
-        self.modebutton.set_sensitive(True)
+        self.mode_button.set_sensitive(True)
 
     @property
     def widget(self):
-        return self.modebutton
+        return self.mode_button
