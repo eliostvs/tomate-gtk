@@ -18,10 +18,11 @@ def gtkui(mocker):
                  event=mocker.Mock(),
                  config=mocker.Mock(),
                  graph=mocker.Mock(),
-                 toolbar=mocker.Mock(),
-                 timerframe=mocker.Mock(),
-                 taskbutton=mocker.Mock(),
-                 infobar=mocker.Mock())
+                 headerbar=mocker.Mock(),
+                 timer_frame=mocker.Mock(),
+                 task_button=mocker.Mock(),
+                 infobar=mocker.Mock(),
+                 task_entry=mocker.Mock())
 
 
 def test_view_module(graph):
@@ -37,12 +38,13 @@ def test_view_module(graph):
                         event='tomate.events.view',
                         config='tomate.config',
                         graph=Graph,
-                        toolbar='view.toolbar',
-                        timerframe='view.timerframe',
-                        taskbutton='view.taskbutton',
-                        infobar='view.infobar')
+                        headerbar='view.headerbar',
+                        timer_frame='view.timerframe',
+                        task_button='view.taskbutton',
+                        infobar='view.infobar',
+                        task_entry='view.taskentry')
 
-    assert provider.dependencies == dependencies
+    assert sorted(provider.dependencies) == sorted(dependencies)
 
 
 def test_should_call_gtk_main(mocker, gtkui):
