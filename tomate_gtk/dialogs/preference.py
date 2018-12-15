@@ -44,9 +44,9 @@ class PreferenceDialog(Gtk.Dialog):
         vbox.pack_start(stack, False, False, 0)
         vbox.show_all()
 
-        stack.get_child_by_name("timer").activate()
-
         self.get_content_area().add(vbox)
+
+        stack.set_visible_child_name('timer')
 
     @property
     def widget(self):
