@@ -1,17 +1,18 @@
 import pytest
 from conftest import refresh_gui
+from tomate.constant import State, Sessions
+from tomate.event import Session, connect_events
+from tomate.session import Session as ModelSession
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.constant import State, Task
-from tomate.event import Session, connect_events
-from tomate_gtk.widgets.mode_button import ModeButton
 from tomate_gtk.widgets import TaskButton
+from tomate_gtk.widgets.mode_button import ModeButton
 
 
 @pytest.fixture
 def mock_session(mocker):
-    return mocker.Mock()
+    return mocker.Mock(spec=ModelSession)
 
 
 @pytest.fixture
@@ -61,15 +62,15 @@ def test_buttons_should_be_activate_when_session_stops(task_button):
 
 
 def test_change_button_when_session_finishes(task_button):
-    Session.send(State.finished, task=Task.shortbreak)
+    Session.send(State.finished, current=Sessions.shortbreak)
 
-    assert task_button.mode_button.get_selected() is Task.shortbreak.value
-    task_button.session.change_task.assert_called_once_with(task=Task.shortbreak)
+    assert task_button.mode_button.get_selected() is Sessions.shortbreak.value
+    task_button.session.change.assert_called_once_with(session=Sessions.shortbreak)
 
 
 def test_change_task_when_mode_button_changes(task_button):
-    task_button.mode_button.emit('mode_changed', Task.longbreak.value)
+    task_button.mode_button.emit('mode_changed', Sessions.longbreak.value)
 
     refresh_gui(0)
 
-    task_button.session.change_task.assert_called_once_with(task=Task.longbreak)
+    task_button.session.change.assert_called_once_with(session=Sessions.longbreak)

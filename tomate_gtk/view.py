@@ -68,7 +68,7 @@ class GtkUI(Subscriber):
 
         self.window.show_all()
 
-        task_button.change_selected()
+        task_button.enable()
 
     def _on_delete_event(self, widget, event):
         return self.quit()
