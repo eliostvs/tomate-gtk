@@ -8,33 +8,32 @@ from tomate.event import Subscriber, on, Events
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-locale.textdomain('tomate')
+locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
 
-@register.factory('view.taskentry', scope=SingletonScope)
+@register.factory("view.taskentry", scope=SingletonScope)
 class TaskEntry(Subscriber):
-    @inject(session='tomate.session')
+    @inject(session="tomate.session")
     def __init__(self, session):
         self.session = session
 
         self.widget = Gtk.Entry(
             margin_left=12,
             margin_right=12,
-            placeholder_text=_('Enter task name...'),
-            secondary_icon_name='gtk-clear',
+            placeholder_text=_("Enter task name..."),
+            secondary_icon_name="gtk-clear",
             sensitive=True,
-            xalign=0.5
+            xalign=0.5,
         )
 
         self.widget.set_icon_sensitive(1, False)
 
-        self.widget.connect('changed', self.on_changed_text)
-        self.widget.connect('icon-press', self.on_icon_press)
+        self.widget.connect("changed", self.on_changed_text)
+        self.widget.connect("icon-press", self.on_icon_press)
 
-    @staticmethod
-    def on_icon_press(widget, icon_pos, event):
-        widget.set_text('')
+    def on_icon_press(self, widget, icon_pos, event):
+        self.session.task_name = ""
         widget.get_toplevel().set_focus(None)
 
     def on_changed_text(self, widget):
@@ -45,6 +44,10 @@ class TaskEntry(Subscriber):
             widget.set_icon_sensitive(1, True)
         else:
             widget.set_icon_sensitive(1, False)
+
+    @on(Events.Session, [State.changed])
+    def update_text(self, sender=None, **kwargs):
+        self.widget.set_text(kwargs.get("task_name", ""))
 
     @on(Events.Session, [State.started])
     def disable(self, sender=None, **kwargs):

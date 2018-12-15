@@ -1,8 +1,8 @@
 import pytest
 from gi.repository import Gtk
-
 from tomate.constant import State
 from tomate.event import Session, connect_events
+from tomate.session import Session as ModelSession
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
@@ -11,7 +11,7 @@ from tomate_gtk.widgets import TaskEntry
 
 @pytest.fixture
 def mock_session(mocker):
-    return mocker.Mock()
+    return mocker.Mock(ModelSession)
 
 
 @pytest.fixture
@@ -56,14 +56,15 @@ def test_task_entry_should_be_disable_when_session_finishes(task_entry):
     assert task_entry.widget.get_sensitive() is True
 
 
-def test_reset_entry_lose_focus_when_reset_icon_is_clicked(task_entry, mocker):
+def test_reset_entry_lose_focus_when_reset_icon_is_clicked(task_entry, mocker, mock_session):
+    mock_session.task_name = 'foo'
     task_entry.widget.get_toplevel = mocker.Mock()
     task_entry.widget.set_text('foo')
 
     task_entry.widget.emit('icon-press', Gtk.EntryIconPosition(1), None)
 
-    assert task_entry.widget.get_text() == ''
     task_entry.widget.get_toplevel.return_value.set_focus.assert_called_with(None)
+    assert mock_session.task_name == ''
 
 
 def test_update_session_when_task_name_changes(task_entry, mock_session):
@@ -88,3 +89,11 @@ def test_enable_reset_icon_when_task_name_is_not_blank(task_entry):
 
     assert task_entry.widget.get_icon_sensitive(1) is True
     assert task_entry.session.task_name == 'foo'
+
+
+def test_updates_task_entry_when_session_changes(task_entry):
+    expected_task_name = "task_name"
+
+    Session.send(State.changed, task_name=expected_task_name)
+
+    assert task_entry.widget.get_text() == expected_task_name
