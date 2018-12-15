@@ -28,27 +28,27 @@ def test_timer_frame_module(graph, timer_frame):
 
 
 def test_update_timer_label_when_timer_changed(timer_frame):
-    Timer.send(State.changed)
+    Timer.send(State.changed, time_left=10)
 
-    markup = timer_frame.time_left_markup(format_time_left(TimerFrame.DEFAULT_TIME_LEFT))
+    markup = timer_frame.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
 
     assert timer_frame.widget.get_text() == root.text
 
 
 def test_update_timer_label_when_session_stops(timer_frame):
-    Session.send(State.stopped, time_left=10)
+    Session.send(State.stopped, duration=10)
 
-    markup = timer_frame.time_left_markup(format_time_left(10))
+    markup = timer_frame.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
 
     assert timer_frame.widget.get_text() == root.text
 
 
-def test_update_timer_label_when_session_attributes_changes(timer_frame):
-    Session.send(State.changed, time_left=1)
+def test_update_timer_label_when_session_changes(timer_frame):
+    Session.send(State.changed, duration=1)
 
-    markup = timer_frame.time_left_markup(format_time_left(1))
+    markup = timer_frame.timer_markup(format_time_left(1))
     root = ET.fromstring(markup)
 
     assert timer_frame.widget.get_text() == root.text

@@ -12,20 +12,26 @@ logger = logging.getLogger(__name__)
 
 @register.factory("view.timerframe", scope=SingletonScope)
 class TimerFrame(Subscriber):
-    DEFAULT_TIME_LEFT = 25 * 60
-
     def __init__(self):
         self.widget = Gtk.Label(margin_top=30)
 
     @on(Events.Timer, [State.changed])
+    def on_timer_changed(self, sender=None, **kwargs):
+        self._update_text(kwargs.get("time_left"))
+
     @on(Events.Session, [State.stopped, State.changed])
-    def update_timer(self, sender=None, **kwargs):
-        time_left = format_time_left(kwargs.get("time_left", self.DEFAULT_TIME_LEFT))
+    def on_session_stop_or_changed(self, sender=None, **kwargs):
+        self._update_text(kwargs.get("duration"))
 
-        self.widget.set_markup(self.time_left_markup(time_left))
+    def _update_text(self, value):
+        formatted_value = format_time_left(value)
 
-        logger.debug("component=timerFrame action=updateTimer time_left=%s", time_left)
+        self.widget.set_markup(self.timer_markup(formatted_value))
+
+        logger.debug(
+            "component=timerFrame action=updateFrame value=%s", formatted_value
+        )
 
     @staticmethod
-    def time_left_markup(time_left):
+    def timer_markup(time_left):
         return '<span face="sans-serif" font="50">{}</span>'.format(time_left)
