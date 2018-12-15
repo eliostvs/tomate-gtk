@@ -7,7 +7,6 @@ from tomate.event import Subscriber, Events, on
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-
 locale.textdomain("tomate")
 
 
@@ -73,20 +72,22 @@ class HeaderBar(Subscriber):
     @on(Events.Session, [State.stopped, State.finished])
     def on_session_stopped_or_finished(self, *args, **kwargs):
         self.start_button.set_visible(True)
-
         self.stop_button.set_visible(False)
 
-        self.on_session_reset(**kwargs)
+        pomodoro_sessions_count = self.session.count_pomodoros(kwargs.get("sessions"))
+        self.reset_button.set_sensitive(bool(pomodoro_sessions_count))
+        self.update_title(pomodoro_sessions_count)
 
     @on(Events.Session, [State.reset])
-    def on_session_reset(self, *args, **kwargs):
-        sessions_count = kwargs.get("sessions")
+    def updates_session_message(self, *args, **kwargs):
+        self.reset_button.set_sensitive(False)
 
-        self.reset_button.set_sensitive(bool(sessions_count))
+        self.update_title(0)
 
+    def update_title(self, pomodoro_sessions: int):
         self.widget.props.title = (
-            _("Session {}".format(sessions_count))
-            if sessions_count
+            _("Session {}".format(pomodoro_sessions))
+            if pomodoro_sessions > 0
             else _("No session yet")
         )
 
