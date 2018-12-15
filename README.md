@@ -69,6 +69,17 @@ Change Logs
 
 ### 0.8.0
 
+#### Changed
+
+- Using gtk headerbar instead of a toolbar
+
+
+#### Added
+
+- Write which task you are doing
+
+### 0.8.0
+
 #### Added
 
 - Show notifications in main widget implementing **show\_message** view interface
