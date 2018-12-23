@@ -70,7 +70,6 @@ class TestMenu(object):
         refresh_gui()
 
         preference.set_transient_for.assert_called_once_with(view.widget)
-        preference.refresh_plugins.assert_called_once_with()
         preference.run.assert_called_once_with()
 
     def test_should_create_about_item(self, mocker):
