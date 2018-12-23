@@ -37,14 +37,14 @@ class PreferenceDialog(Gtk.Dialog):
         switcher = Gtk.StackSwitcher(halign=Gtk.Align.CENTER)
         switcher.set_stack(stack)
 
-        vbox = Gtk.Box(
+        content_container = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_bottom=12
         )
-        vbox.pack_start(switcher, False, False, 0)
-        vbox.pack_start(stack, False, False, 0)
-        vbox.show_all()
+        content_container.pack_start(switcher, False, False, 0)
+        content_container.pack_start(stack, False, False, 0)
+        content_container.show_all()
 
-        self.get_content_area().add(vbox)
+        self.widget.get_content_area().add(content_container)
 
         stack.set_visible_child_name('timer')
 
@@ -52,8 +52,9 @@ class PreferenceDialog(Gtk.Dialog):
     def widget(self):
         return self
 
-    def refresh_plugins(self):
+    def run(self):
         self.extension.refresh()
+        super().run()
 
 
 @register.factory("view.preference.duration", scope=SingletonScope)
@@ -123,34 +124,34 @@ class TimerTab(Gtk.Grid):
 
 @register.factory("view.preference.extension", scope=SingletonScope)
 class ExtensionTab(Gtk.Box):
-    @inject(plugin="tomate.plugin", config="tomate.config", lazy_proxy="tomate.proxy")
-    def __init__(self, plugin, config, lazy_proxy):
-        self.plugin_manager = plugin
+    @inject(plugin_manager="tomate.plugin", config="tomate.config", lazy_proxy="tomate.proxy")
+    def __init__(self, plugin_manager, config, lazy_proxy):
+        self.plugin_manager = plugin_manager
         self.config = config
         self.preference_dialog = lazy_proxy("view.preference")
 
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
         self._store = Gtk.ListStore(
-            bool, GdkPixbuf.Pixbuf, str, str, object  # active  # icon  # name  # detail
-        )  # plugin
+            bool, GdkPixbuf.Pixbuf, str, str, object  # active, icon, name, detail, plugin
+        )
 
-        self.tree_view = Gtk.TreeView(headers_visible=False, model=self._store)
-        self.tree_view.get_selection().connect("changed", self._on_tree_view_changed)
-        self.tree_view.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
+        self.plugin_list = Gtk.TreeView(headers_visible=False, model=self._store)
+        self.plugin_list.get_selection().connect("changed", self._on_tree_view_changed)
+        self.plugin_list.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         renderer = Gtk.CellRendererToggle()
         renderer.connect("toggled", self._on_plugin_toggled)
         column = Gtk.TreeViewColumn("Active", renderer, active=0)
-        self.tree_view.append_column(column)
+        self.plugin_list.append_column(column)
 
         renderer = Gtk.CellRendererPixbuf()
         column = Gtk.TreeViewColumn("Icon", renderer, pixbuf=1)
-        self.tree_view.append_column(column)
+        self.plugin_list.append_column(column)
 
-        renderer = Gtk.CellRendererText(wrap_mode=Pango.WrapMode.WORD, wrap_width=200)
+        renderer = Gtk.CellRendererText(wrap_mode=Pango.WrapMode.WORD, wrap_width=250)
         column = Gtk.TreeViewColumn("Detail", renderer, markup=3)
-        self.tree_view.append_column(column)
+        self.plugin_list.append_column(column)
 
         self.plugin_settings_button = Gtk.Button.new_from_icon_name(
             Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU
@@ -158,14 +159,14 @@ class ExtensionTab(Gtk.Box):
         self.plugin_settings_button.set_sensitive(False)
         self.plugin_settings_button.connect("clicked", self._on_plugin_settings_clicked)
 
-        scrolledwindow = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
-        scrolledwindow.add(self.tree_view)
+        plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
+        plugin_list_container.add(self.plugin_list)
 
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        hbox.pack_end(self.plugin_settings_button, False, False, 0)
+        settings_button_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        settings_button_container.pack_end(self.plugin_settings_button, False, False, 0)
 
-        self.pack_start(scrolledwindow, True, True, 0)
-        self.pack_start(hbox, False, False, 0)
+        self.pack_start(plugin_list_container, True, True, 0)
+        self.pack_start(settings_button_container, False, False, 0)
 
         self.show_all()
 
@@ -194,14 +195,14 @@ class ExtensionTab(Gtk.Box):
                 self.plugin_settings_button.set_sensitive(False)
 
     def get_selected_plugin(self):
-        _, treeiter = self.tree_view.get_selection().get_selected()
+        _, treeiter = self.plugin_list.get_selection().get_selected()
 
         grid_plugin = GridPlugin.from_iter(self._store, treeiter)
 
         return self.plugin_manager.getPluginByName(grid_plugin.name)
 
     @property
-    def _toplevel(self):
+    def toplevel(self):
         return self.preference_dialog.widget
 
     def _on_plugin_toggled(self, _, path):
@@ -218,7 +219,7 @@ class ExtensionTab(Gtk.Box):
         plugin = self.get_selected_plugin()
 
         widget = plugin.plugin_object.settings_window()
-        widget.set_transient_for(self._toplevel)
+        widget.set_transient_for(self.toplevel)
         widget.run()
 
     def _deactivate_plugin(self, plugin_name):
@@ -232,20 +233,20 @@ class ExtensionTab(Gtk.Box):
         self._store.clear()
 
     def _select_first_plugin(self):
-        self.tree_view.get_selection().select_iter(self._store.get_iter_first())
+        self.plugin_list.get_selection().select_iter(self._store.get_iter_first())
 
     @property
     def _there_are_plugins(self):
         return bool(len(self._store))
 
     def _add_plugin(self, plugin):
-        iconname = getattr(plugin, "icon", "tomate-plugin")
-        iconpath = self.config.get_icon_path(iconname, 16)
+        icon_name = getattr(plugin, "icon", "tomate-plugin")
+        icon_path = self.config.get_icon_path(icon_name, 16)
 
         self._store.append(
             (
                 plugin.plugin_object.is_activated,
-                GridPlugin.pixbuf(iconpath),
+                GridPlugin.pixbuf(icon_path),
                 plugin.name,
                 GridPlugin.markup(plugin),
                 plugin,
