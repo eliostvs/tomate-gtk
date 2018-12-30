@@ -64,14 +64,15 @@ Bugs and Suggestions
 
 Bugs and suggestions should be reported [here][bugs].
 
-Change Logs
------------
+Changelog
+---------
 
 ### [Unreleased]
 
 #### Changed
 
 - Change UI to use a headerbar widget instead of a toolbar
+- The Task enum was renamed to Sessions
 
 #### Removed
 
