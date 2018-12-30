@@ -18,8 +18,7 @@ def gtkui(mocker):
                  graph=mocker.Mock(),
                  headerbar=mocker.Mock(),
                  timer_frame=mocker.Mock(),
-                 task_button=mocker.Mock(),
-                 task_entry=mocker.Mock())
+                 task_button=mocker.Mock())
 
 
 def test_view_module(graph):
@@ -37,8 +36,7 @@ def test_view_module(graph):
                         graph=Graph,
                         headerbar='view.headerbar',
                         timer_frame='view.timerframe',
-                        task_button='view.taskbutton',
-                        task_entry='view.taskentry')
+                        task_button='view.taskbutton')
 
     assert sorted(provider.dependencies) == sorted(dependencies)
 

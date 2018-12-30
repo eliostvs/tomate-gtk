@@ -22,7 +22,6 @@ class GtkUI(Subscriber):
         headerbar="view.headerbar",
         timer_frame="view.timerframe",
         task_button="view.taskbutton",
-        task_entry="view.taskentry",
     )
     def __init__(
         self,
@@ -33,7 +32,6 @@ class GtkUI(Subscriber):
         headerbar,
         timer_frame,
         task_button,
-        task_entry,
     ):
 
         self.config = config
@@ -55,7 +53,6 @@ class GtkUI(Subscriber):
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         box.pack_start(timer_frame.widget, False, False, 0)
-        box.pack_start(task_entry.widget, False, False, 0)
         box.pack_start(task_button.widget, False, False, 0)
 
         self.window.add(box)
