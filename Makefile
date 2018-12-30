@@ -8,7 +8,7 @@ TOMATE_PATH = $(PACKAGE_ROOT)/tomate
 XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local/share:/usr/share
 PYTHONPATH=PYTHONPATH=$(TOMATE_PATH):$(PACKAGE_ROOT)
 PROJECT = home:eliostvs:tomate
-OBS_API_URL = https://api.opensuse.org:443/trigger/runservice?project=$(PROJECT)&package=$(PACKAGE)
+OBS_API_URL = https://api.opensuse.org/trigger/runservice
 DEBUG = TOMATE_DEBUG=true
 WORK_DIR=/code
 CURRENT_VERSION = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
