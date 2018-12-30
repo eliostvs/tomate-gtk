@@ -56,6 +56,7 @@ trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
 
 release-%:
+	grep -q '\[Unreleased\]' || echo 'Create the [Unreleased] section in the changelog first!'
 	bumpversion --verbose --commit $*
 	git flow release start $(CURRENT_VERSION)
 	git flow release finish -p $(CURRENT_VERSION)
