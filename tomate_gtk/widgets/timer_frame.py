@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @register.factory("view.timerframe", scope=SingletonScope)
 class TimerFrame(Subscriber):
     def __init__(self):
-        self.widget = Gtk.Label(margin_top=30)
+        self.widget = Gtk.Label(margin_top=30, margin_bottom=10)
 
     @on(Events.Timer, [State.changed])
     def on_timer_changed(self, sender=None, **kwargs):
