@@ -22,7 +22,6 @@ class GtkUI(Subscriber):
         headerbar="view.headerbar",
         timer_frame="view.timerframe",
         task_button="view.taskbutton",
-        infobar="view.infobar",
         task_entry="view.taskentry",
     )
     def __init__(
@@ -34,7 +33,6 @@ class GtkUI(Subscriber):
         headerbar,
         timer_frame,
         task_button,
-        infobar,
         task_entry,
     ):
 
@@ -42,7 +40,6 @@ class GtkUI(Subscriber):
         self.session = session
         self.event = event
         self.graph = graph
-        self.infobar = infobar.widget
 
         self.window = Gtk.Window(
             title="Tomate",
@@ -57,7 +54,6 @@ class GtkUI(Subscriber):
         self.window.set_titlebar(headerbar.widget)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.pack_start(self.infobar, False, False, 0)
         box.pack_start(timer_frame.widget, False, False, 0)
         box.pack_start(task_entry.widget, False, False, 0)
         box.pack_start(task_button.widget, False, False, 0)
@@ -100,9 +96,6 @@ class GtkUI(Subscriber):
             logger.debug("component=view action=hide type=minimize")
             self.window.iconify()
             return Gtk.true
-
-    def show_message(self, message, level):
-        self.infobar.show_message(message, level)
 
     @property
     def widget(self):
