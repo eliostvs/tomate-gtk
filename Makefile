@@ -56,8 +56,7 @@ trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
 
 release-%:
-	grep -q '\[Unreleased\]' || echo 'Create the [Unreleased] section in the changelog first!'
+	@grep -q '\[Unreleased\]' README.md || (echo 'Create the [Unreleased] section in the changelog first!' && exit)
 	bumpversion --verbose --commit $*
 	git flow release start $(CURRENT_VERSION)
-	git flow release finish -p $(CURRENT_VERSION)
-	git push --tags
+	GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$(CURRENT_VERSION)" -T $(CURRENT_VERSION) $(CURRENT_VERSION)
