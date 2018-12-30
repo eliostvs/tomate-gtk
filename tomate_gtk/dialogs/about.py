@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from gi.repository import GdkPixbuf, Gtk
 from wiring import inject, SingletonScope
 from wiring.scanning import register
@@ -19,7 +17,7 @@ class AboutDialog(Gtk.AboutDialog):
             modal=True,
             program_name='Tomate Gtk',
             title='Tomate Gtk',
-            version='0.8.0',
+            version='0.9.0',
             website='https://github.com/eliostvs/tomate-gtk',
             website_label='Tomate GTK on Github',
         )

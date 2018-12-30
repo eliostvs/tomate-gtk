@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from locale import gettext as _
 
 import pytest
@@ -9,7 +7,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.constant import State
 from tomate.event import Events, connect_events, disconnect_events
-from tomate_gtk.widgets.menu import TrayIconMenu, Menu
+from tomate_gtk.widgets import TrayIconMenu, Menu
 
 
 @pytest.fixture
@@ -72,7 +70,6 @@ class TestMenu(object):
         refresh_gui()
 
         preference.set_transient_for.assert_called_once_with(view.widget)
-        preference.refresh_plugins.assert_called_once_with()
         preference.run.assert_called_once_with()
 
     def test_should_create_about_item(self, mocker):

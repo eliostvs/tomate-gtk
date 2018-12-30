@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import logging
 from locale import gettext as _
 
@@ -21,24 +19,19 @@ class Menu(object):
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
-        self.about_item = Gtk.MenuItem.new_with_label(_('About'))
-        self.about_item.connect('activate', self._on_about_item_activate, about)
-        self.widget.add(self.about_item)
-
         self.preference_item = Gtk.MenuItem.new_with_label(_('Preferences'))
-        self.preference_item.connect('activate', self._on_preference_item_activate, preference)
+        self.preference_item.connect('activate', self._on_item_activate, preference)
         self.widget.add(self.preference_item)
+
+        self.about_item = Gtk.MenuItem.new_with_label(_('About'))
+        self.about_item.connect('activate', self._on_item_activate, about)
+        self.widget.add(self.about_item)
 
         self.widget.show_all()
 
-    def _on_about_item_activate(self, widget, about):
-        about.set_transient_for(self.toplevel)
-        about.run()
-
-    def _on_preference_item_activate(self, widget, preference):
-        preference.set_transient_for(self.toplevel)
-        preference.refresh_plugins()
-        preference.run()
+    def _on_item_activate(self, _, widget):
+        widget.set_transient_for(self.toplevel)
+        widget.run()
 
     @property
     def toplevel(self):

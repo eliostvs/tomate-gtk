@@ -1,12 +1,8 @@
-from __future__ import unicode_literals
-
 import pytest
-from gi.repository import Gtk
-from wiring import Graph, SingletonScope
-from wiring.scanning import scan_to_graph
-
 from tomate.constant import State
 from tomate.view import UI, TrayIcon
+from wiring import Graph, SingletonScope
+from wiring.scanning import scan_to_graph
 
 
 @pytest.fixture
@@ -20,10 +16,9 @@ def gtkui(mocker):
                  event=mocker.Mock(),
                  config=mocker.Mock(),
                  graph=mocker.Mock(),
-                 toolbar=mocker.Mock(),
-                 timerframe=mocker.Mock(),
-                 taskbutton=mocker.Mock(),
-                 infobar=mocker.Mock())
+                 headerbar=mocker.Mock(),
+                 timer_frame=mocker.Mock(),
+                 task_button=mocker.Mock())
 
 
 def test_view_module(graph):
@@ -39,12 +34,11 @@ def test_view_module(graph):
                         event='tomate.events.view',
                         config='tomate.config',
                         graph=Graph,
-                        toolbar='view.toolbar',
-                        timerframe='view.timerframe',
-                        taskbutton='view.taskbutton',
-                        infobar='view.infobar')
+                        headerbar='view.headerbar',
+                        timer_frame='view.timerframe',
+                        task_button='view.taskbutton')
 
-    assert provider.dependencies == dependencies
+    assert sorted(provider.dependencies) == sorted(dependencies)
 
 
 def test_should_call_gtk_main(mocker, gtkui):
@@ -86,12 +80,6 @@ def test_should_hide_when_timer_is_running_and_trayicon_is_in_providers(gtkui):
 
 def test_interface_compliance(gtkui):
     UI.check_compliance(gtkui)
-
-
-def test_show_message(gtkui):
-    gtkui.show_message('message', Gtk.MessageType.INFO)
-
-    gtkui.infobar.show_message.assert_called_with('message', Gtk.MessageType.INFO)
 
 
 def test_should_should_window(gtkui, mocker):
