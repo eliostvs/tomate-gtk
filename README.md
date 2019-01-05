@@ -44,7 +44,7 @@ If you have installed the program using the **old ppa repository** uninstall the
 
 ### Arch
 
-    pacaur -S tomate-gtk
+The packages are available in [aur repository](https://aur.archlinux.org/packages/tomate-gtk/)
 
 Plugins
 -------
@@ -66,6 +66,12 @@ Bugs and suggestions should be reported [here][bugs].
 
 Changelog
 ---------
+
+### 0.9.1
+
+#### Changed
+
+- Arch linux installation instructions
 
 ### 0.9.0
 
