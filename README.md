@@ -67,6 +67,12 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
+### [Unreleased]
+
+#### Fixed
+
+- Timer countdown blinking
+
 ### 0.9.1
 
 #### Changed
