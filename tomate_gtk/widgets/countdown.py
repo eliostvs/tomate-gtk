@@ -34,4 +34,4 @@ class Countdown(Subscriber):
 
     @staticmethod
     def timer_markup(time_left):
-        return '<span face="sans-serif" font="50">{}</span>'.format(time_left)
+        return '<span face="sans-serif" font="45">{}</span>'.format(time_left)
