@@ -17,7 +17,7 @@ def gtkui(mocker):
                  config=mocker.Mock(),
                  graph=mocker.Mock(),
                  headerbar=mocker.Mock(),
-                 timer_frame=mocker.Mock(),
+                 countdown=mocker.Mock(),
                  task_button=mocker.Mock())
 
 
@@ -35,7 +35,7 @@ def test_view_module(graph):
                         config='tomate.config',
                         graph=Graph,
                         headerbar='view.headerbar',
-                        timer_frame='view.timerframe',
+                        countdown='view.countdown',
                         task_button='view.taskbutton')
 
     assert sorted(provider.dependencies) == sorted(dependencies)

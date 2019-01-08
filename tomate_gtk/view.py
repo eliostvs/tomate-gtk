@@ -20,7 +20,7 @@ class GtkUI(Subscriber):
         config="tomate.config",
         graph=Graph,
         headerbar="view.headerbar",
-        timer_frame="view.timerframe",
+        countdown="view.countdown",
         task_button="view.taskbutton",
     )
     def __init__(
@@ -30,7 +30,7 @@ class GtkUI(Subscriber):
         config,
         graph,
         headerbar,
-        timer_frame,
+        countdown,
         task_button,
     ):
 
@@ -52,7 +52,7 @@ class GtkUI(Subscriber):
         self.window.set_titlebar(headerbar.widget)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.pack_start(timer_frame.widget, False, False, 0)
+        box.pack_start(countdown.widget, False, False, 0)
         box.pack_start(task_button.widget, False, False, 0)
 
         self.window.add(box)
