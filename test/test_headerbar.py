@@ -1,17 +1,17 @@
 import pytest
 from conftest import refresh_gui
 from gi.repository import Gtk
-from tomate.constant import State
-from tomate.event import Session, connect_events
-from tomate.session import Session as ModelSession
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
+from tomate.constant import State, Sessions
+from tomate.event import Session, connect_events
+from tomate.session import Session as ModelSession, SessionPayload, FinishedSession
 from tomate_gtk.widgets import HeaderBar
 
-ONE_PAST_SESSION = [("session_type", 0)]
+ONE_FINISHED_SESSION = [FinishedSession(1, Sessions.pomodoro, 10)]
 
-NO_PAST_SESSIONS = []
+NO_FINISHED_SESSIONS = []
 
 
 @pytest.fixture
@@ -64,17 +64,20 @@ class TestSessionStart:
 
 
 class TestSessionStopOrFinished:
-    def test_buttons_visibility_and_title_with_no_past_sessions(self, header_bar, model_session):
-        def side_effect(s):
-            if s == NO_PAST_SESSIONS:
-                return 0
+    def test_buttons_visibility_and_title_with_no_past_sessions(
+            self, header_bar, model_session
+    ):
 
-            raise AssertionError
-
-        model_session.count_pomodoros.side_effect = side_effect
+        payload = SessionPayload(
+            type=Sessions.pomodoro,
+            sessions=NO_FINISHED_SESSIONS,
+            state=State.started,
+            duration=0,
+            task="",
+        )
 
         for state in [State.stopped, State.finished]:
-            Session.send(state, sessions=NO_PAST_SESSIONS)
+            Session.send(state, payload=payload)
 
             assert header_bar.start_button.get_visible() is True
             assert header_bar.stop_button.get_visible() is False
@@ -82,17 +85,20 @@ class TestSessionStopOrFinished:
 
             assert header_bar.widget.props.title == "No session yet"
 
-    def test_changes_buttons_visibility_and_title_with_one_past_session(self, header_bar, model_session):
-        def side_effect(s):
-            if s == ONE_PAST_SESSION:
-                return 1
+    def test_changes_buttons_visibility_and_title_with_one_past_session(
+            self, header_bar, model_session
+    ):
 
-            raise AssertionError
-
-        model_session.count_pomodoros.side_effect = side_effect
+        payload = SessionPayload(
+            type=Sessions.pomodoro,
+            sessions=ONE_FINISHED_SESSION,
+            state=State.finished,
+            duration=1,
+            task="",
+        )
 
         for state in [State.stopped, State.finished]:
-            Session.send(state, sessions=ONE_PAST_SESSION)
+            Session.send(state, payload=payload)
 
             assert header_bar.start_button.get_visible() is True
             assert header_bar.stop_button.get_visible() is False
