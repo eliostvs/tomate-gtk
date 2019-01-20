@@ -67,6 +67,12 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
+### [Unreleased]
+
+#### Changed
+
+- The timer, session and settings now emit a payload object instead of a dictionary
+
 ### 0.9.2
 
 #### Fixed
