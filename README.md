@@ -67,7 +67,7 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
-### [Unreleased]
+### 0.10.0
 
 #### Changed
 
