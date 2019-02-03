@@ -4,6 +4,7 @@ from locale import gettext as _
 from gi.repository import Gtk
 from tomate.constant import State
 from tomate.event import Subscriber, Events, on
+from tomate.session import SessionPayload
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -70,13 +71,12 @@ class HeaderBar(Subscriber):
         self.reset_button.set_sensitive(False)
 
     @on(Events.Session, [State.stopped, State.finished])
-    def on_session_stopped_or_finished(self, *args, **kwargs):
+    def on_session_stopped_or_finished(self, _, payload: SessionPayload):
         self.start_button.set_visible(True)
         self.stop_button.set_visible(False)
 
-        pomodoro_sessions_count = self.session.count_pomodoros(kwargs.get("sessions"))
-        self.reset_button.set_sensitive(bool(pomodoro_sessions_count))
-        self.update_title(pomodoro_sessions_count)
+        self.reset_button.set_sensitive(bool(payload.finished_pomodoros))
+        self.update_title(len(payload.finished_pomodoros))
 
     @on(Events.Session, [State.reset])
     def updates_session_message(self, *args, **kwargs):
@@ -84,10 +84,10 @@ class HeaderBar(Subscriber):
 
         self.update_title(0)
 
-    def update_title(self, pomodoro_sessions: int):
+    def update_title(self, finished_pomodoros: int):
         self.widget.props.title = (
-            _("Session {}".format(pomodoro_sessions))
-            if pomodoro_sessions > 0
+            _("Session {}".format(finished_pomodoros))
+            if finished_pomodoros > 0
             else _("No session yet")
         )
 

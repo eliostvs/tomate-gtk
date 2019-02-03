@@ -1,9 +1,11 @@
 import locale
 import logging
 from locale import gettext as _
+from typing import Optional
 
 from tomate.constant import Sessions, State
 from tomate.event import Subscriber, on, Events
+from tomate.session import SessionPayload
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -30,24 +32,24 @@ class TaskButton(Subscriber):
         self.mode_button.append_text(_("Pomodoro"))
         self.mode_button.append_text(_("Short Break"))
         self.mode_button.append_text(_("Long Break"))
-        self.mode_button.set_selected(Sessions.pomodoro)
 
         self.mode_button.connect("mode_changed", self.on_mode_changed)
 
-    def on_mode_changed(self, widget, index):
+    def on_mode_changed(self, _, index):
         session_type = Sessions.by_index(index)
 
         self.session.change(session=session_type)
 
     @on(Events.Session, [State.started])
-    def disable(self, sender=None, **kwargs):
+    def disable(self, *args, **kwargs):
         self.mode_button.set_sensitive(False)
 
     @on(Events.Session, [State.finished, State.stopped])
-    def enable(self, sender=None, **kwargs):
+    def enable(self, sender=None, payload: Optional[SessionPayload] = None):
         self.mode_button.set_sensitive(True)
 
-        session_type = kwargs.get("current", Sessions.pomodoro)
+        session_type = payload.type if payload else Sessions.pomodoro
+
         self.mode_button.set_selected(session_type.value)
 
     @property

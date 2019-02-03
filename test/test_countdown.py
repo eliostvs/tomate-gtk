@@ -1,12 +1,13 @@
 import xml.etree.ElementTree as ET
 
 import pytest
-from tomate.constant import State
-from tomate.event import Session, Timer
-from tomate.utils import format_time_left
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
+from tomate.constant import State
+from tomate.event import Session, Timer
+from tomate.utils import format_time_left
+from tomate.timer import TimerPayload
 from tomate_gtk.widgets import Countdown
 
 
@@ -28,7 +29,7 @@ def test_countdown_module(graph, countdown):
 
 
 def test_update_timer_label_when_timer_changed(countdown):
-    Timer.send(State.changed, time_left=10)
+    Timer.send(State.changed, payload=TimerPayload(time_left=10, duration=0))
 
     markup = countdown.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
@@ -37,7 +38,7 @@ def test_update_timer_label_when_timer_changed(countdown):
 
 
 def test_update_timer_label_when_session_stops(countdown):
-    Session.send(State.stopped, duration=10)
+    Session.send(State.stopped, payload=TimerPayload(duration=10, time_left=10))
 
     markup = countdown.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
@@ -46,7 +47,7 @@ def test_update_timer_label_when_session_stops(countdown):
 
 
 def test_update_timer_label_when_session_changes(countdown):
-    Session.send(State.changed, duration=1)
+    Session.send(State.changed, payload=TimerPayload(duration=1, time_left=1))
 
     markup = countdown.timer_markup(format_time_left(1))
     root = ET.fromstring(markup)
