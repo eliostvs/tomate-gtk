@@ -15,9 +15,11 @@ def graph():
 
 @pytest.fixture
 def config(graph, mocker):
+    from tomate.config import Config
+
     parent = os.path.dirname(os.path.dirname(__file__))
     icon_path = os.path.join(parent, 'data/icons/hicolor/16x16/apps/tomate-plugin.png')
-    mock_config = mocker.Mock(**{'get_int.return_value': 25, 'get_icon_path.return_value': icon_path})
+    mock_config = mocker.Mock(Config, **{'get_int.return_value': 25, 'get_icon_path.return_value': icon_path})
 
     graph.register_instance('tomate.config', mock_config)
 
