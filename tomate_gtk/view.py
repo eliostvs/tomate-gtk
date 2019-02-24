@@ -24,14 +24,7 @@ class GtkUI(Subscriber):
         task_button="view.taskbutton",
     )
     def __init__(
-        self,
-        session,
-        event,
-        config,
-        graph,
-        headerbar,
-        countdown,
-        task_button,
+        self, session, event, config, graph, headerbar, countdown, task_button
     ):
 
         self.config = config

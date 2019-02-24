@@ -9,9 +9,7 @@ class ModeButtonItem(Gtk.ToggleButton):
 
 
 class ModeButton(Gtk.Box):
-    __gsignals__ = {
-        'mode_changed': (GObject.SignalFlags.RUN_FIRST, None, (int,))
-    }
+    __gsignals__ = {"mode_changed": (GObject.SignalFlags.RUN_FIRST, None, (int,))}
 
     def __init__(self, **kwargs):
         Gtk.Box.__init__(self, **kwargs)
@@ -21,7 +19,7 @@ class ModeButton(Gtk.Box):
 
         style = self.get_style_context()
         style.add_class(Gtk.STYLE_CLASS_LINKED)
-        style.add_class('raised')
+        style.add_class("raised")
 
     def get_selected(self):
         return self.__selected
@@ -29,7 +27,7 @@ class ModeButton(Gtk.Box):
     def append_text(self, text):
         button = ModeButtonItem(len(self.__items))
         button.add(Gtk.Label.new(text))
-        button.connect('button_press_event', self.on_button_press_event)
+        button.connect("button_press_event", self.on_button_press_event)
         button.show_all()
 
         self.__items[button.index] = button
@@ -53,6 +51,6 @@ class ModeButton(Gtk.Box):
 
             self.__selected = index
 
-            self.emit('mode_changed', self.__selected)
+            self.emit("mode_changed", self.__selected)
 
             return True
