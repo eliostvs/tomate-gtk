@@ -42,19 +42,21 @@ def header_bar(session, mock_menu, mock_shortcuts):
     return subject
 
 
-def test_header_bar_module(graph, session, mock_menu, mock_shortcuts):
+def test_module(graph, session, mock_menu, mock_shortcuts):
+    spec = "view.headerbar"
+
     scan_to_graph(["tomate_gtk.widgets.headerbar"], graph)
 
-    assert "view.headerbar" in graph.providers
+    assert spec in graph.providers
 
     graph.register_instance("view.menu", mock_menu)
     graph.register_instance("tomate.session", mock_shortcuts)
     graph.register_instance("view.shortcut", mock_shortcuts)
 
-    provider = graph.providers["view.headerbar"]
+    provider = graph.providers[spec]
     assert provider.scope == SingletonScope
 
-    assert isinstance(graph.get("view.headerbar"), HeaderBar)
+    assert isinstance(graph.get(spec), HeaderBar)
 
 
 def test_connect_shortcuts(mock_shortcuts, header_bar):

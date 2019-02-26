@@ -80,13 +80,15 @@ def test_initialize(shortcut_manager, mocker, config):
 
 
 def test_module(graph, mocker, shortcut_manager):
+    spec = "view.shortcut"
+
     scan_to_graph(["tomate_gtk.shortcut"], graph)
 
-    assert "view.shortcut" in graph.providers
+    assert spec in graph.providers
 
     graph.register_instance("tomate.config", mocker.Mock())
 
-    provider = graph.providers["view.shortcut"]
+    provider = graph.providers[spec]
     assert provider.scope == SingletonScope
 
-    assert isinstance(graph.get("view.shortcut"), shortcut_manager.__class__)
+    assert isinstance(graph.get(spec), shortcut_manager.__class__)

@@ -27,7 +27,7 @@ def task_button(mocker):
 
 
 @pytest.fixture
-def ui(mocker, shortcut_manager, task_button):
+def subject(mocker, shortcut_manager, task_button):
     mocker.patch("tomate_gtk.view.Gtk.Window")
     mocker.patch("tomate_gtk.view.GdkPixbuf")
 
@@ -49,16 +49,18 @@ def ui(mocker, shortcut_manager, task_button):
     )
 
 
-def test_interface_compliance(ui):
-    UI.check_compliance(ui)
+def test_interface_compliance(subject):
+    UI.check_compliance(subject)
 
 
 def test_module(graph):
+    spec = "tomate.view"
+
     scan_to_graph(["tomate_gtk.view"], graph)
 
-    assert "tomate.view" in graph.providers
+    assert spec in graph.providers
 
-    provider = graph.providers["tomate.view"]
+    provider = graph.providers[spec]
 
     assert provider.scope == SingletonScope
 
@@ -78,80 +80,80 @@ def test_module(graph):
 
 class TestInitialize:
     def test_should_initialize_shortcuts_and_session_buttons(
-            self, ui, task_button, shortcut_manager
+            self, subject, task_button, shortcut_manager
     ):
         # when
         assert task_button.enable.called_once_with()
-        assert shortcut_manager.initialize(ui.widget)
+        assert shortcut_manager.initialize(subject.widget)
 
 
 class TestRun:
-    def test_should_call_gtk_main(self, mocker, ui):
+    def test_should_call_gtk_main(self, mocker, subject):
         # given
         gtk = mocker.patch("tomate_gtk.view.Gtk")
 
         # when
-        ui.run()
+        subject.run()
 
         # then
         gtk.main.assert_called_once_with()
 
 
 class TestHide:
-    def test_should_minimize_when_none_tray_plugin_is_enabled(self, ui):
+    def test_should_minimize_when_none_tray_plugin_is_enabled(self, subject):
         # given
-        ui.graph.providers = {}
+        subject.graph.providers = {}
 
         # when
-        assert ui.hide() is Gtk.true
+        assert subject.hide() is Gtk.true
 
         # then
-        ui.dispatcher.send.assert_called_with(State.hid)
-        ui.widget.iconify.assert_called_once_with()
+        subject.dispatcher.send.assert_called_with(State.hid)
+        subject.widget.iconify.assert_called_once_with()
 
-    def test_should_hide_in_tray_when_a_tray_plugin_is_enabled(self, ui):
+    def test_should_hide_in_tray_when_a_tray_plugin_is_enabled(self, subject):
         # given
-        ui.graph.providers = {TrayIcon: ""}
+        subject.graph.providers = {TrayIcon: ""}
 
         return_value = random.random()
-        ui.widget.hide_on_delete.return_value = return_value
+        subject.widget.hide_on_delete.return_value = return_value
 
         # when
-        assert ui.hide() is return_value
+        assert subject.hide() is return_value
 
         # then
-        ui.dispatcher.send.assert_called_with(State.hid)
+        subject.dispatcher.send.assert_called_with(State.hid)
 
 
 class TestQuit:
-    def test_should_quit_when_timer_is_not_running(self, mocker, ui):
+    def test_should_quit_when_timer_is_not_running(self, mocker, subject):
         # given
         gtk = mocker.patch("tomate_gtk.view.Gtk")
-        ui.session.is_running.return_value = False
+        subject.session.is_running.return_value = False
 
         # when
-        ui.quit()
+        subject.quit()
 
         # then
         gtk.main_quit.assert_called_once_with()
 
-    def test_should_hide_when_timer_is_running(self, ui, mocker):
+    def test_should_hide_when_timer_is_running(self, subject, mocker):
         # given
-        ui.hide = mocker.Mock()
-        ui.session.is_running.return_value = True
+        subject.hide = mocker.Mock()
+        subject.session.is_running.return_value = True
 
         # when
-        ui.quit()
+        subject.quit()
 
         # then
-        ui.hide.assert_called_once_with()
+        subject.hide.assert_called_once_with()
 
 
 class TestShow:
-    def test_should_present_window(self, ui, mocker):
+    def test_should_present_window(self, subject, mocker):
         # when
         Events.Session.send(State.finished)
 
         # then
-        ui.dispatcher.send.assert_called_once_with(State.showed)
-        ui.widget.present_with_time_once(mocker.ANY)
+        subject.dispatcher.send.assert_called_once_with(State.showed)
+        subject.widget.present_with_time_once(mocker.ANY)

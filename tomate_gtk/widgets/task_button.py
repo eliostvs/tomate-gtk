@@ -21,7 +21,7 @@ class TaskButton(Subscriber):
     def __init__(self, session):
         self.session = session
 
-        self.mode_button = ModeButton(
+        self.widget = ModeButton(
             can_focus=False,
             homogeneous=True,
             margin_bottom=12,
@@ -29,11 +29,11 @@ class TaskButton(Subscriber):
             margin_right=12,
         )
 
-        self.mode_button.append_text(_("Pomodoro"))
-        self.mode_button.append_text(_("Short Break"))
-        self.mode_button.append_text(_("Long Break"))
+        self.widget.append_text(_("Pomodoro"))
+        self.widget.append_text(_("Short Break"))
+        self.widget.append_text(_("Long Break"))
 
-        self.mode_button.connect("mode_changed", self.on_mode_changed)
+        self.widget.connect("mode_changed", self.on_mode_changed)
 
     def on_mode_changed(self, _, index):
         session_type = Sessions.by_index(index)
@@ -42,16 +42,13 @@ class TaskButton(Subscriber):
 
     @on(Events.Session, [State.started])
     def disable(self, *args, **kwargs):
-        self.mode_button.set_sensitive(False)
+        self.widget.set_sensitive(False)
 
     @on(Events.Session, [State.finished, State.stopped])
     def enable(self, sender=None, payload: Optional[SessionPayload] = None):
-        self.mode_button.set_sensitive(True)
+        self.widget.set_sensitive(True)
 
         session_type = payload.type if payload else Sessions.pomodoro
 
-        self.mode_button.set_selected(session_type.value)
+        self.widget.set_selected(session_type.value)
 
-    @property
-    def widget(self):
-        return self.mode_button

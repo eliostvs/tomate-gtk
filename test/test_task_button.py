@@ -5,76 +5,79 @@ from wiring.scanning import scan_to_graph
 
 from tomate.constant import State, Sessions
 from tomate.event import Session, connect_events
-from tomate.session import Session as ModelSession, SessionPayload
+from tomate.session import SessionPayload
 from tomate_gtk.widgets import TaskButton
 from tomate_gtk.widgets.mode_button import ModeButton
 
 
 @pytest.fixture
-def mock_session(mocker):
-    return mocker.Mock(spec=ModelSession)
-
-
-@pytest.fixture
-def task_button(mock_session):
+def subject(session):
     Session.receivers.clear()
 
-    instance = TaskButton(mock_session)
+    instance = TaskButton(session)
+
     connect_events(instance)
 
     return instance
 
 
-def test_task_button_module(graph, mocker):
+def test_module(graph, session):
+    spec = "view.taskbutton"
+
     scan_to_graph(["tomate_gtk.widgets.task_button"], graph)
+    graph.register_instance("tomate.session", session)
 
-    assert "view.taskbutton" in graph.providers
+    assert spec in graph.providers
 
-    provider = graph.providers["view.taskbutton"]
+    provider = graph.providers[spec]
 
     assert provider.scope == SingletonScope
 
-    graph.register_factory("tomate.session", mocker.Mock)
-
-    assert isinstance(graph.get("view.taskbutton"), TaskButton)
+    assert isinstance(graph.get(spec), TaskButton)
 
 
-def test_button_should_be_a_mode_button_widget(task_button):
-    assert isinstance(task_button.widget, ModeButton)
+def test_should_be_a_mode_button(subject):
+    assert isinstance(subject.widget, ModeButton)
 
 
-def test_buttons_should_be_activate_when_session_finishes(task_button):
-    Session.send(State.finished)
+class TestSessionStart:
+    def test_buttons_should_be_deactivate_when_session_starts(self, subject):
+        Session.send(State.started)
 
-    assert task_button.mode_button.get_sensitive() is True
-
-
-def test_buttons_should_be_deactivate_when_session_starts(task_button):
-    Session.send(State.started)
-
-    assert task_button.mode_button.get_sensitive() is False
+        assert subject.widget.get_sensitive() is False
 
 
-def test_buttons_should_be_activate_when_session_stops(task_button):
-    Session.send(State.stopped)
+class TestSessionStop:
+    def test_buttons_should_be_activate_when_session_stops(self, subject):
+        Session.send(State.stopped)
 
-    assert task_button.mode_button.get_sensitive() is True
-
-
-def test_change_button_when_session_finishes(task_button):
-    payload = SessionPayload(
-        type=Sessions.shortbreak, sessions=[], state=State.finished, duration=0, task=""
-    )
-
-    Session.send(State.finished, payload=payload)
-
-    assert task_button.mode_button.get_selected() is Sessions.shortbreak.value
-    task_button.session.change.assert_called_once_with(session=Sessions.shortbreak)
+        assert subject.widget.get_sensitive() is True
 
 
-def test_change_task_when_mode_button_changes(task_button):
-    task_button.mode_button.emit("mode_changed", Sessions.longbreak.value)
+class TestSessionFinished:
+    def test_change_button_when_session_finishes(self, subject):
+        payload = SessionPayload(
+            type=Sessions.shortbreak,
+            sessions=[],
+            state=State.finished,
+            duration=0,
+            task="",
+        )
+
+        Session.send(State.finished, payload=payload)
+
+        assert subject.widget.get_selected() is Sessions.shortbreak.value
+        subject.session.change.assert_called_once_with(session=Sessions.shortbreak)
+
+    def test_buttons_should_be_activate_when_session_finishes(self, subject):
+        Session.send(State.finished)
+
+        assert subject.widget.get_sensitive() is True
+
+
+def test_change_task_when_mode_button_changes(subject):
+    subject.widget.emit("mode_changed", Sessions.longbreak.value)
 
     refresh_gui(0)
 
-    task_button.session.change.assert_called_once_with(session=Sessions.longbreak)
+    subject.session.change.assert_called_once_with(session=Sessions.longbreak)

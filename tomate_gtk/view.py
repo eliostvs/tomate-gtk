@@ -58,6 +58,7 @@ class GtkUI(Subscriber):
 
         self.widget.add(box)
 
+        # TODO: this connect
         self.widget.connect("delete-event", lambda *args: self.quit())
 
         self.widget.show_all()
