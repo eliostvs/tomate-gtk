@@ -6,8 +6,16 @@ from gi.repository import Gtk
 
 
 @pytest.fixture
+def session(mocker):
+    from tomate.session import Session
+
+    return mocker.Mock(Session)
+
+
+@pytest.fixture
 def graph():
     from tomate.graph import graph
+
     graph.providers.clear()
 
     return graph
@@ -29,14 +37,18 @@ def config(graph, mocker):
 @pytest.fixture
 def plugin_manager(graph, mocker):
     mock_plugin_manager = mocker.Mock()
+
     graph.register_instance('tomate.plugin', mock_plugin_manager)
+
     return mock_plugin_manager
 
 
 @pytest.fixture
 def lazy_proxy(graph, mocker):
     mock_proxy = mocker.Mock()
+
     graph.register_instance('tomate.proxy', mock_proxy)
+
     return mock_proxy
 
 

@@ -4,18 +4,22 @@ from locale import gettext as _
 from gi.repository import Gtk
 from tomate.constant import State
 from tomate.event import Subscriber, Events, on
-from tomate.session import SessionPayload
+from tomate.session import SessionPayload, Session
 from wiring import inject, SingletonScope
 from wiring.scanning import register
+
+from ..shortcut import ShortcutManager
+from .menu import Menu
 
 locale.textdomain("tomate")
 
 
 @register.factory("view.headerbar", scope=SingletonScope)
 class HeaderBar(Subscriber):
-    @inject(session="tomate.session", menu="view.menu")
-    def __init__(self, session, menu):
+    @inject(session="tomate.session", menu="view.menu", shortcuts="view.shortcut")
+    def __init__(self, session: Session, menu: Menu, shortcuts: ShortcutManager):
         self.session = session
+        self.shortcuts = shortcuts
 
         self.widget = Gtk.HeaderBar(
             show_close_button=True,
@@ -23,29 +27,29 @@ class HeaderBar(Subscriber):
             decoration_layout=":close",
         )
 
-        self.start_button = HeaderBar.button(
-            Gtk.STOCK_MEDIA_PLAY, "Starts the session", self.on_start_button_clicked
+        self.start_button = self.create_button(
+            Gtk.STOCK_MEDIA_PLAY,
+            "Starts the session",
+            self.on_start_button_clicked,
+            shortcuts.START,
         )
 
-        self.widget.pack_start(self.start_button)
-
-        self.stop_button = HeaderBar.button(
+        self.stop_button = self.create_button(
             Gtk.STOCK_MEDIA_STOP,
             "Stops the session",
             self.on_stop_button_clicked,
+            shortcuts.STOP,
             visible=False,
             no_show_all=True,
         )
 
-        self.widget.pack_start(self.stop_button)
-
-        self.reset_button = HeaderBar.button(
+        self.reset_button = self.create_button(
             Gtk.STOCK_CLEAR,
             "Resets the current sessions",
             self.on_reset_button_clicked,
+            shortcuts.RESET,
             sensitive=False,
         )
-        self.widget.pack_start(self.reset_button)
 
         button = Gtk.MenuButton(popup=menu.widget)
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
@@ -53,13 +57,13 @@ class HeaderBar(Subscriber):
 
         self.widget.pack_end(button)
 
-    def on_start_button_clicked(self, widget):
+    def on_start_button_clicked(self, *args):
         self.session.start()
 
-    def on_stop_button_clicked(self, widget):
+    def on_stop_button_clicked(self, *args):
         self.session.stop()
 
-    def on_reset_button_clicked(self, widget):
+    def on_reset_button_clicked(self, *args):
         self.session.reset()
 
     @on(Events.Session, [State.started])
@@ -91,8 +95,9 @@ class HeaderBar(Subscriber):
             else _("No session yet")
         )
 
-    @staticmethod
-    def button(icon_name, tooltip_text, on_clicked, **props):
+    def create_button(
+            self, icon_name, tooltip_text, on_clicked, shortcut_name, **props
+    ):
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
         image.show()
 
@@ -100,5 +105,9 @@ class HeaderBar(Subscriber):
         button.add(image)
 
         button.connect("clicked", on_clicked)
+
+        self.shortcuts.connect(shortcut_name, on_clicked)
+
+        self.widget.pack_start(button)
 
         return button
