@@ -67,6 +67,12 @@ Bugs and suggestions should be reported [here][bugs].
 Changelog
 ---------
 
+### [Unreleased]
+
+#### Added
+
+- Keyboard shortcuts to start (control + s), stop (control + p) and reset (control + r) sessions
+
 ### 0.10.0
 
 #### Changed
