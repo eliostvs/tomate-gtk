@@ -16,6 +16,27 @@ def shortcut_manager(mocker, config):
     return ShortcutManager(config, mock.Mock(Gtk.AccelGroup))
 
 
+def test_label(shortcut_manager, config):
+    # given
+    shortcut_name = "start"
+    shortcut = "<control>s"
+
+    def side_effect(section, option, fallback=None):
+        assert section == "shortcuts"
+        assert option == shortcut_name
+        assert fallback == shortcut
+
+        return shortcut
+
+    config.get.side_effect = side_effect
+
+    # when
+    label = shortcut_manager.label(shortcut_name)
+
+    # then
+    assert label == "Ctrl+S"
+
+
 @pytest.mark.parametrize(
     "option, shortcut",
     (["start", "<control>s"], ["stop", "<control>p"], ["reset", "<control>r"]),
@@ -35,18 +56,17 @@ def test_connect(option, shortcut, shortcut_manager, mocker, config):
         return shortcut
 
     config.get.side_effect = side_effect
-    config.SECTION_SHORTCUTS = "shortcuts"
 
     # When
     shortcut_manager.connect(option, fn)
 
     # Then
     shortcut_manager.accel_group.connect_by_path.assert_called_once_with(
-        "<Tomate>/accelerators/{}".format(option), fn
+        "<tomate>/Global/{}".format(option), fn
     )
 
     Gtk.AccelMap.add_entry.assert_any_call(
-        "<Tomate>/accelerators/{}".format(option), key, mod
+        "<tomate>/Global/{}".format(option), key, mod
     )
 
 
@@ -62,7 +82,7 @@ def test_change(shortcut_manager):
 
     # Then
     Gtk.AccelMap.change_entry.assert_called_once_with(
-        f"<Tomate>/accelerators/name", key, mod, True
+        "<tomate>/Global/name", key, mod, True
     )
 
 
