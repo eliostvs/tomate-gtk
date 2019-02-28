@@ -80,7 +80,7 @@ def test_module(graph):
 
 class TestInitialize:
     def test_should_initialize_shortcuts_and_session_buttons(
-            self, subject, task_button, shortcut_manager
+        self, subject, task_button, shortcut_manager
     ):
         # when
         assert task_button.enable.called_once_with()

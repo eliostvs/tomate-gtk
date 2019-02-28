@@ -28,9 +28,7 @@ def preference(timer_tab_mock, extension_tab_mock):
 
 
 class TestModule:
-    def test_extension_tab(
-            self, graph, session, config, plugin_manager, lazy_proxy
-    ):
+    def test_extension_tab(self, graph, session, config, plugin_manager, lazy_proxy):
         graph.register_instance("tomate.plugin", plugin_manager)
         graph.register_instance("tomate.config", config)
         graph.register_instance("tomate.proxy", lazy_proxy)
@@ -80,14 +78,16 @@ def plugin(mocker):
 
 
 class TestPreferenceDialog:
-    def test_refresh_plugin_list_when_widget_is_run(self, preference, extension_tab_mock):
+    def test_refresh_plugin_list_when_widget_is_run(
+        self, preference, extension_tab_mock
+    ):
         GLib.timeout_add(1, lambda: preference.destroy() and False)
         preference.run()
 
         extension_tab_mock.refresh.assert_called_once()
 
     def test_disable_plugin_settings_button_when_plugin_when_has_no_settings(
-            self, plugin_manager, config, lazy_proxy, plugin
+        self, plugin_manager, config, lazy_proxy, plugin
     ):
         plugin.plugin_object.is_activated = True
         plugin.plugin_object.has_activated = False
@@ -100,7 +100,7 @@ class TestPreferenceDialog:
         assert extension_tab.plugin_settings_button.get_sensitive() is False
 
     def test_activate_plugin_settings_button_when_plugin_has_settings(
-            self, plugin_manager, config, lazy_proxy, plugin
+        self, plugin_manager, config, lazy_proxy, plugin
     ):
         plugin.plugin_object.is_activated = True
         plugin.plugin_object.has_settings = True
@@ -113,7 +113,7 @@ class TestPreferenceDialog:
         assert extension_tab.plugin_settings_button.get_sensitive() is True
 
     def test_show_plugin_settings(
-            self, plugin_manager, config, lazy_proxy, plugin, mocker
+        self, plugin_manager, config, lazy_proxy, plugin, mocker
     ):
         plugin.plugin_object.is_activated = True
         plugin.plugin_object.has_settings = True

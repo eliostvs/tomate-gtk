@@ -51,4 +51,3 @@ class TaskButton(Subscriber):
         session_type = payload.type if payload else Sessions.pomodoro
 
         self.widget.set_selected(session_type.value)
-

@@ -17,9 +17,9 @@ def subject():
 
 
 def test_module(graph, subject):
-    spec = 'view.countdown'
+    spec = "view.countdown"
 
-    scan_to_graph(['tomate_gtk.widgets.countdown'], graph)
+    scan_to_graph(["tomate_gtk.widgets.countdown"], graph)
 
     assert spec in graph.providers
 

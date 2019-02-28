@@ -38,7 +38,7 @@ class TestMenu:
         return Menu(mock_about, mock_preference, lazy_proxy)
 
     def test_should_run_preference_widget_on_preference_item_activate(
-            self, subject, mock_view, mock_preference
+        self, subject, mock_view, mock_preference
     ):
         subject.preference_item.activate()
         refresh_gui()
@@ -47,7 +47,7 @@ class TestMenu:
         mock_preference.run.assert_called_once_with()
 
     def test_should_run_preference_widget_on_about_item_activate(
-            self, subject, mock_view, mock_about
+        self, subject, mock_view, mock_about
     ):
         subject.about_item.activate()
         refresh_gui()
@@ -94,7 +94,9 @@ class TestTrayIconMenu(object):
 
         mock_view.show.assert_called_once_with()
 
-    def test_should_change_items_visibility_when_window_is_show(self, subject, mock_view):
+    def test_should_change_items_visibility_when_window_is_show(
+        self, subject, mock_view
+    ):
         Events.View.send(State.showed)
 
         assert subject.hide_item.get_visible()
@@ -107,7 +109,9 @@ class TestTrayIconMenu(object):
 
         mock_view.hide.assert_called_once_with()
 
-    def test_should_change_items_visibility_when_window_is_hide(self, subject, mock_view):
+    def test_should_change_items_visibility_when_window_is_hide(
+        self, subject, mock_view
+    ):
         Events.View.send(State.hid)
 
         assert not subject.hide_item.get_visible()
