@@ -2,14 +2,14 @@ import locale
 from locale import gettext as _
 
 from gi.repository import Gtk
-from tomate.constant import State
-from tomate.event import Subscriber, Events, on
-from tomate.session import SessionPayload, Session
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from ..shortcut import ShortcutManager
+from tomate.constant import State
+from tomate.event import Subscriber, Events, on
+from tomate.session import SessionPayload, Session
 from .menu import Menu
+from ..shortcut import ShortcutManager
 
 locale.textdomain("tomate")
 
@@ -45,7 +45,7 @@ class HeaderBar(Subscriber):
 
         self.reset_button = self.create_button(
             Gtk.STOCK_CLEAR,
-            "Resets the current sessions",
+            "Clear the count of sessions",
             self.on_reset_button_clicked,
             shortcuts.RESET,
             sensitive=False,
@@ -96,12 +96,13 @@ class HeaderBar(Subscriber):
         )
 
     def create_button(
-            self, icon_name, tooltip_text, on_clicked, shortcut_name, **props
+        self, icon_name, tooltip_text, on_clicked, shortcut_name, **props
     ):
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
         image.show()
 
-        button = Gtk.Button(tooltip_text=_(tooltip_text), **props)
+        tooltip = "{} ({})".format(_(tooltip_text), self.shortcuts.label(shortcut_name))
+        button = Gtk.Button(tooltip_text=tooltip, **props)
         button.add(image)
 
         button.connect("clicked", on_clicked)
