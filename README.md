@@ -18,6 +18,7 @@ Installation
 ### Ubuntu 16.04+
 
 If you have installed the program using the **old ppa repository** uninstall the old version first.
+If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** variable to the Ubuntu version number, such as 16.04, rather than running the sed script bellow.
 
     RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
     sudo wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key | sudo apt-key add -
@@ -66,6 +67,12 @@ Bugs and suggestions should be reported [here][bugs].
 
 Changelog
 ---------
+
+### 0.11.0
+
+#### Added
+
+- Keyboard shortcuts to start (control + s), stop (control + p) and reset (control + r) sessions
 
 ### 0.10.0
 

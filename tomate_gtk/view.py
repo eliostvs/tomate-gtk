@@ -16,30 +16,31 @@ logger = logging.getLogger(__name__)
 class GtkUI(Subscriber):
     @inject(
         session="tomate.session",
-        event="tomate.events.view",
+        dispatcher="tomate.events.view",
         config="tomate.config",
         graph=Graph,
         headerbar="view.headerbar",
         countdown="view.countdown",
         task_button="view.taskbutton",
+        shortcuts="view.shortcut",
     )
     def __init__(
         self,
         session,
-        event,
+        dispatcher,
         config,
         graph,
         headerbar,
         countdown,
         task_button,
+        shortcuts,
     ):
-
         self.config = config
         self.session = session
-        self.event = event
+        self.dispatcher = dispatcher
         self.graph = graph
 
-        self.window = Gtk.Window(
+        self.widget = Gtk.Window(
             title="Tomate",
             icon=GdkPixbuf.Pixbuf.new_from_file(
                 self.config.get_icon_path("tomate", 22)
@@ -48,23 +49,23 @@ class GtkUI(Subscriber):
             resizable=False,
         )
 
-        self.window.set_size_request(350, -1)
-        self.window.set_titlebar(headerbar.widget)
+        self.widget.set_size_request(350, -1)
+        self.widget.set_titlebar(headerbar.widget)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         box.pack_start(countdown.widget, False, False, 0)
         box.pack_start(task_button.widget, False, False, 0)
 
-        self.window.add(box)
+        self.widget.add(box)
 
-        self.window.connect("delete-event", self._on_delete_event)
+        # TODO: this connect
+        self.widget.connect("delete-event", lambda *args: self.quit())
 
-        self.window.show_all()
+        self.widget.show_all()
+
+        shortcuts.initialize(self.widget)
 
         task_button.enable()
-
-    def _on_delete_event(self, widget, event):
-        return self.quit()
 
     def run(self, *args, **kwargs):
         Gtk.main()
@@ -73,27 +74,24 @@ class GtkUI(Subscriber):
         if self.session.is_running():
             return self.hide()
         else:
+            logger.debug("component=view acton=quit")
             Gtk.main_quit()
 
     @on(Events.Session, [State.finished])
     def show(self, *args, **kwargs):
-        self.event.send(State.showed)
+        self.dispatcher.send(State.showed)
 
-        logger.debug("view showed")
+        logger.debug("component=view acton=show")
 
-        self.window.present_with_time(time.time())
+        self.widget.present_with_time(time.time())
 
     def hide(self, *args, **kwargs):
-        self.event.send(State.hid)
+        self.dispatcher.send(State.hid)
 
         if TrayIcon in self.graph.providers.keys():
-            logger.debug("component=view action=hide type=tray")
-            return self.window.hide_on_delete()
+            logger.debug("component=view action=hide to=tray")
+            return self.widget.hide_on_delete()
         else:
-            logger.debug("component=view action=hide type=minimize")
-            self.window.iconify()
+            logger.debug("component=view action=hide to=minimize")
+            self.widget.iconify()
             return Gtk.true
-
-    @property
-    def widget(self):
-        return self.window

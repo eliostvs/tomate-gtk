@@ -46,7 +46,7 @@ class PreferenceDialog(Gtk.Dialog):
 
         self.widget.get_content_area().add(content_container)
 
-        stack.set_visible_child_name('timer')
+        stack.set_visible_child_name("timer")
 
     @property
     def widget(self):
@@ -124,7 +124,11 @@ class TimerTab(Gtk.Grid):
 
 @register.factory("view.preference.extension", scope=SingletonScope)
 class ExtensionTab(Gtk.Box):
-    @inject(plugin_manager="tomate.plugin", config="tomate.config", lazy_proxy="tomate.proxy")
+    @inject(
+        plugin_manager="tomate.plugin",
+        config="tomate.config",
+        lazy_proxy="tomate.proxy",
+    )
     def __init__(self, plugin_manager, config, lazy_proxy):
         self.plugin_manager = plugin_manager
         self.config = config
@@ -133,7 +137,11 @@ class ExtensionTab(Gtk.Box):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
         self._store = Gtk.ListStore(
-            bool, GdkPixbuf.Pixbuf, str, str, object  # active, icon, name, detail, plugin
+            bool,
+            GdkPixbuf.Pixbuf,
+            str,
+            str,
+            object,  # active, icon, name, detail, plugin
         )
 
         self.plugin_list = Gtk.TreeView(headers_visible=False, model=self._store)
@@ -162,7 +170,9 @@ class ExtensionTab(Gtk.Box):
         plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         plugin_list_container.add(self.plugin_list)
 
-        settings_button_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        settings_button_container = Gtk.Box(
+            orientation=Gtk.Orientation.HORIZONTAL, spacing=6
+        )
         settings_button_container.pack_end(self.plugin_settings_button, False, False, 0)
 
         self.pack_start(plugin_list_container, True, True, 0)

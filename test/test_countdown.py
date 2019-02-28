@@ -12,44 +12,46 @@ from tomate_gtk.widgets import Countdown
 
 
 @pytest.fixture
-def countdown():
+def subject():
     return Countdown()
 
 
-def test_countdown_module(graph, countdown):
-    scan_to_graph(['tomate_gtk.widgets.countdown'], graph)
+def test_module(graph, subject):
+    spec = "view.countdown"
 
-    assert 'view.countdown' in graph.providers
+    scan_to_graph(["tomate_gtk.widgets.countdown"], graph)
 
-    provider = graph.providers['view.countdown']
+    assert spec in graph.providers
+
+    provider = graph.providers[spec]
 
     assert provider.scope == SingletonScope
 
-    assert isinstance(graph.get('view.countdown'), Countdown)
+    assert isinstance(graph.get(spec), Countdown)
 
 
-def test_update_timer_label_when_timer_changed(countdown):
+def test_update_timer_label_when_timer_changed(subject):
     Timer.send(State.changed, payload=TimerPayload(time_left=10, duration=0))
 
-    markup = countdown.timer_markup(format_time_left(10))
+    markup = subject.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
 
-    assert countdown.widget.get_text() == root.text
+    assert subject.widget.get_text() == root.text
 
 
-def test_update_timer_label_when_session_stops(countdown):
+def test_update_timer_label_when_session_stops(subject):
     Session.send(State.stopped, payload=TimerPayload(duration=10, time_left=10))
 
-    markup = countdown.timer_markup(format_time_left(10))
+    markup = subject.timer_markup(format_time_left(10))
     root = ET.fromstring(markup)
 
-    assert countdown.widget.get_text() == root.text
+    assert subject.widget.get_text() == root.text
 
 
-def test_update_timer_label_when_session_changes(countdown):
+def test_update_timer_label_when_session_changes(subject):
     Session.send(State.changed, payload=TimerPayload(duration=1, time_left=1))
 
-    markup = countdown.timer_markup(format_time_left(1))
+    markup = subject.timer_markup(format_time_left(1))
     root = ET.fromstring(markup)
 
-    assert countdown.widget.get_text() == root.text
+    assert subject.widget.get_text() == root.text

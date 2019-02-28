@@ -10,7 +10,7 @@ def find_xdg_data_files(syspath, relativepath, pkgname, data_files=[]):
             syspath = syspath.format(pkgname=pkgname)
 
             subpath = dirname.split(relativepath)[1]
-            if subpath.startswith('/'):
+            if subpath.startswith("/"):
                 subpath = subpath[1:]
 
             files = [os.path.join(dirname, f) for f in filenames]
@@ -30,28 +30,24 @@ def find_data_files(data_map, pkgname):
 
 
 DATA_FILES = [
-    ('share/icons', 'data/icons'),
-    ('share/applications', 'data/applications'),
+    ("share/icons", "data/icons"),
+    ("share/applications", "data/applications"),
 ]
 
 
 setup(
-    author='Elio Esteves Duarte',
-    author_email='elio.esteves.duarte@gmail.com',
-    description='Tomate Pomodoro timer (GTK+ Interface).',
+    author="Elio Esteves Duarte",
+    author_email="elio.esteves.duarte@gmail.com",
+    description="Tomate Pomodoro timer (GTK+ Interface).",
     include_package_data=True,
-    keywords='pomodoro,tomate',
-    license='GPL-3',
-    long_description=open('README.md', 'r', encoding='utf-8').read(),
-    name='tomate-gtk',
-    packages=find_packages(exclude=['tomate', 'tests']),
-    data_files=find_data_files(DATA_FILES, 'tomate-gtk'),
-    url='https://github.com/eliostvs/tomate-gtk',
-    version='0.10.0',
+    keywords="pomodoro,tomate",
+    license="GPL-3",
+    long_description=open("README.md", "r", encoding="utf-8").read(),
+    name="tomate-gtk",
+    packages=find_packages(exclude=["tomate", "tests"]),
+    data_files=find_data_files(DATA_FILES, "tomate-gtk"),
+    url="https://github.com/eliostvs/tomate-gtk",
+    version="0.11.0",
     zip_safe=False,
-    entry_points={
-        'console_scripts': [
-            'tomate-gtk=tomate_gtk.__main__:main',
-        ],
-    },
+    entry_points={"console_scripts": ["tomate-gtk=tomate_gtk.__main__:main"]},
 )

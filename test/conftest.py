@@ -6,36 +6,49 @@ from gi.repository import Gtk
 
 
 @pytest.fixture
+def session(mocker):
+    from tomate.session import Session
+
+    return mocker.Mock(Session)
+
+
+@pytest.fixture
 def graph():
     from tomate.graph import graph
+
     graph.providers.clear()
 
     return graph
 
 
 @pytest.fixture
-def config(graph, mocker):
-    parent = os.path.dirname(os.path.dirname(__file__))
-    icon_path = os.path.join(parent, 'data/icons/hicolor/16x16/apps/tomate-plugin.png')
-    mock_config = mocker.Mock(**{'get_int.return_value': 25, 'get_icon_path.return_value': icon_path})
+def config(mocker):
+    from tomate.config import Config
 
-    graph.register_instance('tomate.config', mock_config)
+    parent_directory = os.path.dirname(os.path.dirname(__file__))
+    icon_path = os.path.join(
+        parent_directory, "data/icons/hicolor/16x16/apps/tomate-plugin.png"
+    )
+    instance = mocker.Mock(
+        Config,
+        SECTION_SHORTCUTS=Config.SECTION_SHORTCUTS,
+        SECTION_TIMER=Config.SECTION_TIMER,
+        **{"get_int.return_value": 25, "get_icon_path.return_value": icon_path}
+    )
 
-    return mock_config
+    return instance
 
 
 @pytest.fixture
-def plugin_manager(graph, mocker):
-    mock_plugin_manager = mocker.Mock()
-    graph.register_instance('tomate.plugin', mock_plugin_manager)
-    return mock_plugin_manager
+def plugin_manager(mocker):
+    return mocker.Mock()
 
 
 @pytest.fixture
-def lazy_proxy(graph, mocker):
-    mock_proxy = mocker.Mock()
-    graph.register_instance('tomate.proxy', mock_proxy)
-    return mock_proxy
+def lazy_proxy(mocker):
+    from tomate.proxy import lazy_proxy
+
+    return mocker.Mock(lazy_proxy)
 
 
 def refresh_gui(delay=0):
