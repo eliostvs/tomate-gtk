@@ -188,6 +188,7 @@ class ExtensionTab(Gtk.Box):
         self._clear()
 
         for plugin in self.plugin_manager.getAllPlugins():
+            logger.debug("action=refresh")
             self._add_plugin(plugin)
 
         if self._there_are_plugins:
@@ -263,7 +264,7 @@ class ExtensionTab(Gtk.Box):
             )
         )
 
-        logger.debug("component=preference action=addPlugin pluginName=%s", plugin.name)
+        logger.debug("action=add.plugin name=%s", plugin.name)
 
 
 class GridPlugin(object):

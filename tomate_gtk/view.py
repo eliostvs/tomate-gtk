@@ -74,14 +74,14 @@ class GtkUI(Subscriber):
         if self.session.is_running():
             return self.hide()
         else:
-            logger.debug("component=view acton=quit")
+            logger.debug("action=quit")
             Gtk.main_quit()
 
     @on(Events.Session, [State.finished])
     def show(self, *args, **kwargs):
         self.dispatcher.send(State.showed)
 
-        logger.debug("component=view acton=show")
+        logger.debug("action=show")
 
         self.widget.present_with_time(time.time())
 
@@ -89,9 +89,9 @@ class GtkUI(Subscriber):
         self.dispatcher.send(State.hid)
 
         if TrayIcon in self.graph.providers.keys():
-            logger.debug("component=view action=hide to=tray")
+            logger.debug("action=hide to=tray")
             return self.widget.hide_on_delete()
         else:
-            logger.debug("component=view action=hide to=minimize")
+            logger.debug("action=hide to=minimize")
             self.widget.iconify()
             return Gtk.true

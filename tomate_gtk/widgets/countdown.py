@@ -33,7 +33,7 @@ class Countdown(Subscriber):
         self.widget.set_markup(self.timer_markup(formatted_value))
 
         logger.debug(
-            "component=timerFrame action=updateFrame value=%s", formatted_value
+            "action=update value=%s", formatted_value
         )
 
     @staticmethod

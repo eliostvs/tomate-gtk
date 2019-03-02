@@ -27,13 +27,13 @@ class ShortcutManager(object):
         self.accel_group = accel_group
 
     def initialize(self, window: Gtk.Window) -> None:
-        logger.debug("component=shortcuts action=initialize")
+        logger.debug("action=initialize")
 
         window.add_accel_group(self.accel_group)
 
     def change(self, name: str, shortcut: str) -> None:
         logger.debug(
-            "component=shortcuts action=configure name=%s shortcut=%s", name, shortcut
+            "action=configure name=%s shortcut=%s", name, shortcut
         )
 
         key, mod = Gtk.accelerator_parse(shortcut)
@@ -49,7 +49,7 @@ class ShortcutManager(object):
         self.accel_group.connect_by_path(accel.path, fn)
 
         logger.debug(
-            "component=shortcuts action=connect name=%s shortcut=%s",
+            "action=connect name=%s shortcut=%s",
             name,
             accel.shortcut,
         )
