@@ -22,6 +22,7 @@ clean:
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
 
 test: clean
+	echo "Current path: $(CURDIR)"
 	$(XDG_DATA_DIRS) $(PYTHONPATH) $(TEST_PREFIX) pytest $(file) -v --cov=$(PACKAGE)
 
 run:
