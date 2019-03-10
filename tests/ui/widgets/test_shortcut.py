@@ -6,17 +6,17 @@ from wiring.scanning import scan_to_graph
 
 
 @pytest.fixture
-def shortcut_manager(mocker, config):
-    mocker.patch("tomate_gtk.shortcut.Gtk.AccelMap.add_entry")
-    mocker.patch("tomate_gtk.shortcut.Gtk.AccelMap.change_entry")
+def subject(mocker, mock_config):
+    mocker.patch("tomate.ui.shortcut.Gtk.AccelMap.add_entry")
+    mocker.patch("tomate.ui.shortcut.Gtk.AccelMap.change_entry")
 
     from gi.repository import Gtk
-    from tomate_gtk.shortcut import ShortcutManager
+    from tomate.ui.shortcut import ShortcutManager
 
-    return ShortcutManager(config, mock.Mock(Gtk.AccelGroup))
+    return ShortcutManager(mock_config, mock.Mock(Gtk.AccelGroup))
 
 
-def test_label(shortcut_manager, config):
+def test_label(subject, mock_config):
     # given
     shortcut_name = "start"
     shortcut = "<control>s"
@@ -28,10 +28,10 @@ def test_label(shortcut_manager, config):
 
         return shortcut
 
-    config.get.side_effect = side_effect
+    mock_config.get.side_effect = side_effect
 
     # when
-    label = shortcut_manager.label(shortcut_name)
+    label = subject.label(shortcut_name)
 
     # then
     assert label == "Ctrl+S"
@@ -41,8 +41,8 @@ def test_label(shortcut_manager, config):
     "option, shortcut",
     (["start", "<control>s"], ["stop", "<control>p"], ["reset", "<control>r"]),
 )
-def test_connect(option, shortcut, shortcut_manager, mocker, config):
-    # Given
+def test_connect(option, shortcut, subject, mocker, mock_config):
+    # given
     from gi.repository import Gtk
 
     fn = mocker.Mock()
@@ -55,13 +55,13 @@ def test_connect(option, shortcut, shortcut_manager, mocker, config):
 
         return shortcut
 
-    config.get.side_effect = side_effect
+    mock_config.get.side_effect = side_effect
 
-    # When
-    shortcut_manager.connect(option, fn)
+    # when
+    subject.connect(option, fn)
 
-    # Then
-    shortcut_manager.accel_group.connect_by_path.assert_called_once_with(
+    # then
+    subject.accel_group.connect_by_path.assert_called_once_with(
         "<tomate>/Global/{}".format(option), fn
     )
 
@@ -70,39 +70,40 @@ def test_connect(option, shortcut, shortcut_manager, mocker, config):
     )
 
 
-def test_change(shortcut_manager):
-    # Given
+def test_change(subject):
+    # given
     from gi.repository import Gtk
 
     shortcut = "<Control>b"
     key, mod = Gtk.accelerator_parse(shortcut)
 
-    # When
-    shortcut_manager.change("name", shortcut)
+    # when
+    subject.change("name", shortcut)
 
-    # Then
+    # then
     Gtk.AccelMap.change_entry.assert_called_once_with(
         "<tomate>/Global/name", key, mod, True
     )
 
 
-def test_initialize(shortcut_manager, mocker, config):
-    # Given
+def test_initialize(subject, mocker):
+    # given
     from gi.repository import Gtk
 
     window = mocker.Mock(Gtk.Window)
 
-    # When
-    shortcut_manager.initialize(window)
+    # when
+    subject.initialize(window)
 
-    # Then
-    window.add_accel_group.assert_called_once_with(shortcut_manager.accel_group)
+    # then
+    window.add_accel_group.assert_called_once_with(subject.accel_group)
 
 
-def test_module(graph, mocker, shortcut_manager):
-    spec = "view.shortcut"
+def test_module(graph, mocker, subject):
+    spec = "tomate.ui.shortcut"
+    package = "tomate.ui.shortcut"
 
-    scan_to_graph(["tomate_gtk.shortcut"], graph)
+    scan_to_graph([package], graph)
 
     assert spec in graph.providers
 
@@ -111,4 +112,4 @@ def test_module(graph, mocker, shortcut_manager):
     provider = graph.providers[spec]
     assert provider.scope == SingletonScope
 
-    assert isinstance(graph.get(spec), shortcut_manager.__class__)
+    assert isinstance(graph.get(spec), subject.__class__)

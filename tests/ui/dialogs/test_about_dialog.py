@@ -1,21 +1,22 @@
 import pytest
-from conftest import refresh_gui
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate_gtk.dialogs.about import AboutDialog
+from tests.conftest import refresh_gui
+from tomate.ui.dialogs import AboutDialog
 
 
 @pytest.fixture
-def subject(config):
-    return AboutDialog(config)
+def subject(mock_config):
+    return AboutDialog(mock_config)
 
 
-def test_module(graph, config):
-    spec = "view.about"
+def test_module(graph, mock_config):
+    spec = "tomate.ui.about"
+    package = "tomate.ui.dialogs.about"
 
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate_gtk.dialogs.about"], graph)
+    graph.register_instance("tomate.config", mock_config)
+    scan_to_graph([package], graph)
 
     assert spec in graph.providers
 
@@ -25,7 +26,7 @@ def test_module(graph, config):
     assert isinstance(graph.get(spec), AboutDialog)
 
 
-def test_response(config, subject, mocker):
+def test_response(subject, mocker):
     # given
     subject.hide = mocker.Mock()
 
