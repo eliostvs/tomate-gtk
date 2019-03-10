@@ -21,31 +21,41 @@ def subject(mock_view):
 
 
 def test_show_window_when_show_item_is_clicked(mock_view, subject):
+    # given
     subject._show_item.activate()
 
+    # when
     refresh_gui()
 
+    # then
     mock_view.show.assert_called_once_with()
 
 
 def test_change_items_visibility_when_window_is_show(subject, mock_view):
+    # when
     Events.View.send(State.showed)
 
+    # then
     assert subject._hide_item.get_visible()
     assert not subject._show_item.get_visible()
 
 
 def test_hide_window_when_hide_item_is_clicked(mock_view, subject):
+    # give
     subject._hide_item.activate()
 
+    # when
     refresh_gui()
 
+    # then
     mock_view.hide.assert_called_once_with()
 
 
 def test_change_items_visibility_when_window_is_hide(subject, mock_view):
+    # when
     Events.View.send(State.hid)
 
+    # then
     assert not subject._hide_item.get_visible()
     assert subject._show_item.get_visible()
 

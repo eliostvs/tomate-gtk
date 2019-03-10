@@ -182,9 +182,13 @@ def describe_headerbar_menu():
     def test_open_preference_dialog_when_preference_item_is_clicked(
         subject, mock_view, mock_preference
     ):
+        # given
         subject._preference_item.activate()
+
+        # when
         refresh_gui()
 
+        # then
         mock_preference.widget.run.assert_called_once_with()
         mock_preference.widget.set_transient_for.assert_called_once_with(
             mock_view.widget
@@ -193,9 +197,13 @@ def describe_headerbar_menu():
     def test_open_about_dialog_when_about_item_is_clicked(
         subject, mock_view, mock_about
     ):
+        # given
         subject._about_item.activate()
+
+        # when
         refresh_gui()
 
+        # then
         mock_about.widget.set_transient_for.assert_called_once_with(mock_view.widget)
         mock_about.widget.run.assert_called_once_with()
 
