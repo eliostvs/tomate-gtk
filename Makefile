@@ -25,7 +25,7 @@ test: clean
 	$(XDG_DATA_DIRS) $(PYTHONPATH) $(TEST_PREFIX) pytest $(file) -v --cov=$(PACKAGE)
 
 run:
-	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE) -v
+	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) python -m $(PACKAGE) -v
 
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
