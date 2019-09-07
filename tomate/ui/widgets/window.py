@@ -5,7 +5,7 @@ from gi.repository import GdkPixbuf, Gtk
 from wiring import inject, Graph, SingletonScope
 from wiring.scanning import register
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import Subscriber, on, Events
 from tomate.ui.widgets.systray import TrayIcon
 

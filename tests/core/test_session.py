@@ -2,7 +2,7 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core.constant import State, Sessions
+from tomate.core import Sessions, State
 from tomate.core.session import (
     Session,
     SECONDS_IN_A_MINUTE,

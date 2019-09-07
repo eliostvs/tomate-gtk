@@ -6,7 +6,7 @@ from typing import Optional
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from tomate.core.constant import Sessions, State
+from tomate.core import Sessions, State
 from tomate.core.event import Subscriber, on, Events
 from tomate.core.session import SessionPayload
 from .mode_button import ModeButton

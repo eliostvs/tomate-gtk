@@ -6,7 +6,7 @@ from wiring.scanning import scan_to_graph
 from yapsy.ConfigurablePluginManager import ConfigurablePluginManager
 from yapsy.VersionedPluginManager import VersionedPluginManager
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import on
 from tomate.core.plugin import Plugin, PluginManager, suppress_errors
 

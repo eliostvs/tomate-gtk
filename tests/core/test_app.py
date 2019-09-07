@@ -1,7 +1,7 @@
 import dbus
 import pytest
 
-from tomate.core.constant import State
+from tomate.core import State
 
 
 @pytest.fixture()

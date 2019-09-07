@@ -4,7 +4,7 @@ from gi.repository import Gtk
 from wiring import Interface, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import on, Events
 
 

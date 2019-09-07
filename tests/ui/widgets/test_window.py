@@ -5,7 +5,7 @@ from gi.repository import Gtk
 from wiring import Graph, SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import Events
 from tomate.ui.widgets import Countdown, HeaderBar, TaskButton, TrayIcon
 

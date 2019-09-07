@@ -4,7 +4,7 @@ from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
-from tomate.core.constant import State, Sessions
+from tomate.core import Sessions, State
 from tomate.core.event import connect_events, Events, Session
 from tomate.core.session import SessionPayload, FinishedSession
 from tomate.ui.shortcut import ShortcutManager

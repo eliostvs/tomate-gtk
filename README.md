@@ -71,6 +71,7 @@ Changelog
 ### [Unreleased]
 
 - Join projects python-tomate and tomate-gtk
+- Move enuns to package init module
 
 ### 0.11.0
 

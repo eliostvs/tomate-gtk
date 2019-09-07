@@ -4,7 +4,7 @@ from gi.repository import GLib
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from .constant import State
+from . import State
 from .event import ObservableProperty
 from .fsm import fsm
 

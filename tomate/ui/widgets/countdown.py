@@ -4,7 +4,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope
 from wiring.scanning import register
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import Subscriber, Events, on
 from tomate.core.session import SessionPayload
 from tomate.core.timer import TimerPayload, format_time_left

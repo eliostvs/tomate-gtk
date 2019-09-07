@@ -5,7 +5,7 @@ from gi.repository import Gtk
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import Subscriber, Events, on
 from tomate.core.session import SessionPayload, Session
 from tomate.ui.shortcut import ShortcutManager

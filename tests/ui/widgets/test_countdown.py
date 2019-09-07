@@ -4,7 +4,7 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import Session, Timer
 from tomate.core.timer import TimerPayload, format_time_left
 from tomate.ui.widgets import Countdown

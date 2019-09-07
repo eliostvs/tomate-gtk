@@ -3,7 +3,7 @@ from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
-from tomate.core.constant import State, Sessions
+from tomate.core import Sessions, State
 from tomate.core.event import Session, connect_events
 from tomate.core.session import SessionPayload
 from tomate.ui.widgets import TaskButton, ModeButton

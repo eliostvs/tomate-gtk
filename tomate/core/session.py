@@ -5,7 +5,7 @@ from typing import List
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from .constant import State, Sessions
+from . import Sessions, State
 from .event import ObservableProperty, Subscriber, on, Events
 from .fsm import fsm
 from .timer import TimerPayload

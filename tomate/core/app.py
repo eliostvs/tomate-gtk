@@ -2,7 +2,7 @@ import dbus.service
 from wiring import inject
 from wiring.scanning import register
 
-from .constant import State
+from . import State
 
 
 @register.factory("tomate.app")

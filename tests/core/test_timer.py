@@ -2,7 +2,7 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.timer import Timer, TimerPayload, format_time_left
 
 

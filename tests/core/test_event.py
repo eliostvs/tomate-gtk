@@ -1,7 +1,7 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.core.constant import State
+from tomate.core import State
 from tomate.core.event import (
     on,
     Subscriber,
