@@ -1,16 +1,14 @@
 .SILENT:
 
-AUTHOR       = eliostvs
-VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
+DATAPATH     = XDG_DATA_DIRS=$(CURDIR)/data:/home/$(USER)/.local/share:/usr/local/share:/usr/share
 DEBUG 		 = TOMATE_DEBUG=true
-DOCKER_IMAGE = $(AUTHOR)/$(PACKAGE)
+DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
-PROJECT      = home:$(AUTOR):tomate
-PYTHONPATH   = PYTHONPATH=$(CURDIR)
 PYTHON       ?= python
+PYTHONPATH   = PYTHONPATH=$(CURDIR)
+VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKPATH     = /code
-DATAPATH     = DATAPATH=$(CURDIR)/data:/home/$(USER)/.local/share:/usr/local/share:/usr/share
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	ARGS = xvfb-run -a
