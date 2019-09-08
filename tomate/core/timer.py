@@ -16,15 +16,15 @@ class TimerPayload(namedtuple("TimerEventPayload", "time_left duration")):
     __slots__ = ()
 
     @property
-    def elapsed_ratio(self) -> float:
+    def remaining_ratio(self) -> float:
         try:
             return self.time_left / self.duration
         except ZeroDivisionError:
             return 0.0
 
     @property
-    def remaining_ratio(self) -> float:
-        return round(1.0 - self.elapsed_ratio, 1)
+    def elapsed_ratio(self) -> float:
+        return round(1.0 - self.remaining_ratio, 1)
 
     @property
     def elapsed_percent(self):
