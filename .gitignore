@@ -48,3 +48,4 @@ whoosh_index/
 .cache
 .envrc
 .pytest_cache
+venv/
