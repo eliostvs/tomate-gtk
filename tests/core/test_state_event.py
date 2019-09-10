@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from tomate.core.event import ObservableProperty
+from tomate.pomodoro.event import ObservableProperty
 
 
 class Subject(object):

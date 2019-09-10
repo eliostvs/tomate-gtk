@@ -1,20 +1,20 @@
 import dbus
 import pytest
 
-from tomate.core import State
+from tomate.pomodoro import State
 
 
 @pytest.fixture()
 def subject(mocker, mock_view, mock_plugin):
-    from tomate.core.app import Application
+    from tomate.pomodoro.app import Application
 
     return Application(bus=mocker.Mock(), view=mock_view, plugin=mock_plugin)
 
 
 def test_from_graph(mocker, graph, mock_plugin, mock_view):
-    mocker.patch("tomate.core.app.dbus.SessionBus")
+    mocker.patch("tomate.pomodoro.app.dbus.SessionBus")
 
-    from tomate.core.app import Application
+    from tomate.pomodoro.app import Application
 
     graph.register_instance("tomate.ui.view", mock_view)
     graph.register_instance("tomate.plugin", mock_plugin)
@@ -25,7 +25,7 @@ def test_from_graph(mocker, graph, mock_plugin, mock_view):
     assert isinstance(app, Application)
 
     with mocker.patch(
-        "tomate.core.app.dbus.SessionBus.return_value.request_name",
+        "tomate.pomodoro.app.dbus.SessionBus.return_value.request_name",
         return_value=dbus.bus.REQUEST_NAME_REPLY_EXISTS,
     ):
         dbus_app = Application.from_graph(graph)

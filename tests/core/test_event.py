@@ -1,8 +1,8 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.core import State
-from tomate.core.event import (
+from tomate.pomodoro import State
+from tomate.pomodoro.event import (
     on,
     Subscriber,
     SubscriberMeta,
@@ -81,21 +81,21 @@ def test_disconnect_bind_events(mocker):
 
 
 def test_raise_attribute_error_when_key_not_found_in_the_namespace():
-    from tomate.core.event import Events
+    from tomate.pomodoro.event import Events
 
     with pytest.raises(AttributeError):
         Events.Foo
 
 
 def test_events_be_accessible_as_dictionary_and_attributes():
-    import tomate.core.event as e
+    import tomate.pomodoro.event as e
 
     assert e.Session == e.Events.Session
     assert e.Session == e.Events.Session
 
 
 def test_module(graph):
-    scan_to_graph(["tomate.core.event"], graph)
+    scan_to_graph(["tomate.pomodoro.event"], graph)
 
     assert sorted(list(graph.providers)) == sorted(
         [

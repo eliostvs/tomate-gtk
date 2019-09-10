@@ -8,7 +8,7 @@ PACKAGE      = tomate
 PYTHON       ?= python
 PYTHONPATH   = PYTHONPATH=$(CURDIR)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
-WORKPATH     = /code
+WORKDIR     = /code
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	ARGS = xvfb-run -a
@@ -47,7 +47,7 @@ docker-clean:
 	docker rmi $(DOCKER_IMAGE) 2> /dev/null || echo $(DOCKER_IMAGE) not found!
 
 docker-test:
-	docker run --rm -it -v $(CURDIR):$(WORKPATH) --workdir $(WORKPATH) $(DOCKER_IMAGE)
+	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE)
 
 docker-pull:
 	docker pull $(DOCKER_IMAGE)
@@ -55,4 +55,4 @@ docker-pull:
 docker-all: docker-pull docker-clean docker-test
 
 docker-enter:
-	docker run --rm -v $(CURDIR):$(WORKPATH) -it --workdir $(WORKPATH) --entrypoint="bash" $(DOCKER_IMAGE)
+	docker run --rm -v $(CURDIR):$(WORKDIR) -it --workdir $(WORKDIR) --entrypoint="bash" $(DOCKER_IMAGE)

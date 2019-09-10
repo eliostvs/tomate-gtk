@@ -2,14 +2,14 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core import Sessions, State
-from tomate.core.session import (
+from tomate.pomodoro import Sessions, State
+from tomate.pomodoro.session import (
     Session,
     SECONDS_IN_A_MINUTE,
     SessionPayload,
     FinishedSession,
 )
-from tomate.core.timer import TimerPayload
+from tomate.pomodoro.timer import TimerPayload
 
 
 @pytest.fixture
@@ -19,8 +19,8 @@ def timer_payload(mocker):
 
 @pytest.fixture()
 def subject(mock_timer, mock_config, mocker):
-    from tomate.core.session import Session
-    from tomate.core.event import Setting
+    from tomate.pomodoro.session import Session
+    from tomate.pomodoro.event import Setting
 
     Setting.receivers.clear()
 
@@ -287,7 +287,7 @@ class TestChangeTask:
 
 def test_module(graph, mocker, mock_config):
     spec = "tomate.session"
-    package = "tomate.core.session"
+    package = "tomate.pomodoro.session"
 
     scan_to_graph([package], graph)
 

@@ -6,7 +6,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.core.config import Config
+from tomate.pomodoro.config import Config
 
 logger = logging.getLogger(__name__)
 

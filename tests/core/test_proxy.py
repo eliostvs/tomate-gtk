@@ -1,6 +1,6 @@
 from wiring.scanning import scan_to_graph
 
-from tomate.core.proxy import LazyProxy, lazy_proxy
+from tomate.pomodoro.proxy import LazyProxy, lazy_proxy
 
 
 def test_lazy_proxy(graph):
@@ -20,6 +20,6 @@ def test_lazy_proxy_function(graph):
 def test_module(graph):
     spec = "tomate.proxy"
 
-    scan_to_graph(["tomate.core.proxy"], graph)
+    scan_to_graph(["tomate.pomodoro.proxy"], graph)
 
     assert spec in graph.providers

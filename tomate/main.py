@@ -7,8 +7,8 @@ import dbus.mainloop.glib
 import gi
 from wiring.scanning import scan_to_graph
 
-from tomate.core.app import Application
-from tomate.core.graph import graph
+from tomate.pomodoro.app import Application
+from tomate.pomodoro.graph import graph
 
 gi.require_version("Gdk", "3.0")
 gi.require_version("Gtk", "3.0")

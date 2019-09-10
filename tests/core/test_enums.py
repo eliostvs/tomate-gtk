@@ -1,4 +1,4 @@
-from tomate.core import Base
+from tomate.pomodoro import Base
 
 
 def test_get_task_by_index():

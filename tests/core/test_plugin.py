@@ -6,9 +6,9 @@ from wiring.scanning import scan_to_graph
 from yapsy.ConfigurablePluginManager import ConfigurablePluginManager
 from yapsy.VersionedPluginManager import VersionedPluginManager
 
-from tomate.core import State
-from tomate.core.event import on
-from tomate.core.plugin import Plugin, PluginManager, suppress_errors
+from tomate.pomodoro import State
+from tomate.pomodoro.event import on
+from tomate.pomodoro.plugin import Plugin, PluginManager, suppress_errors
 
 
 @pytest.fixture()
@@ -40,7 +40,7 @@ def test_connect_events_when_plugin_active(plugin, mock_event):
 
 def test_configure_plugin_manager(mock_config, mocker):
     mock_config.get_plugin_paths.return_value = "path"
-    factory = mocker.patch("tomate.core.plugin.PluginManagerSingleton")
+    factory = mocker.patch("tomate.pomodoro.plugin.PluginManagerSingleton")
     singleton = mocker.Mock()
     factory.get.return_value = singleton
 
@@ -55,7 +55,7 @@ def test_configure_plugin_manager(mock_config, mocker):
 
 
 def test_delegate_to_plugin_manager(mocker, mock_config):
-    factory = mocker.patch("tomate.core.plugin.PluginManagerSingleton")
+    factory = mocker.patch("tomate.pomodoro.plugin.PluginManagerSingleton")
     singleton = mocker.Mock()
     factory.get.return_value = singleton
 
@@ -69,7 +69,7 @@ def test_delegate_to_plugin_manager(mocker, mock_config):
 def test_module(graph, mock_config):
     spec = "tomate.plugin"
 
-    scan_to_graph(["tomate.core.plugin"], graph)
+    scan_to_graph(["tomate.pomodoro.plugin"], graph)
 
     assert spec in graph.providers
 

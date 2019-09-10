@@ -8,7 +8,7 @@ from wiring import Graph
 
 @pytest.fixture()
 def mock_config(mocker):
-    from tomate.core.config import Config
+    from tomate.pomodoro.config import Config
 
     parent_directory = os.path.dirname(os.path.dirname(__file__))
     icon_path = os.path.join(
@@ -27,14 +27,14 @@ def mock_config(mocker):
 
 @pytest.fixture()
 def mock_session(mocker):
-    from tomate.core.session import Session
+    from tomate.pomodoro.session import Session
 
     return mocker.Mock(Session)
 
 
 @pytest.fixture()
 def mock_timer(mocker):
-    from tomate.core.timer import Timer
+    from tomate.pomodoro.timer import Timer
 
     return mocker.Mock(Timer)
 
@@ -58,7 +58,7 @@ def mock_view(mocker):
 
 @pytest.fixture
 def mock_proxy(mocker, mock_view):
-    from tomate.core.proxy import lazy_proxy
+    from tomate.pomodoro.proxy import lazy_proxy
 
     return mocker.Mock(
         lazy_proxy,

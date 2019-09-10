@@ -6,9 +6,9 @@ from typing import Optional
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from tomate.core import Sessions, State
-from tomate.core.event import Subscriber, on, Events
-from tomate.core.session import SessionPayload
+from tomate.pomodoro import Sessions, State
+from tomate.pomodoro.event import Subscriber, on, Events
+from tomate.pomodoro.session import SessionPayload
 from .mode_button import ModeButton
 
 locale.textdomain("tomate")

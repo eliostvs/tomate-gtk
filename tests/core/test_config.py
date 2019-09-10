@@ -6,7 +6,7 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core.config import Config, SettingsPayload
+from tomate.pomodoro.config import Config, SettingsPayload
 
 BaseDirectory_attrs = {
     "xdg_config_home": "/home/mock/.config",
@@ -19,7 +19,7 @@ def subject():
     return Config(Mock(), Mock(configparser.RawConfigParser))
 
 
-@patch("tomate.core.config.BaseDirectory", spec_set=True, **BaseDirectory_attrs)
+@patch("tomate.pomodoro.config.BaseDirectory", spec_set=True, **BaseDirectory_attrs)
 class TestConfig:
     def test_get_config_path(self, base_directory, subject):
         assert subject.get_config_path() == "/home/mock/.config/tomate/tomate.conf"
@@ -30,12 +30,12 @@ class TestConfig:
     def test_write_config(self, base_directory, subject):
         mo = mock_open()
 
-        with patch("tomate.core.config.open", mo, create=True):
+        with patch("tomate.pomodoro.config.open", mo, create=True):
             subject.save()
 
         subject.parser.write.assert_called_once_with(mo())
 
-    @patch("tomate.core.config.os.path.exists", spec_set=True, return_value=True)
+    @patch("tomate.pomodoro.config.os.path.exists", spec_set=True, return_value=True)
     def test_get_media_file(self, path, base_directory, subject):
         file_path = "file:///usr/mock/tomate/media/alarm.mp3"
 
@@ -45,14 +45,14 @@ class TestConfig:
         with pytest.raises(EnvironmentError):
             subject.get_resource_path("/file/not/exist/")
 
-    @patch("tomate.core.config.IconTheme.getIconPath", return_value=None)
+    @patch("tomate.pomodoro.config.IconTheme.getIconPath", return_value=None)
     def test_get_icon_path_raise_exception(
         self, get_icon_path, base_directory, subject
     ):
         with pytest.raises(EnvironmentError):
             subject.get_icon_path("tomate", 22)
 
-    @patch("tomate.core.config.IconTheme.getIconPath", spec_set=True)
+    @patch("tomate.pomodoro.config.IconTheme.getIconPath", spec_set=True)
     def test_get_icon_path_success(self, get_icon_path, base_directory, subject):
         def side_effect(name, size, theme, extensions):
             return "/usr/mock/icons/hicolor/{size}x{size}/apps/{name}.png".format(
@@ -77,7 +77,7 @@ class TestConfig:
         subject.parser.getint.assert_called_with("section", "option", fallback=None)
 
     def test_get_option_using_defaults(self, based_directory):
-        from tomate.core.config import Config, DEFAULTS
+        from tomate.pomodoro.config import Config, DEFAULTS
 
         config = Config(Mock(), configparser.RawConfigParser(defaults=DEFAULTS))
 
@@ -90,7 +90,7 @@ class TestConfig:
 
         mo = mock_open()
 
-        with patch("tomate.core.config.open", mo, create=True):
+        with patch("tomate.pomodoro.config.open", mo, create=True):
             subject.set("Timer", "Shortbreak Duration", 4)
 
             subject.parser.has_section.assert_called_once_with("timer")
@@ -102,9 +102,9 @@ class TestConfig:
             subject.parser.write.assert_called_once_with(mo())
 
 
-@patch("tomate.core.config.BaseDirectory", spec_set=True, **BaseDirectory_attrs)
+@patch("tomate.pomodoro.config.BaseDirectory", spec_set=True, **BaseDirectory_attrs)
 def test_emit_setting_changed(base_directory, subject):
-    with patch("tomate.core.config.open", mock_open(), create=True):
+    with patch("tomate.pomodoro.config.open", mock_open(), create=True):
         subject.set("Timer", "Pomodoro", 4)
 
         payload = SettingsPayload(
@@ -116,7 +116,7 @@ def test_emit_setting_changed(base_directory, subject):
 
 def test_module(graph, mocker):
     spec = "tomate.config"
-    package = "tomate.core.config"
+    package = "tomate.pomodoro.config"
 
     scan_to_graph([package], graph)
 

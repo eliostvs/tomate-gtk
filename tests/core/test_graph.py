@@ -3,7 +3,7 @@ from wiring.scanning import scan_to_graph
 
 
 def test_returns_graph_instance():
-    package = "tomate.core.graph"
+    package = "tomate.pomodoro.graph"
 
     graph = Graph()
 

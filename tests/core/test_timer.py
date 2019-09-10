@@ -2,13 +2,13 @@ import pytest
 from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
-from tomate.core import State
-from tomate.core.timer import Timer, TimerPayload, format_time_left
+from tomate.pomodoro import State
+from tomate.pomodoro.timer import Timer, TimerPayload, format_time_left
 
 
 @pytest.fixture()
 def subject(mocker):
-    from tomate.core.timer import Timer
+    from tomate.pomodoro.timer import Timer
 
     return Timer(dispatcher=mocker.Mock())
 
@@ -166,7 +166,7 @@ class TestTimerEnd:
 
 def test_module(graph, mocker):
     spec = "tomate.timer"
-    package = "tomate.core.timer"
+    package = "tomate.pomodoro.timer"
 
     scan_to_graph([package], graph)
 

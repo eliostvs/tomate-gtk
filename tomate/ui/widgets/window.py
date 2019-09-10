@@ -5,8 +5,8 @@ from gi.repository import GdkPixbuf, Gtk
 from wiring import inject, Graph, SingletonScope
 from wiring.scanning import register
 
-from tomate.core import State
-from tomate.core.event import Subscriber, on, Events
+from tomate.pomodoro import State
+from tomate.pomodoro.event import Subscriber, on, Events
 from tomate.ui.widgets.systray import TrayIcon
 
 logger = logging.getLogger(__name__)

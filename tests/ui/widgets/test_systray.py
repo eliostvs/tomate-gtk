@@ -3,8 +3,8 @@ from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
-from tomate.core import State
-from tomate.core.event import Events, connect_events
+from tomate.pomodoro import State
+from tomate.pomodoro.event import Events, connect_events
 from tomate.ui.widgets import TrayIconMenu
 
 

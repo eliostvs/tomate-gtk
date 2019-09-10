@@ -4,8 +4,8 @@ from gi.repository import Gtk
 from wiring import Interface, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.core import State
-from tomate.core.event import on, Events
+from tomate.pomodoro import State
+from tomate.pomodoro.event import on, Events
 
 
 class TrayIcon(Interface):
