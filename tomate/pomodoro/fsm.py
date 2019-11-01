@@ -10,23 +10,22 @@ class fsm(object):
         self.target = target
         self.source = kwargs.pop("source", "*")
         self.attr = kwargs.pop("attr", "state")
-        self.conditions = kwargs.pop("conditions", [])
+        self.condition = kwargs.pop("condition", None)
         self.exit_action = kwargs.pop("exit", None)
 
-    def valid_transition(self, instance):
+    def is_valid_transition(self, instance) -> bool:
         if self.source == "*" or getattr(instance, self.attr) in self.source:
             return True
 
         return False
 
-    def valid_conditions(self, instance):
-        if not self.conditions:
+    def is_valid_condition(self, instance) -> bool:
+        if not self.condition:
             return True
 
-        else:
-            return all(map(lambda condition: condition(instance), self.conditions))
+        return self.condition(instance)
 
-    def change_state(self, instance):
+    def change_state(self, instance) -> None:
         current_target = getattr(instance, self.attr, None)
 
         logger.debug(
@@ -40,7 +39,7 @@ class fsm(object):
         if self.target != "self" and current_target != self.target:
             setattr(instance, self.attr, self.target)
 
-    def call_exit_action(self, instance):
+    def call_exit_action(self, instance) -> None:
         if self.exit_action is not None:
             self.exit_action(instance)
 
@@ -52,7 +51,7 @@ class fsm(object):
             wrapped.__name__,
         )
 
-        if self.valid_transition(instance) and self.valid_conditions(instance):
+        if self.is_valid_transition(instance) and self.is_valid_condition(instance):
             result = wrapped(*args, **kwargs)
 
             self.change_state(instance)

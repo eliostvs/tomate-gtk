@@ -49,7 +49,7 @@ class Session(Subscriber):
 
         return True
 
-    @fsm(target=State.stopped, source=[State.started], conditions=[is_running])
+    @fsm(target=State.stopped, source=[State.started], condition=is_running)
     def stop(self) -> bool:
         self._timer.stop()
 
@@ -65,7 +65,7 @@ class Session(Subscriber):
 
         return True
 
-    @fsm(target=State.finished, source=[State.started], conditions=[is_not_running])
+    @fsm(target=State.finished, source=[State.started], condition=is_not_running)
     @on(Events.Timer, [State.finished])
     def end(self, _, payload: TimerPayload) -> bool:
         self._save_session(payload.duration)

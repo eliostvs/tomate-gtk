@@ -65,7 +65,7 @@ class Timer(object):
     def timer_is_up(self) -> bool:
         return self.time_left <= 0
 
-    @fsm(target=State.finished, source=[State.started], conditions=[timer_is_up])
+    @fsm(target=State.finished, source=[State.started], condition=timer_is_up)
     def end(self) -> bool:
         return True
 
