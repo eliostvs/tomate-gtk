@@ -16,7 +16,7 @@ def subject(mocker):
 class TestEventPayload:
     @pytest.mark.parametrize(
         "duration,time_left,ratio",
-        [(100, 99, .99), (100, 90, 0.9), (100, 50, 0.5), (100, 0, 0.0)],
+        [(100, 99, 0.99), (100, 90, 0.9), (100, 50, 0.5), (100, 0, 0.0)],
     )
     def test_remaining_ratio(self, duration, time_left, ratio):
         # given
@@ -38,8 +38,18 @@ class TestEventPayload:
 
     @pytest.mark.parametrize(
         "duration,time_left,percent",
-        [(100, 0, 100.0), (100, 96, 0), (100, 95, 10.0), (100, 90, 10.0), (100, 89, 10.0), (100, 88, 10.0),
-         (100, 86, 10), (100, 85, 20), (100, 84, 20), (100, 80, 20)],
+        [
+            (100, 0, 100.0),
+            (100, 96, 0),
+            (100, 95, 10.0),
+            (100, 90, 10.0),
+            (100, 89, 10.0),
+            (100, 88, 10.0),
+            (100, 86, 10),
+            (100, 85, 20),
+            (100, 84, 20),
+            (100, 80, 20),
+        ],
     )
     def test_elapsed_percent(self, duration, time_left, percent):
         # given
