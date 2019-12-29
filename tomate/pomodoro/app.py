@@ -29,7 +29,6 @@ class Application(dbus.service.Object):
     def run(self):
         if self.is_running():
             self.window.show()
-
         else:
             self.state = State.started
             self.window.run()
@@ -47,7 +46,6 @@ class Application(dbus.service.Object):
         if request != dbus.bus.REQUEST_NAME_REPLY_EXISTS:
             graph.register_instance("dbus.session", bus_session)
             instance = graph.get(cls.specification)
-
         else:
             bus_object = bus_session.get_object(cls.bus_name, cls.bus_object_path)
             instance = dbus.Interface(bus_object, cls.bus_interface_name)
