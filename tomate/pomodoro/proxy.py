@@ -3,19 +3,13 @@ from wiring.scanning import register
 
 
 class LazyProxy(object):
-    def __init__(self, specification, graph):
-        self.__specification = specification
-        self.__graph = graph
+    def __init__(self, spec, graph):
+        self._spec = spec
+        self._graph = graph
 
-    def __getattribute__(self, attr):
-        try:
-            obj = object.__getattribute__(self, attr)
-
-        except AttributeError:
-            target = self.__graph.get(self.__specification)
-            obj = object.__getattribute__(target, attr)
-
-        return obj
+    def __getattr__(self, attr):
+        target = self._graph.get(self._spec)
+        return getattr(target, attr)
 
 
 @register.function("tomate.proxy")

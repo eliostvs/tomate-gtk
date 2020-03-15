@@ -76,7 +76,6 @@ class Session(Subscriber):
                 if self._is_time_to_long_break
                 else Sessions.shortbreak
             )
-
         else:
             self.current = Sessions.pomodoro
 

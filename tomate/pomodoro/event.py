@@ -35,7 +35,6 @@ def on(event, senders):
             return func(*args, **kwargs)
 
         return wrapped
-
     return wrapper
 
 
@@ -95,7 +94,6 @@ class ObservableProperty(object):
     def __get__(self, instance, owner):
         if instance is None or not hasattr(instance, self.attr):
             value = self.initial
-
         else:
             value = getattr(instance, self.attr)
 

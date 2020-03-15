@@ -55,21 +55,21 @@ def describe_headerbar():
         def test_connect_shortcuts(mock_shortcuts, subject):
             # start
             mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.START, subject._on_start_button_clicked
+                ShortcutManager.START, subject._start_session
             )
             tooltip = "Starts the session (start)"
             assert subject._start_button.get_tooltip_text() == tooltip
 
             # stop
             mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.STOP, subject._on_stop_button_clicked
+                ShortcutManager.STOP, subject._stop_session
             )
             tooltip = "Stops the session (stop)"
             assert subject._stop_button.get_tooltip_text() == tooltip
 
             # reset
             mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.RESET, subject._on_reset_button_clicked
+                ShortcutManager.RESET, subject._reset_session
             )
             tooltip = "Clear the count of sessions (reset)"
             assert subject._reset_button.get_tooltip_text() == tooltip

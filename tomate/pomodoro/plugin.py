@@ -55,7 +55,6 @@ class PluginManager:
 def suppress_errors(wrapped, _, args, kwargs):
     try:
         return wrapped(*args, **kwargs)
-
     except Exception as ex:
         if in_debug_mode():
             raise ex

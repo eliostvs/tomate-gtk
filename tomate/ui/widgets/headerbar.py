@@ -37,11 +37,11 @@ class Menu:
 
     def _create_menu_item(self, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(label)
-        menu_item.connect("activate", self._on_item_activate, dialog)
+        menu_item.connect("activate", self._show_dialog_window, dialog)
 
         return menu_item
 
-    def _on_item_activate(self, _, widget: Gtk.Widget) -> None:
+    def _show_dialog_window(self, _, widget: Gtk.Widget) -> None:
         widget.set_transient_for(self.toplevel)
         widget.run()
 
@@ -67,28 +67,28 @@ class HeaderBar(Subscriber):
             decoration_layout=":close",
         )
 
-        self._start_button = self._create_connected_button(
+        self._start_button = self._create_button(
             Gtk.STOCK_MEDIA_PLAY,
             "Starts the session",
-            self._on_start_button_clicked,
+            self._start_session,
             shortcuts.START,
         )
         self.widget.pack_start(self._start_button)
 
-        self._stop_button = self._create_connected_button(
+        self._stop_button = self._create_button(
             Gtk.STOCK_MEDIA_STOP,
             "Stops the session",
-            self._on_stop_button_clicked,
+            self._stop_session,
             shortcuts.STOP,
             visible=False,
             no_show_all=True,
         )
         self.widget.pack_start(self._stop_button)
 
-        self._reset_button = self._create_connected_button(
+        self._reset_button = self._create_button(
             Gtk.STOCK_CLEAR,
             "Clear the count of sessions",
-            self._on_reset_button_clicked,
+            self._reset_session,
             shortcuts.RESET,
             sensitive=False,
         )
@@ -100,28 +100,25 @@ class HeaderBar(Subscriber):
 
         self.widget.pack_end(button)
 
-    def _on_start_button_clicked(self, *args):
+    def _start_session(self, *args):
         self._session.start()
 
-    def _on_stop_button_clicked(self, *args):
+    def _stop_session(self, *args):
         self._session.stop()
 
-    def _on_reset_button_clicked(self, *args):
+    def _reset_session(self, *args):
         self._session.reset()
 
     @on(Events.Session, [State.started])
     def _on_session_started(self, *args, **kwargs):
         self._start_button.set_visible(False)
-
         self._stop_button.set_visible(True)
-
         self._reset_button.set_sensitive(False)
 
     @on(Events.Session, [State.stopped, State.finished])
     def _on_session_stopped_or_finished(self, _, payload: SessionPayload):
         self._start_button.set_visible(True)
         self._stop_button.set_visible(False)
-
         self._reset_button.set_sensitive(bool(payload.finished_pomodoros))
         self._update_title(len(payload.finished_pomodoros))
 
@@ -138,7 +135,7 @@ class HeaderBar(Subscriber):
             else _("No session yet")
         )
 
-    def _create_connected_button(
+    def _create_button(
         self, icon_name: str, tooltip_text: str, on_clicked, shortcut_name: str, **props
     ) -> Gtk.Button:
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)

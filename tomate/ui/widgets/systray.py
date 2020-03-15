@@ -26,20 +26,20 @@ class Menu(object):
 
         self._show_item = Gtk.MenuItem.new_with_label(_("Show"))
         self._show_item.set_properties(visible=False, no_show_all=True)
-        self._show_item.connect("activate", self._on_show_item_activate)
+        self._show_item.connect("activate", self._show_window)
         self.widget.add(self._show_item)
 
         self._hide_item = Gtk.MenuItem.new_with_label(_("Hide"))
         self._hide_item.set_properties(visible=True)
-        self._hide_item.connect("activate", self._on_hide_item_activate)
+        self._hide_item.connect("activate", self._hide_window)
         self.widget.add(self._hide_item)
 
         self.widget.show_all()
 
-    def _on_hide_item_activate(self, _):
+    def _hide_window(self, _):
         return self._view.hide()
 
-    def _on_show_item_activate(self, _):
+    def _show_window(self, _):
         return self._view.show()
 
     @on(Events.View, [State.showed])
