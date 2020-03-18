@@ -1,5 +1,6 @@
 import dbus
 import pytest
+import contextlib
 
 from tomate.pomodoro import State
 
@@ -24,10 +25,11 @@ def test_from_graph(mocker, graph, mock_plugin, mock_view):
 
     assert isinstance(app, Application)
 
-    with mocker.patch(
-        "tomate.pomodoro.app.dbus.SessionBus.return_value.request_name",
-        return_value=dbus.bus.REQUEST_NAME_REPLY_EXISTS,
-    ):
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(mocker.patch(
+            "tomate.pomodoro.app.dbus.SessionBus.return_value.request_name",
+            return_value=dbus.bus.REQUEST_NAME_REPLY_EXISTS,
+        ))
         dbus_app = Application.from_graph(graph)
 
         assert isinstance(dbus_app, dbus.Interface)

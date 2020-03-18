@@ -35,6 +35,7 @@ def on(event, senders):
             return func(*args, **kwargs)
 
         return wrapped
+
     return wrapper
 
 
