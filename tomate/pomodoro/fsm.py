@@ -14,10 +14,7 @@ class fsm(object):
         self.exit_action = kwargs.pop("exit", None)
 
     def is_valid_transition(self, instance) -> bool:
-        if self.source == "*" or getattr(instance, self.attr) in self.source:
-            return True
-
-        return False
+        return self.source == "*" or getattr(instance, self.attr) in self.source
 
     def is_valid_condition(self, instance) -> bool:
         if not self.condition:
