@@ -12,7 +12,7 @@ ONE_SECOND = 1
 SIXTY_SECONDS = 60
 
 
-class TimerPayload(namedtuple("TimerEventPayload", "time_left duration")):
+class TimerPayload(namedtuple("TimerPayload", "time_left duration")):
     __slots__ = ()
 
     @property
@@ -82,10 +82,9 @@ class Timer(object):
 
         return True
 
-    def _trigger(self, event_type) -> None:
+    def _trigger(self, event) -> None:
         payload = TimerPayload(time_left=self.time_left, duration=self.duration)
-
-        self._dispatcher.send(event_type, payload=payload)
+        self._dispatcher.send(event, payload=payload)
 
     def _reset(self) -> None:
         self.duration = self.time_left = 0
