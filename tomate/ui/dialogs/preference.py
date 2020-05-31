@@ -256,15 +256,6 @@ class GridPlugin(object):
     def __init__(self, value):
         self._value = value
 
-    @staticmethod
-    def from_iter(treestore, treeiter):
-        return GridPlugin(treestore[treeiter])
-
-    @staticmethod
-    def from_path(treestore, treepath):
-        treeiter = treestore.get_iter(treepath)
-        return GridPlugin(treestore[treeiter])
-
     @property
     def name(self):
         return self._value[self.TITLE]
@@ -285,3 +276,12 @@ class GridPlugin(object):
         return "<b>{name}</b> ({version})" "\n<small>{description}</small>".format(
             name=plugin.name, version=plugin.version, description=plugin.description
         )
+
+    @staticmethod
+    def from_iter(treestore, treeiter):
+        return GridPlugin(treestore[treeiter])
+
+    @staticmethod
+    def from_path(treestore, treepath):
+        treeiter = treestore.get_iter(treepath)
+        return GridPlugin(treestore[treeiter])
