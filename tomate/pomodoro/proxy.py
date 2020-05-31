@@ -13,5 +13,5 @@ class LazyProxy(object):
 
 
 @register.function("tomate.proxy")
-def lazy_proxy(specification, graph=injected(Graph)):
-    return LazyProxy(specification, graph)
+def lazy_proxy(spec, graph=injected(Graph)):
+    return LazyProxy(spec, graph)
