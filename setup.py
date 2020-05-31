@@ -14,7 +14,6 @@ def find_xdg_data_files(from_dir, to_dir, package_name, data_files):
                 sub_path = sub_path[1:]
 
             files = [os.path.join(root, file) for file in files]
-
             data_files.append((os.path.join(to_dir, sub_path), files))
 
 
