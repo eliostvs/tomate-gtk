@@ -41,7 +41,7 @@ def on(event, senders):
 
 
 def methods_with_events(obj):
-    methods = [
+    return [
         getattr(obj, attr)
         for attr in dir(obj)
         if getattr(getattr(obj, attr), "_has_event", False) is True
