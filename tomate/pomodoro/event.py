@@ -1,5 +1,6 @@
 import functools
 import logging
+
 from blinker import Namespace
 from wiring.scanning import register
 
@@ -45,7 +46,6 @@ def methods_with_events(obj):
         for attr in dir(obj)
         if getattr(getattr(obj, attr), "_has_event", False) is True
     ]
-    return methods
 
 
 def connect_events(obj):
