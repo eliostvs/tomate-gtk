@@ -14,15 +14,13 @@ def mock_config(mocker):
     icon_path = os.path.join(
         parent_directory, "data/icons/hicolor/16x16/apps/tomate-plugin.png"
     )
-    instance = mocker.Mock(
+    return mocker.Mock(
         Config,
         SECTION_SHORTCUTS=Config.SECTION_SHORTCUTS,
         SECTION_TIMER=Config.SECTION_TIMER,
         parser=mocker.Mock(),
         **{"get_int.return_value": 25, "get_icon_path.return_value": icon_path}
     )
-
-    return instance
 
 
 @pytest.fixture()
