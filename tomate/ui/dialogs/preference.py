@@ -83,8 +83,7 @@ class TimerTab:
         self.widget.attach_next_to(button, label, Gtk.PositionType.RIGHT, 3, 1)
         self.longbreak_duration = button
 
-    @staticmethod
-    def _create_section(name):
+    def _create_section(self, name):
         section = Gtk.Label.new()
         section.set_markup("<b>{0}</b>".format(name))
         section.set_halign(Gtk.Align.START)
