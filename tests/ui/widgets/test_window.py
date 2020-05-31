@@ -120,7 +120,7 @@ def describe_quit():
     def test_quit_when_timer_is_not_running(mocker, subject, mock_session):
         # given
         main_quit = mocker.patch("tomate.ui.widgets.window.Gtk.main_quit")
-        mock_session.is_running.return_value = False
+        mock_session.IsRunning.return_value = False
 
         # when
         subject.quit()
@@ -131,7 +131,7 @@ def describe_quit():
     def test_hide_when_timer_is_running(subject, mocker, mock_session):
         # given
         subject.hide = mocker.Mock()
-        mock_session.is_running.return_value = True
+        mock_session.IsRunning.return_value = True
 
         # when
         subject.quit()

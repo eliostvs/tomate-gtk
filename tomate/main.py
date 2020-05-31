@@ -30,9 +30,9 @@ def main():
 
         app = Application.from_graph(graph)
 
-        app.run()
+        app.Run()
 
-        if app.is_running():
+        if app.IsRunning():
             Gdk.notify_startup_complete()
 
     except Exception as ex:

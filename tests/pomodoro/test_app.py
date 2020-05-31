@@ -1,6 +1,7 @@
+import contextlib
+
 import dbus
 import pytest
-import contextlib
 
 from tomate.pomodoro import State
 
@@ -36,7 +37,7 @@ def test_from_graph(mocker, graph, mock_plugin, mock_view):
 
 
 def test_run_when_not_running(subject):
-    subject.run()
+    subject.Run()
 
     subject.window.run.assert_called_once_with()
 
@@ -44,17 +45,17 @@ def test_run_when_not_running(subject):
 def test_run_when_already_running(subject):
     subject.state = State.started
 
-    subject.run()
+    subject.Run()
 
     subject.window.show.assert_called_once_with()
 
 
 def test_is_running(subject):
-    assert not subject.is_running()
+    assert not subject.IsRunning()
 
     subject.state = State.started
 
-    assert subject.is_running()
+    assert subject.IsRunning()
 
 
 def test_load_plugins_in_init(subject, mock_plugin):
