@@ -204,7 +204,6 @@ class ExtensionTab:
 
         if grid_plugin.is_enable:
             self._activate_plugin(grid_plugin.name)
-
         else:
             self._deactivate_plugin(grid_plugin.name)
 
