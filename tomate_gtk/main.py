@@ -44,12 +44,7 @@ def main():
 def setup_logging(options):
     fmt = "%(levelname)s:%(asctime)s:%(name)s:%(message)s"
 
-    if options.verbose:
-        level = logging.DEBUG
-
-    else:
-        level = logging.INFO
-
+    level = logging.DEBUG if options.verbose else logging.INFO
     logging.basicConfig(level=level, format=fmt)
 
 

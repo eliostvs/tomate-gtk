@@ -29,14 +29,12 @@ def config(mocker):
     icon_path = os.path.join(
         parent_directory, "data/icons/hicolor/16x16/apps/tomate-plugin.png"
     )
-    instance = mocker.Mock(
-        Config,
-        SECTION_SHORTCUTS=Config.SECTION_SHORTCUTS,
-        SECTION_TIMER=Config.SECTION_TIMER,
-        **{"get_int.return_value": 25, "get_icon_path.return_value": icon_path}
-    )
-
-    return instance
+    return mocker.Mock(
+            Config,
+            SECTION_SHORTCUTS=Config.SECTION_SHORTCUTS,
+            SECTION_TIMER=Config.SECTION_TIMER,
+            **{"get_int.return_value": 25, "get_icon_path.return_value": icon_path}
+        )
 
 
 @pytest.fixture
