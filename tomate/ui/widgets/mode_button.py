@@ -42,7 +42,6 @@ class ModeButton(Gtk.Box):
             try:
                 old_item = self.__items[self.__selected]
                 old_item.set_active(False)
-
             except KeyError:
                 pass
 
