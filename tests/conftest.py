@@ -2,7 +2,7 @@ import os
 import time
 
 import pytest
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 from wiring import Graph
 
 
@@ -64,10 +64,15 @@ def mock_proxy(mocker, mock_view):
     )
 
 
-def refresh_gui(delay=0):
+def refresh_gui(delay: int = 0) -> None:
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
     time.sleep(delay)
+
+
+def run_loop_for(seconds: int = 1) -> None:
+    GLib.timeout_add_seconds(seconds, Gtk.main_quit)
+    Gtk.main()
 
 
 @pytest.fixture

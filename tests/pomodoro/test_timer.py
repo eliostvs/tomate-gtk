@@ -1,28 +1,131 @@
 import pytest
-from wiring import SingletonScope
+from blinker import signal
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import run_loop_for
 from tomate.pomodoro import State
-from tomate.pomodoro.timer import Timer, TimerPayload, format_time_left
+from tomate.pomodoro.timer import TimerPayload, format_time_left, SIXTY_SECONDS
 
 
 @pytest.fixture()
-def subject(mocker):
-    from tomate.pomodoro.timer import Timer
-
-    return Timer(dispatcher=mocker.Mock())
+def dispatcher():
+    return signal('timer')
 
 
-class TestEventPayload:
+@pytest.fixture()
+def subject(graph, dispatcher):
+    graph.register_instance("tomate.events.timer", dispatcher)
+
+    scan_to_graph(["tomate.pomodoro.timer"], graph)
+
+    return graph.get("tomate.timer")
+
+
+class TestTimerStart:
+    def test_not_starts_when_timer_is_already_running(self, subject):
+        subject.state = State.started
+
+        assert not subject.start(SIXTY_SECONDS)
+
+    @pytest.mark.parametrize(
+        "state",
+        [State.finished, State.stopped]
+    )
+    def test_starts_when_timer_not_started_yet(self, state, subject, dispatcher):
+        subject.state = state
+        called = False
+
+        def subscriber(sender, payload):
+            assert sender is State.started
+            assert payload == TimerPayload(time_left=60, duration=60)
+
+            nonlocal called
+            called = True
+
+        dispatcher.connect(subscriber, sender=State.started)
+
+        result = subject.start(SIXTY_SECONDS)
+
+        assert result is True
+        assert called is True
+
+
+class TestTimerStop:
+    @pytest.mark.parametrize(
+        "state",
+        [State.finished, State.stopped]
+    )
+    def test_not_stops_when_timer_is_not_running(self, state, subject):
+        subject.state = state
+        assert not subject.stop()
+
+    def test_stops_when_timer_is_running(self, subject, dispatcher):
+        called = False
+
+        def subscriber(sender, payload):
+            assert sender is State.stopped
+            assert payload == TimerPayload(time_left=0, duration=0)
+
+            nonlocal called
+            called = True
+
+        dispatcher.connect(subscriber, sender=State.stopped)
+
+        subject.start(SIXTY_SECONDS)
+        result = subject.stop()
+
+        assert result is True
+        assert called is True
+
+
+class TestTimerEnd:
+    @pytest.mark.parametrize(
+        "state",
+        [State.finished, State.stopped]
+    )
+    def test_not_ends_when_timer_is_not_running(self, state, subject):
+        subject.state = state
+        assert not subject.end()
+
+    def test_ends_when_timer_is_running(self, subject, dispatcher):
+        finished_called = False
+        changed_called = False
+
+        def changed_subscriber(sender, payload):
+            assert sender is State.changed
+            assert payload == TimerPayload(time_left=0, duration=1)
+
+            nonlocal changed_called
+            changed_called = True
+
+        dispatcher.connect(changed_subscriber, sender=State.changed)
+
+        def finished_subscriber(sender, payload):
+            assert sender is State.finished
+            assert payload == TimerPayload(time_left=0, duration=1)
+
+            nonlocal finished_called
+            finished_called = True
+
+        dispatcher.connect(finished_subscriber, sender=State.finished)
+
+        subject.start(1)
+        run_loop_for(1)
+        result = subject.end()
+
+        assert result is True
+        assert finished_called is True
+        assert changed_called is True
+
+
+class TestTimerPayload:
     @pytest.mark.parametrize(
         "duration,time_left,ratio",
         [(100, 99, 0.99), (100, 90, 0.9), (100, 50, 0.5), (100, 0, 0.0)],
     )
     def test_remaining_ratio(self, duration, time_left, ratio):
-        # given
         payload = TimerPayload(duration=duration, time_left=time_left)
 
-        # then
         assert payload.remaining_ratio == ratio
 
     @pytest.mark.parametrize(
@@ -30,10 +133,8 @@ class TestEventPayload:
         [(100, 99, 0.0), (100, 90, 0.1), (100, 50, 0.5), (100, 0, 1.0)],
     )
     def test_elapsed_ratio(self, duration, time_left, ratio):
-        # given
         payload = TimerPayload(duration=duration, time_left=time_left)
 
-        # then
         assert payload.elapsed_ratio == ratio
 
     @pytest.mark.parametrize(
@@ -52,148 +153,18 @@ class TestEventPayload:
         ],
     )
     def test_elapsed_percent(self, duration, time_left, percent):
-        # given
         payload = TimerPayload(duration=duration, time_left=time_left)
 
-        # then
         assert payload.elapsed_percent == percent
 
 
-class TestTimerStop:
-    def test_not_be_able_to_stop_when_timer_is_not_running(self, subject):
-        # given
-        subject.state = State.stopped
-
-        # then
-        assert not subject.stop()
-
-    def test_be_able_to_stop_when_timer_is_running(self, subject):
-        # given
-        subject.state = State.started
-
-        # then
-        assert subject.stop()
-        assert subject.state == State.stopped
-
-
-class TestTimerStart:
-    def test_not_be_able_to_start_when_timer_is_already_running(self, subject):
-        # given
-        subject.state = State.started
-
-        # then
-        assert not subject.start(1)
-
-    def test_be_able_to_start_when_timer_is_stopped(self, subject):
-        # given
-        subject.state = State.stopped
-
-        # then
-        assert subject.start(1)
-
-    def test_be_able_to_start_when_timer_is_finished(self, subject):
-        # given
-        subject.state = State.finished
-
-        # then
-        assert subject.start(1)
-
-    def test_update_time_left_and_duration_when_timer_start(self, subject):
-        # given
-        subject.state = State.finished
-
-        # when
-        subject.start(5)
-
-        # then
-        assert subject.time_left == 5
-        assert subject.duration == 5
-
-    def test_trigger_started_event_when_timer_start(self, subject):
-        subject.start(10)
-
-        subject._dispatcher.send.assert_called_with(
-            State.started, payload=TimerPayload(time_left=10, duration=10)
-        )
-
-
-class TestTimerUpdate:
-    def test_not_update_when_timer_is_not_started(self, subject):
-        # given
-        subject.state = State.stopped
-
-        # then
-        assert subject._update() is False
-
-    def test_decrease_the_time_left_after_update(self, subject):
-        # given
-        duration = 2
-
-        # when
-        subject.start(duration)
-
-        assert subject._update()
-        assert subject.time_left == 1
-
-    def test_keep_duration_after_update(self, subject):
-        # given
-        duration = 10
-
-        # when
-        subject.start(duration)
-
-        # then
-        assert subject._update()
-
-        assert subject.duration == duration
-
-    def test_trigger_changed_event_after_update(self, subject):
-        # when
-        subject.start(10)
-
-        subject._update()
-
-        # then
-        subject._dispatcher.send.assert_called_with(
-            State.changed, payload=TimerPayload(time_left=9, duration=10)
-        )
-
-
-class TestTimerEnd:
-    def test_trigger_finished_event_when_time_ends(self, subject):
-        # given
-        subject.start(1)
-
-        # when
-        subject._update()
-        subject._update()
-
-        # then
-        subject._dispatcher.send.assert_called_with(
-            State.finished, payload=TimerPayload(time_left=0, duration=1)
-        )
-
-
-def test_module(graph, mocker):
-    spec = "tomate.timer"
-    package = "tomate.pomodoro.timer"
-
-    scan_to_graph([package], graph)
-
-    assert spec in graph.providers
-
-    provider = graph.providers[spec]
-
-    assert provider.scope == SingletonScope
-
-    graph.register_factory("tomate.events.timer", mocker.Mock)
-
-    assert isinstance(graph.get(spec), Timer)
+def test_module(graph, subject):
+    assert graph.get('tomate.timer') is subject
 
 
 @pytest.mark.parametrize(
-    "seconds, time_formatted",
+    "seconds,time_formatted",
     [(25 * 60, "25:00"), (15 * 60, "15:00"), (5 * 60, "05:00")],
 )
-def test_format_seconds_in_string_with_minutes_and_seconds(seconds, time_formatted):
+def test_format_time_left(seconds, time_formatted):
     assert time_formatted == format_time_left(seconds)
