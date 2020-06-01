@@ -32,7 +32,6 @@ class TimerPayload(namedtuple("TimerPayload", "time_left duration")):
         Returns the percentage in 5% steps
         """
         percent = self.elapsed_ratio * 100
-
         return percent - percent % 5
 
 
@@ -94,5 +93,4 @@ class Timer(object):
 
 def format_time_left(seconds: int) -> str:
     minutes, seconds = divmod(seconds, SIXTY_SECONDS)
-
     return "{0:0>2}:{1:0>2}".format(minutes, seconds)
