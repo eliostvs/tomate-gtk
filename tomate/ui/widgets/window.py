@@ -57,9 +57,7 @@ class Window(Subscriber):
         box.pack_start(task_button.widget, False, False, 0)
 
         self.widget.add(box)
-
         self.widget.connect("delete-event", lambda *args: self.quit())
-
         self.widget.show_all()
 
         shortcuts.initialize(self.widget)
