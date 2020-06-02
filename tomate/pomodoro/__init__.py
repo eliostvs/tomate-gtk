@@ -1,5 +1,7 @@
 import enum
 
+SECONDS_IN_A_MINUTE = 60
+
 
 @enum.unique
 class Base(enum.Enum):

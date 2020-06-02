@@ -4,12 +4,11 @@ from gi.repository import GLib
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
-from . import State
+from . import State, SECONDS_IN_A_MINUTE
 from .event import ObservableProperty
 from .fsm import fsm
 
 ONE_SECOND = 1
-SIXTY_SECONDS = 60
 
 
 class TimerPayload(namedtuple("TimerPayload", "time_left duration")):
@@ -92,5 +91,5 @@ class Timer(object):
 
 
 def format_time_left(seconds: int) -> str:
-    minutes, seconds = divmod(seconds, SIXTY_SECONDS)
+    minutes, seconds = divmod(seconds, SECONDS_IN_A_MINUTE)
     return "{0:0>2}:{1:0>2}".format(minutes, seconds)
