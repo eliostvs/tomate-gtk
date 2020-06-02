@@ -2,6 +2,7 @@ import os
 import time
 
 import pytest
+from blinker import Namespace
 from gi.repository import Gtk, GLib
 from wiring import Graph
 
@@ -28,6 +29,16 @@ def mock_session(mocker):
     from tomate.pomodoro.session import Session
 
     return mocker.Mock(Session)
+
+
+@pytest.fixture()
+def timer_dispatcher():
+    return Namespace().signal('timer')
+
+
+@pytest.fixture()
+def session_dispatcher():
+    return Namespace().signal('session')
 
 
 @pytest.fixture()
