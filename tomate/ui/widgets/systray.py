@@ -43,11 +43,11 @@ class Menu(object):
         return self._view.show()
 
     @on(Events.View, [State.showed])
-    def _on_view_show(self, sender=None, **kwargs):
+    def _on_view_show(self, *args, **kwargs):
         self._hide_item.set_visible(True)
         self._show_item.set_visible(False)
 
     @on(Events.View, [State.hid])
-    def _on_view_hide(self, sender=None, **kwargs):
+    def _on_view_hide(self, *args, **kwargs):
         self._hide_item.set_visible(False)
         self._show_item.set_visible(True)
