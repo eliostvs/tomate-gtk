@@ -99,7 +99,7 @@ class ObservableProperty(object):
             value = getattr(instance, self.attr)
 
         logger.debug(
-            "instance=%s action=get.observable attr=%s, value=%s",
+            "instance=%s action=observable_get attr=%s, value=%s",
             instance.__class__.__name__,
             self.attr,
             value,
@@ -109,7 +109,7 @@ class ObservableProperty(object):
 
     def __set__(self, instance, value):
         logger.debug(
-            "instance=%s action=set.observable attr=%s value=%s",
+            "instance=%s action=observable_set attr=%s value=%s",
             instance.__class__.__name__,
             self.attr,
             value,
