@@ -20,7 +20,7 @@ SettingsPayload = namedtuple("SettingsPayload", "action section option value")
 
 
 @register.factory("tomate.config", scope=SingletonScope)
-class Config(object):
+class Config:
     APP_NAME = "tomate"
     SECTION_SHORTCUTS = "shortcuts"
     SECTION_TIMER = "timer"
