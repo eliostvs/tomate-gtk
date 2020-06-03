@@ -9,7 +9,7 @@ class AboutDialog(Gtk.AboutDialog):
     def __init__(self, config):
         Gtk.AboutDialog.__init__(
             self,
-            comments="Tomate Pomodoro Timer (GTK+ Interface).",
+            comments="Tomate Pomodoro Timer (GTK+ Interface)",
             copyright="2014, Elio Esteves Duarte",
             license="GPL-3",
             license_type=Gtk.License.GPL_3_0,

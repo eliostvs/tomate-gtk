@@ -1,38 +1,38 @@
 import pytest
-from wiring import SingletonScope
+from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
-from tomate.ui.dialogs import AboutDialog
+from tomate import __version__
 
 
 @pytest.fixture
-def subject(mock_config):
-    return AboutDialog(mock_config)
-
-
-def test_module(graph, mock_config):
-    spec = "tomate.ui.about"
-    package = "tomate.ui.dialogs.about"
-
+def subject(graph, mock_config):
     graph.register_instance("tomate.config", mock_config)
-    scan_to_graph([package], graph)
+    scan_to_graph(["tomate.ui.dialogs.about"], graph)
 
-    assert spec in graph.providers
-
-    provider = graph.providers[spec]
-    assert provider.scope == SingletonScope
-
-    assert isinstance(graph.get(spec), AboutDialog)
+    return graph.get("tomate.ui.about")
 
 
-def test_response(subject, mocker):
-    # given
+def test_module(graph, subject):
+    assert graph.get("tomate.ui.about") is subject
+
+
+def test_dialog_info(subject, mock_config):
+    assert subject.get_comments() == "Tomate Pomodoro Timer (GTK+ Interface)"
+    assert subject.get_copyright() == "2014, Elio Esteves Duarte"
+    assert subject.get_version() == __version__
+    assert subject.get_website() == "https://github.com/eliostvs/tomate-gtk"
+    assert subject.get_website_label() == "Tomate GTK on Github"
+    assert subject.get_license_type() == Gtk.License.GPL_3_0
+    assert subject.get_logo()
+    mock_config.get_icon_path.assert_called_once_with("tomate", 48)
+
+
+def test_close_dialog(subject, mocker):
     subject.hide = mocker.Mock()
 
-    # when
     subject.emit("response", 0)
     refresh_gui()
 
-    # then
     subject.hide.assert_called_once()
