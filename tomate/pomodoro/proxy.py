@@ -2,7 +2,7 @@ from wiring import injected, Graph
 from wiring.scanning import register
 
 
-class LazyProxy(object):
+class LazyProxy:
     def __init__(self, spec, graph):
         self._spec = spec
         self._graph = graph
