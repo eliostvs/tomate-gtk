@@ -5,7 +5,7 @@ import wrapt
 logger = logging.getLogger(__name__)
 
 
-class fsm(object):
+class fsm:
     def __init__(self, target, **kwargs):
         self.target = target
         self.source = kwargs.pop("source", "*")
