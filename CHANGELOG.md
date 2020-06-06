@@ -3,7 +3,12 @@
 #### Changed
 
 - Join python-tomate and tomate-gtk projects
-- Move enuns to package init module
+- Move enums to package init module
+- Change tomate.events.setting event namespace to tomate.events.config
+- Change session payload fields
+- Change Events.Setting to Events.Config
+- Trigger State.finished and State.changed in the end of a session
+- Remove 'get' from config methods
 
 ### 0.11.0
 

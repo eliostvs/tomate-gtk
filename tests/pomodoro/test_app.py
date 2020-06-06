@@ -1,62 +1,92 @@
-import contextlib
-
 import dbus
 import pytest
+from dbus.mainloop.glib import DBusGMainLoop
+from dbusmock import DBusTestCase
+from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import State
+from tomate.pomodoro.app import Application
+
+DBusGMainLoop(set_as_default=True)
 
 
 @pytest.fixture()
-def subject(mocker, mock_view, mock_plugin):
-    from tomate.pomodoro.app import Application
+def mock_plugin(mocker):
+    from yapsy.PluginManager import PluginManager
 
-    return Application(bus=mocker.Mock(), view=mock_view, plugin=mock_plugin)
+    return mocker.Mock(PluginManager)
 
 
-def test_from_graph(mocker, graph, mock_plugin, mock_view):
-    mocker.patch("tomate.pomodoro.app.dbus.SessionBus")
-
-    from tomate.pomodoro.app import Application
-
+@pytest.fixture()
+def subject(graph, mock_view, mock_plugin, mocker):
     graph.register_instance("tomate.ui.view", mock_view)
     graph.register_instance("tomate.plugin", mock_plugin)
-    graph.register_factory("tomate.app", Application)
+    graph.register_instance("dbus.session", mocker.Mock())
 
-    app = Application.from_graph(graph)
+    scan_to_graph(["tomate.pomodoro.app"], graph)
 
-    assert isinstance(app, Application)
-
-    with contextlib.ExitStack() as stack:
-        stack.enter_context(mocker.patch(
-            "tomate.pomodoro.app.dbus.SessionBus.return_value.request_name",
-            return_value=dbus.bus.REQUEST_NAME_REPLY_EXISTS,
-        ))
-        dbus_app = Application.from_graph(graph)
-
-        assert isinstance(dbus_app, dbus.Interface)
+    return graph.get("tomate.app")
 
 
-def test_run_when_not_running(subject):
-    subject.Run()
+def test_module(graph, subject):
+    instance = graph.get("tomate.app")
 
-    subject.window.run.assert_called_once_with()
-
-
-def test_run_when_already_running(subject):
-    subject.state = State.started
-
-    subject.Run()
-
-    subject.window.show.assert_called_once_with()
+    assert isinstance(instance, Application)
+    assert instance is subject
 
 
-def test_is_running(subject):
-    assert not subject.IsRunning()
-
-    subject.state = State.started
-
-    assert subject.IsRunning()
+def test_search_plugin_on_init(subject, mock_plugin):
+    mock_plugin.collectPlugins.assert_called_once()
 
 
-def test_load_plugins_in_init(subject, mock_plugin):
-    mock_plugin.collectPlugins()
+class TestRun:
+    def test_shows_window_when_app_is_running(self, subject):
+        subject.state = State.stopped
+
+        subject.Run()
+
+        subject.window.run.assert_called_once_with()
+
+    def test_runs_window_when_app_is_not_running(self, subject):
+        subject.state = State.started
+
+        subject.Run()
+
+        subject.window.show.assert_called_once_with()
+        assert subject.state is State.started
+
+
+class TestFromGraph:
+    def setup_method(self):
+        DBusTestCase.start_session_bus()
+
+    def teardown_method(self):
+        DBusTestCase.tearDownClass()
+
+    def test_create_app_instance_when_is_not_registered_in_dbus(
+        self, graph, mock_view, mock_plugin
+    ):
+        graph.register_instance("tomate.ui.view", mock_view)
+        graph.register_instance("tomate.plugin", mock_plugin)
+        scan_to_graph(["tomate.pomodoro.app"], graph)
+
+        instance = Application.from_graph(graph, DBusTestCase.get_dbus())
+
+        assert isinstance(instance, Application)
+
+    @pytest.fixture()
+    def mock_dbus(self):
+        mock = DBusTestCase.spawn_server(
+            Application.BUS_NAME, Application.BUS_PATH, Application.BUS_INTERFACE
+        )
+        yield mock
+        mock.terminate()
+        mock.wait()
+
+    def test_get_dbus_interface_when_is_registered_in_dbus(self, graph, mock_dbus):
+        instance = Application.from_graph(graph, DBusTestCase.get_dbus())
+
+        assert isinstance(instance, dbus.Interface)
+        assert instance.dbus_interface == Application.BUS_INTERFACE
+        assert instance.object_path == Application.BUS_PATH
+        assert instance.requested_bus_name == Application.BUS_NAME

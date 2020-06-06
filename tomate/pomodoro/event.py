@@ -18,7 +18,7 @@ class Dispatcher(Namespace):
 Events = Dispatcher()
 Session = Events.signal("Session")
 Timer = Events.signal("Timer")
-Setting = Events.signal("Setting")
+Config = Events.signal("Config")
 View = Events.signal("View")
 
 
@@ -122,5 +122,5 @@ class ObservableProperty(object):
 
 register.instance("tomate.events.session")(Session)
 register.instance("tomate.events.timer")(Timer)
-register.instance("tomate.events.setting")(Setting)
+register.instance("tomate.events.config")(Config)
 register.instance("tomate.events.view")(View)

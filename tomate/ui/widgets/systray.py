@@ -17,37 +17,29 @@ class TrayIcon(Interface):
 
 
 @register.factory("tomate.ui.tray.menu", scope=SingletonScope)
-class Menu(object):
+class Menu:
     @inject(view="tomate.ui.view")
     def __init__(self, view):
-        self._view = view
-
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
-        self._show_item = Gtk.MenuItem.new_with_label(_("Show"))
-        self._show_item.set_properties(visible=False, no_show_all=True)
-        self._show_item.connect("activate", self._show_window)
-        self.widget.add(self._show_item)
+        self.show_item = Gtk.MenuItem.new_with_label(_("Show"))
+        self.show_item.set_properties(visible=False, no_show_all=True)
+        self.show_item.connect("activate", lambda _: view.show())
+        self.widget.add(self.show_item)
 
-        self._hide_item = Gtk.MenuItem.new_with_label(_("Hide"))
-        self._hide_item.set_properties(visible=True)
-        self._hide_item.connect("activate", self._hide_window)
-        self.widget.add(self._hide_item)
+        self.hide_item = Gtk.MenuItem.new_with_label(_("Hide"))
+        self.hide_item.set_properties(visible=True)
+        self.hide_item.connect("activate", lambda _: view.hide())
+        self.widget.add(self.hide_item)
 
         self.widget.show_all()
 
-    def _hide_window(self, _):
-        return self._view.hide()
-
-    def _show_window(self, _):
-        return self._view.show()
-
     @on(Events.View, [State.showed])
     def _on_view_show(self, *args, **kwargs):
-        self._hide_item.set_visible(True)
-        self._show_item.set_visible(False)
+        self.hide_item.set_visible(True)
+        self.show_item.set_visible(False)
 
     @on(Events.View, [State.hid])
     def _on_view_hide(self, *args, **kwargs):
-        self._hide_item.set_visible(False)
-        self._show_item.set_visible(True)
+        self.hide_item.set_visible(False)
+        self.show_item.set_visible(True)

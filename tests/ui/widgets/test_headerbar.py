@@ -1,227 +1,165 @@
 import pytest
 from gi.repository import Gtk
-from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
 from tomate.pomodoro import Sessions, State
 from tomate.pomodoro.event import connect_events, Events, Session
-from tomate.pomodoro.session import SessionPayload, FinishedSession
+from tomate.pomodoro.session import Payload as SessionPayload
 from tomate.ui.shortcut import ShortcutManager
-from tomate.ui.widgets import HeaderBar, HeaderBarMenu
-
-ONE_FINISHED_SESSION = [FinishedSession(1, Sessions.pomodoro, 10)]
-NO_FINISHED_SESSIONS = []
+from tomate.ui.widgets import HeaderBarMenu, HeaderBar
 
 
-@pytest.fixture
-def mock_menu(mocker):
-    return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
-
-
-def describe_headerbar():
+class TestHeaderBar:
     @pytest.fixture
-    def subject(mock_session, mock_shortcuts, mock_menu):
+    def mock_menu(self, mocker):
+        return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
+
+    @pytest.fixture
+    def subject(self, graph, mock_menu, mock_shortcut, mock_session, mocker):
         Session.receivers.clear()
 
-        subject = HeaderBar(mock_session, mock_menu, mock_shortcuts)
+        scan_to_graph(["tomate.ui.widgets.headerbar"], graph)
 
-        connect_events(subject)
-
-        return subject
-
-    def test_module(graph, mocker):
-        specification = "tomate.ui.headerbar"
-        package = "tomate.ui.widgets.headerbar"
-
-        scan_to_graph([package], graph)
-
-        assert specification in graph.providers
-
-        graph.register_factory("tomate.ui.menu", mocker.Mock)
-        graph.register_factory("tomate.session", mocker.Mock)
-        graph.register_factory("tomate.ui.shortcut", mocker.Mock)
+        graph.register_instance("tomate.ui.menu", mock_menu)
+        graph.register_instance("tomate.session", mock_session)
+        graph.register_instance("tomate.ui.shortcut", mock_shortcut)
         graph.register_factory("tomate.ui.view", mocker.Mock)
         graph.register_factory("tomate.proxy", mocker.Mock)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
 
-        provider = graph.providers[specification]
-        assert provider.scope == SingletonScope
+        instance = graph.get("tomate.ui.headerbar")
 
-        assert isinstance(graph.get(specification), HeaderBar)
+        connect_events(instance)
+        return instance
 
-    def describe_buttons_behaviour():
-        def test_connect_shortcuts(mock_shortcuts, subject):
-            # start
-            mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.START, subject._start_session
-            )
-            tooltip = "Starts the session (start)"
-            assert subject._start_button.get_tooltip_text() == tooltip
+    def test_module(self, graph, subject):
+        instance = graph.get("tomate.ui.headerbar")
 
-            # stop
-            mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.STOP, subject._stop_session
-            )
-            tooltip = "Stops the session (stop)"
-            assert subject._stop_button.get_tooltip_text() == tooltip
+        assert isinstance(instance, HeaderBar)
+        assert instance is subject
 
-            # reset
-            mock_shortcuts.connect.assert_any_call(
-                ShortcutManager.RESET, subject._reset_session
-            )
-            tooltip = "Clear the count of sessions (reset)"
-            assert subject._reset_button.get_tooltip_text() == tooltip
+    def test_connect_shortcuts(self, mock_shortcut, subject):
+        mock_shortcut.connect.assert_any_call(
+            ShortcutManager.START, subject._start_session
+        )
 
-        def test_start_then_session_when_start_button_is_clicked(subject, mock_session):
-            subject._start_button.emit("clicked")
+        mock_shortcut.connect.assert_any_call(
+            ShortcutManager.STOP, subject._stop_session
+        )
 
-            refresh_gui(0)
+        mock_shortcut.connect.assert_any_call(
+            ShortcutManager.RESET, subject._reset_session
+        )
 
-            mock_session.start.assert_called_once_with()
-
-        def test_stop_the_session_when_stop_button_is_clicked(subject, mock_session):
-            subject._stop_button.emit("clicked")
-
-            refresh_gui(0)
-
-            mock_session.stop.assert_called_once_with()
-
-        def test_reset_the_session_when_reset_button_is_clicked(
-            subject, mock_session: Session
-        ):
-            subject._reset_button.emit("clicked")
-
-            refresh_gui(0)
-
-            mock_session.reset.assert_called_once_with()
-
-    def describe_session_lifecycle():
-        def test_enable_only_the_stop_button_when_session_starts(subject):
-            # when
-            Session.send(State.started)
-
-            # then
-            assert subject._stop_button.get_visible() is True
-            assert subject._start_button.get_visible() is False
-            assert subject._reset_button.get_sensitive() is False
-
-        def test_disables_reset_button_when_session_is_reset(subject, mock_session):
-            # given
-            subject._reset_button.set_sensitive(True)
-
-            # when
-            Session.send(State.reset)
-
-            # then
-            assert subject._reset_button.get_sensitive() is False
-
-        def test_buttons_visibility_and_title_in_the_first_session(
-            subject, mock_session
-        ):
-            # given
-            payload = SessionPayload(
-                type=Sessions.pomodoro,
-                sessions=NO_FINISHED_SESSIONS,
-                state=State.started,
-                duration=0,
-                task="",
-            )
-
-            for state in [State.stopped, State.finished]:
-                # when
-                Session.send(state, payload=payload)
-
-                # then
-                assert subject._start_button.get_visible() is True
-                assert subject._stop_button.get_visible() is False
-                assert subject._reset_button.get_sensitive() is False
-
-                assert subject.widget.props.title == "No session yet"
-
-        def test_buttons_visibility_and_title_in_past_session(subject, mock_session):
-            # when
-            payload = SessionPayload(
-                type=Sessions.pomodoro,
-                sessions=ONE_FINISHED_SESSION,
-                state=State.finished,
-                duration=1,
-                task="",
-            )
-
-            for state in [State.stopped, State.finished]:
-                # when
-                Session.send(state, payload=payload)
-
-                # then
-                assert subject._stop_button.get_visible() is False
-                assert subject._start_button.get_visible() is True
-                assert subject._reset_button.get_sensitive() is True
-
-                assert subject.widget.props.title == "Session 1"
-
-
-@pytest.fixture
-def mock_preference(mocker):
-    return mocker.Mock(widget=mocker.Mock(Gtk.Dialog))
-
-
-@pytest.fixture()
-def mock_about(mocker):
-    return mocker.Mock(widget=mocker.Mock(Gtk.Dialog))
-
-
-def describe_headerbar_menu():
-    @pytest.fixture
-    def subject(mock_proxy, mock_about, mock_preference, mock_view):
-        Events.View.receivers.clear()
-
-        return HeaderBarMenu(mock_about, mock_preference, mock_proxy)
-
-    def test_open_preference_dialog_when_preference_item_is_clicked(
-        subject, mock_view, mock_preference
+    def test_start_then_session_when_start_button_is_clicked(
+        self, subject, mock_session
     ):
-        # given
-        subject._preference_item.activate()
+        subject._start_button.emit("clicked")
 
-        # when
         refresh_gui()
 
-        # then
+        mock_session.start.assert_called_once_with()
+
+    def test_stop_the_session_when_stop_button_is_clicked(self, subject, mock_session):
+        subject._stop_button.emit("clicked")
+
+        refresh_gui()
+
+        mock_session.stop.assert_called_once_with()
+
+    def test_reset_the_session_when_reset_button_is_clicked(
+        self, subject, mock_session
+    ):
+        subject._reset_button.emit("clicked")
+
+        refresh_gui()
+
+        mock_session.reset.assert_called_once_with()
+
+    def test_enable_only_the_stop_button_when_session_starts(self, subject):
+        Session.send(State.started)
+
+        assert subject._stop_button.get_visible() is True
+        assert subject._start_button.get_visible() is False
+        assert subject._reset_button.get_sensitive() is False
+
+    def test_disables_reset_button_when_session_is_reset(self, subject, mock_session):
+        subject._reset_button.set_sensitive(True)
+        subject.widget.props.title = "foo"
+
+        Session.send(State.reset)
+
+        assert subject._reset_button.get_sensitive() is False
+        assert subject.widget.props.title == "No session yet"
+
+    @pytest.mark.parametrize(
+        "state,pomodoros,title",
+        [(State.stopped, 0, "No session yet"), (State.finished, 1, "Session 1")],
+    )
+    def test_buttons_visibility_and_title_in_the_first_session(
+        self, state, title, pomodoros, subject, mock_session
+    ):
+        payload = SessionPayload(
+            id="",
+            type=Sessions.pomodoro,
+            pomodoros=pomodoros,
+            state=State.started,
+            duration=0,
+            task="",
+        )
+
+        Session.send(state, payload=payload)
+
+        assert subject._start_button.get_visible() is True
+        assert subject._stop_button.get_visible() is False
+        assert subject._reset_button.get_sensitive() is bool(pomodoros)
+
+        assert subject.widget.props.title == title
+
+
+class TestHeaderBarMenu:
+    @pytest.fixture
+    def mock_preference(self, mocker):
+        return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
+
+    @pytest.fixture()
+    def mock_about(self, mocker):
+        return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
+
+    @pytest.fixture
+    def subject(self, mock_proxy, mock_about, mock_preference, mock_view, graph):
+        Events.View.receivers.clear()
+
+        graph.register_instance("tomate.ui.view", mock_view)
+        graph.register_instance("tomate.proxy", mock_proxy)
+        graph.register_instance("tomate.ui.about", mock_about)
+        graph.register_instance("tomate.ui.preference", mock_preference)
+
+        scan_to_graph(["tomate.ui.widgets.headerbar"], graph)
+        return graph.get("tomate.ui.headerbar.menu")
+
+    def test_module(self, graph, subject):
+        instance = graph.get("tomate.ui.headerbar.menu")
+
+        assert isinstance(instance, HeaderBarMenu)
+        assert instance is subject
+
+    def test_open_preference_dialog(self, subject, mock_view, mock_preference):
+        subject._preference_item.emit("activate")
+
+        refresh_gui()
+
         mock_preference.widget.run.assert_called_once_with()
         mock_preference.widget.set_transient_for.assert_called_once_with(
             mock_view.widget
         )
 
-    def test_open_about_dialog_when_about_item_is_clicked(
-        subject, mock_view, mock_about
-    ):
-        # given
-        subject._about_item.activate()
+    def test_open_about_dialog(self, subject, mock_view, mock_about):
+        subject._about_item.emit("activate")
 
-        # when
         refresh_gui()
 
-        # then
         mock_about.widget.set_transient_for.assert_called_once_with(mock_view.widget)
         mock_about.widget.run.assert_called_once_with()
-
-    def test_module(graph, mocker):
-        specification = "tomate.ui.headerbar.menu"
-        package = "tomate.ui.widgets.headerbar"
-
-        graph.register_factory("tomate.ui.view", mocker.Mock)
-        graph.register_factory("tomate.proxy", mocker.Mock)
-        graph.register_factory("tomate.ui.about", mocker.Mock)
-        graph.register_factory("tomate.ui.preference", mocker.Mock)
-
-        scan_to_graph([package], graph)
-
-        assert specification in graph.providers
-
-        provider = graph.providers[specification]
-
-        assert provider.scope == SingletonScope
-
-        assert isinstance(graph.get(specification), HeaderBarMenu)

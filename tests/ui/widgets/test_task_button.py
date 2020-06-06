@@ -1,89 +1,58 @@
 import pytest
-from wiring import SingletonScope
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
 from tomate.pomodoro import Sessions, State
-from tomate.pomodoro.event import Session, connect_events
-from tomate.pomodoro.session import SessionPayload
-from tomate.ui.widgets import TaskButton, ModeButton
+from tomate.pomodoro.event import Events
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.ui.widgets import TaskButton
 
 
 @pytest.fixture
-def subject(mock_session):
-    Session.receivers.clear()
-
-    instance = TaskButton(mock_session)
-
-    connect_events(instance)
-
-    return instance
+def subject(graph, mock_session):
+    graph.register_instance("tomate.session", mock_session)
+    scan_to_graph(["tomate.ui.widgets.task_button"], graph)
+    return graph.get("tomate.ui.taskbutton")
 
 
-def test_module(graph, mocker):
-    spec = "tomate.ui.taskbutton"
-    package = "tomate.ui.widgets.task_button"
+def test_module(graph, subject):
+    instance = graph.get("tomate.ui.taskbutton")
 
-    scan_to_graph([package], graph)
-    graph.register_factory("tomate.session", mocker.Mock)
-
-    assert spec in graph.providers
-
-    provider = graph.providers[spec]
-
-    assert provider.scope == SingletonScope
-
-    assert isinstance(graph.get(spec), TaskButton)
+    assert isinstance(instance, TaskButton)
+    assert instance is subject
 
 
-def test_mode_button_type(subject):
-    assert isinstance(subject.widget, ModeButton)
+def test_disables_buttons_when_session_starts(subject):
+    Events.Session.send(State.started)
+
+    assert subject.widget.get_sensitive() is False
 
 
-def describe_session_lifecycle():
-    def test_disable_button_when_session_starts(subject):
-        # when
-        Session.send(State.started)
+@pytest.mark.parametrize("state", [State.finished, State.stopped])
+def test_changes_selected_button_when_session_finishes(state, subject, mock_session):
+    payload = SessionPayload(
+        id="",
+        type=Sessions.shortbreak,
+        pomodoros=0,
+        state=State.finished,
+        duration=0,
+        task="",
+    )
+    Events.Session.send(state, payload=payload)
 
-        # then
-        assert subject.widget.get_sensitive() is False
+    assert subject.widget.get_sensitive() is True
+    assert subject.widget.get_selected() is Sessions.shortbreak.value
+    mock_session.change.assert_called_once_with(session=Sessions.shortbreak)
 
-    def test_enable_mode_button_when_session_stops(subject):
-        # when
-        Session.send(State.stopped)
 
-        # then
-        assert subject.widget.get_sensitive() is True
+@pytest.mark.parametrize(
+    "session_type", [Sessions.pomodoro, Sessions.shortbreak, Sessions.longbreak]
+)
+def test_changes_session_type_when_respective_button_is_clicked(
+    session_type, subject, mock_session
+):
+    subject.widget.emit("mode_changed", session_type.value)
 
-    def test_change_active_button_button_when_session_finishes(subject, mock_session):
-        # given
-        payload = SessionPayload(
-            type=Sessions.shortbreak,
-            sessions=[],
-            state=State.finished,
-            duration=0,
-            task="",
-        )
+    refresh_gui()
 
-        # when
-        Session.send(State.finished, payload=payload)
-
-        # then
-        assert subject.widget.get_selected() is Sessions.shortbreak.value
-        mock_session.change.assert_called_once_with(session=Sessions.shortbreak)
-
-    def test_buttons_be_activate_when_session_finishes(subject):
-        # when
-        Session.send(State.finished)
-
-        # then
-        assert subject.widget.get_sensitive() is True
-
-    def test_change_task_when_mode_button_changes(subject, mock_session):
-        # when
-        subject.widget.emit("mode_changed", Sessions.longbreak.value)
-
-        refresh_gui(0)
-
-        # then
-        mock_session.change.assert_called_once_with(session=Sessions.longbreak)
+    mock_session.change.assert_called_once_with(session=session_type)

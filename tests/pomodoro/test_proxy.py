@@ -1,25 +1,18 @@
+import pytest
+from wiring import Graph
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro.proxy import LazyProxy, lazy_proxy
 
-
-def test_lazy_proxy(graph):
-    graph.register_instance("dict", {"a": 1, "b": 2})
-    new_proxy = LazyProxy("dict", graph)
-
-    assert sorted(new_proxy.keys()) == ["a", "b"]
-    assert sorted(new_proxy.values()) == [1, 2]
-
-
-def test_lazy_proxy_function(graph):
-    new_proxy = lazy_proxy("foo", graph=graph)
-
-    assert isinstance(new_proxy, LazyProxy)
-
-
-def test_module(graph):
-    spec = "tomate.proxy"
-
+@pytest.fixture()
+def subject(graph):
+    graph.register_instance(Graph, graph)
     scan_to_graph(["tomate.pomodoro.proxy"], graph)
+    return graph.get("tomate.proxy")
 
-    assert spec in graph.providers
+
+def test_lazy_proxy(graph, subject):
+    graph.register_instance("foo", {"a": 1, "b": 2})
+    proxy = subject("foo")
+
+    assert sorted(proxy.keys()) == ["a", "b"]
+    assert sorted(proxy.values()) == [1, 2]

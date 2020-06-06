@@ -22,7 +22,7 @@ clean:
 
 test: clean
 	echo "Current path: $(CURDIR)"
-	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(file) -v --cov=$(PACKAGE)
+	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(cmd) -v --cov=$(PACKAGE)
 
 run:
 	$(DATAPATH) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v

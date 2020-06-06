@@ -1,150 +1,134 @@
-import random
-
 import pytest
-from gi.repository import Gtk
-from wiring import Graph, SingletonScope
+from gi.repository import Gtk, Gdk
+from wiring import Graph
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import refresh_gui
 from tomate.pomodoro import State
-from tomate.pomodoro.event import Events
-from tomate.ui.widgets import Countdown, HeaderBar, TaskButton, TrayIcon
+from tomate.pomodoro.event import Events, connect_events
+from tomate.ui.widgets import Window, TaskButton, TrayIcon, Countdown, HeaderBar
 
 
-@pytest.fixture
-def task_button(mocker):
+@pytest.fixture()
+def mock_taskbutton(mocker):
     return mocker.Mock(TaskButton, widget=Gtk.Label())
 
 
 @pytest.fixture
-def dispatcher(mocker):
-    return mocker.Mock()
-
-
-@pytest.fixture
 def subject(
-    graph, mocker, mock_shortcuts, task_button, dispatcher, mock_config, mock_session
+    graph, mock_shortcut, mock_taskbutton, dispatcher, mock_config, mock_session, mocker
 ):
-    mocker.patch("tomate.ui.widgets.window.Gtk.Window")
-    mocker.patch("tomate.ui.widgets.window.GdkPixbuf")
-
-    from tomate.ui.widgets.window import Window
-
     Events.Session.receivers.clear()
 
-    widget = Gtk.Label()
-
-    return Window(
-        session=mock_session,
-        dispatcher=dispatcher,
-        config=mock_config,
-        graph=graph,
-        headerbar=mocker.Mock(HeaderBar, widget=widget),
-        countdown=mocker.Mock(Countdown, widget=widget),
-        task_button=task_button,
-        shortcuts=mock_shortcuts,
+    graph.register_instance("tomate.session", mock_session)
+    graph.register_instance(
+        "tomate.ui.headerbar", mocker.Mock(HeaderBar, widget=Gtk.Label())
     )
-
-
-def test_module(graph):
-    spec = "tomate.ui.view"
-    package = "tomate.ui.widgets.window"
-
-    scan_to_graph([package], graph)
-
-    assert spec in graph.providers
-
-    provider = graph.providers[spec]
-
-    assert provider.scope == SingletonScope
-
-    dependencies = dict(
-        session="tomate.session",
-        dispatcher="tomate.events.view",
-        config="tomate.config",
-        graph=Graph,
-        headerbar="tomate.ui.headerbar",
-        countdown="tomate.ui.countdown",
-        task_button="tomate.ui.taskbutton",
-        shortcuts="tomate.ui.shortcuts",
+    graph.register_instance(
+        "tomate.ui.countdown", mocker.Mock(Countdown, widget=Gtk.Label())
     )
+    graph.register_instance("tomate.ui.taskbutton", mock_taskbutton)
+    graph.register_instance("tomate.ui.shortcut", mock_shortcut)
+    graph.register_instance("tomate.events.view", dispatcher)
+    graph.register_instance("tomate.config", mock_config)
+    graph.register_instance(Graph, graph)
+    scan_to_graph(["tomate.ui.widgets.window"], graph)
+    instance = graph.get("tomate.ui.view")
 
-    assert sorted(provider.dependencies) == sorted(dependencies)
+    connect_events(instance)
+
+    return instance
 
 
-def test_initialize_shortcuts_and_session_buttons(subject, task_button, mock_shortcuts):
-    # when
-    assert task_button.enable.called_once_with()
-    assert mock_shortcuts.initialize(subject.widget)
+def test_module(graph, subject):
+    instance = graph.get("tomate.ui.view")
+
+    assert isinstance(instance, Window)
+    assert instance is subject
 
 
-def test_call_gtk_main_on_run(mocker, subject):
-    # given
+def test_initializes_shortcuts(subject, mock_shortcut):
+    assert mock_shortcut.initialize(subject.widget)
+
+
+def test_enables_session_buttons(subject, mock_taskbutton):
+    assert mock_taskbutton.enable.called_once_with()
+
+
+def test_starts_loop(mocker, subject):
     gtk_main = mocker.patch("tomate.ui.widgets.window.Gtk.main")
 
-    # when
     subject.run()
 
-    # then
     gtk_main.assert_called_once_with()
 
 
-def describe_hide():
-    def test_minimize_when_none_tray_plugin_is_enabled(subject, dispatcher, graph):
-        # given
+def test_uses_correct_icon_size(subject, mock_config):
+    mock_config.icon_path.assert_called_once_with("tomate", 22)
+
+
+class TestWindowHide:
+    def test_iconify_when_tray_icon_plugin_is_not_registered(
+        self, subject, dispatcher, graph, mocker
+    ):
         graph.providers.clear()
 
-        # when
-        assert subject.hide() is Gtk.true
+        subscriber = mocker.Mock()
+        dispatcher.connect(subscriber, sender=State.hid, weak=False)
 
-        # then
-        dispatcher.send.assert_called_with(State.hid)
-        subject.widget.iconify.assert_called_once_with()
+        result = subject.hide()
 
-    def test_hide_in_tray_when_a_tray_plugin_is_enabled(
-        subject, dispatcher, graph, mocker
+        assert result is Gtk.true
+        subscriber.assert_called_once_with(State.hid)
+
+    def test_deletes_when_tray_icon_plugin_is_registered(
+        self, subject, dispatcher, graph, mocker
     ):
-        # given
         graph.register_factory(TrayIcon, mocker.Mock)
 
-        return_value = random.random()
-        subject.widget.hide_on_delete.return_value = return_value
+        subscriber = mocker.Mock()
+        dispatcher.connect(subscriber, sender=State.hid, weak=False)
 
-        # when
-        assert subject.hide() is return_value
+        subject.widget.set_visible(True)
 
-        # then
-        dispatcher.send.assert_called_with(State.hid)
+        result = subject.hide()
+
+        assert result
+        assert subject.widget.get_visible() is False
+        subscriber.assert_called_once_with(State.hid)
 
 
-def describe_quit():
-    def test_quit_when_timer_is_not_running(mocker, subject, mock_session):
-        # given
+class TestWindowQuit:
+    def test_quits_when_timer_is_not_running(self, subject, mock_session, mocker):
         main_quit = mocker.patch("tomate.ui.widgets.window.Gtk.main_quit")
-        mock_session.IsRunning.return_value = False
+        mock_session.is_running.return_value = False
 
-        # when
-        subject.quit()
+        subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
-        # then
+        refresh_gui()
+
         main_quit.assert_called_once_with()
 
-    def test_hide_when_timer_is_running(subject, mocker, mock_session):
-        # given
-        subject.hide = mocker.Mock()
-        mock_session.IsRunning.return_value = True
+    def test_hides_when_timer_is_running(
+        self, subject, mock_session, dispatcher, mocker
+    ):
+        mock_session.is_running.return_value = True
 
-        # when
-        subject.quit()
+        subscriber = mocker.Mock()
+        dispatcher.connect(subscriber, sender=State.hid, weak=False)
 
-        # then
-        subject.hide.assert_called_once_with()
+        subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
+
+        subscriber.assert_called_once_with(State.hid)
 
 
-def describe_session_lifecycle():
-    def test_show_window_when_session_finishes(subject, mocker, dispatcher):
-        # when
-        Events.Session.send(State.finished)
+def test_shows_window_when_session_finishes(subject, dispatcher, mocker):
+    subject.widget.set_visible(False)
 
-        # then
-        dispatcher.send.assert_called_once_with(State.showed)
-        subject.widget.present_with_time_once(mocker.ANY)
+    subscriber = mocker.Mock()
+    dispatcher.connect(subscriber, sender=State.showed, weak=False)
+
+    Events.Session.send(State.finished)
+
+    assert subject.widget.get_visible()
+    subscriber.assert_called_once_with(State.showed)

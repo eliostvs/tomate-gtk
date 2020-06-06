@@ -13,7 +13,7 @@ class AboutDialog(Gtk.AboutDialog):
             copyright="2014, Elio Esteves Duarte",
             license="GPL-3",
             license_type=Gtk.License.GPL_3_0,
-            logo=GdkPixbuf.Pixbuf.new_from_file(config.get_icon_path("tomate", 48)),
+            logo=GdkPixbuf.Pixbuf.new_from_file(config.icon_path("tomate", 48)),
             modal=True,
             program_name="Tomate Gtk",
             title="Tomate Gtk",

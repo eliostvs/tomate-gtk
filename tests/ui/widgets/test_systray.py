@@ -1,5 +1,5 @@
 import pytest
-from wiring import SingletonScope
+from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
@@ -8,70 +8,55 @@ from tomate.pomodoro.event import Events, connect_events
 from tomate.ui.widgets import TrayIconMenu
 
 
-@pytest.fixture
-def subject(mock_view):
-    mock_view.widget.get_visible.return_value = False
+@pytest.fixture()
+def view():
+    return Gtk.Label()
 
+
+@pytest.fixture
+def subject(graph, view):
     Events.View.receivers.clear()
 
-    instance = TrayIconMenu(mock_view)
-    connect_events(instance)
+    graph.register_instance("tomate.ui.view", view)
+    scan_to_graph(["tomate.ui.widgets.systray"], graph)
+    instance = graph.get("tomate.ui.tray.menu")
 
+    connect_events(instance)
     return instance
 
 
-def test_show_window_when_show_item_is_clicked(mock_view, subject):
-    # given
-    subject._show_item.activate()
+def test_module(graph, subject):
+    instance = graph.get("tomate.ui.tray.menu")
 
-    # when
+    assert isinstance(instance, TrayIconMenu)
+    assert instance is subject
+
+
+def test_hide_view_when_hide_menu_is_clicked(view, subject):
+    view.set_visible(True)
+
+    subject.hide_item.emit("activate")
+
     refresh_gui()
 
-    # then
-    mock_view.show.assert_called_once_with()
+    assert view.get_visible() is False
 
 
-def test_change_items_visibility_when_window_is_show(subject, mock_view):
-    # when
-    Events.View.send(State.showed)
+def test_show_window_when_hide_item_is_clicked(view, subject):
+    view.set_visible(False)
 
-    # then
-    assert subject._hide_item.get_visible()
-    assert not subject._show_item.get_visible()
+    subject.show_item.emit("activate")
 
-
-def test_hide_window_when_hide_item_is_clicked(mock_view, subject):
-    # give
-    subject._hide_item.activate()
-
-    # when
     refresh_gui()
 
-    # then
-    mock_view.hide.assert_called_once_with()
+    assert view.get_visible() is True
 
 
-def test_change_items_visibility_when_window_is_hide(subject, mock_view):
-    # when
-    Events.View.send(State.hid)
+@pytest.mark.parametrize(
+    "event,hide,show", [(State.hid, False, True), (State.showed, True, False)]
+)
+def test_change_items_visibility(event, hide, show, subject):
+    Events.View.send(event)
 
-    # then
-    assert not subject._hide_item.get_visible()
-    assert subject._show_item.get_visible()
-
-
-def test_module(graph, mock_view):
-    spec = "tomate.ui.tray.menu"
-    package = "tomate.ui.widgets.systray"
-
-    graph.register_instance("tomate.ui.view", mock_view)
-
-    scan_to_graph([package], graph)
-
-    assert spec in graph.providers
-
-    provider = graph.providers[spec]
-
-    assert provider.scope == SingletonScope
-
-    assert isinstance(graph.get(spec), TrayIconMenu)
+    assert subject.hide_item.get_visible() is hide
+    assert subject.show_item.get_visible() is show

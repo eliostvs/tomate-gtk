@@ -6,8 +6,8 @@ from wiring.scanning import register
 
 from tomate.pomodoro import State
 from tomate.pomodoro.event import Subscriber, Events, on
-from tomate.pomodoro.session import SessionPayload
-from tomate.pomodoro.timer import TimerPayload, format_time_left
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.pomodoro.timer import Payload as TimerPayload, format_time_left
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,6 @@ class Countdown(Subscriber):
 
     def _update_text(self, value: int) -> None:
         formatted_value = format_time_left(value)
-
         self.widget.set_markup(self.timer_markup(formatted_value))
 
         logger.debug("action=update value=%s", formatted_value)

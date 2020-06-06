@@ -35,16 +35,13 @@ class Window(Subscriber):
         task_button,
         shortcuts,
     ):
-        self._config = config
         self._session = session
         self._dispatcher = dispatcher
         self._graph = graph
 
         self.widget = Gtk.Window(
             title="Tomate",
-            icon=GdkPixbuf.Pixbuf.new_from_file(
-                self._config.get_icon_path("tomate", 22)
-            ),
+            icon=GdkPixbuf.Pixbuf.new_from_file(config.icon_path("tomate", 22)),
             window_position=Gtk.WindowPosition.CENTER,
             resizable=False,
         )
@@ -57,17 +54,17 @@ class Window(Subscriber):
         box.pack_start(task_button.widget, False, False, 0)
 
         self.widget.add(box)
-        self.widget.connect("delete-event", lambda *args: self.quit())
+        self.widget.connect("delete-event", self.quit)
         self.widget.show_all()
 
         shortcuts.initialize(self.widget)
 
         task_button.enable()
 
-    def run(self, *args, **kwargs):
+    def run(self):
         Gtk.main()
 
-    def quit(self, *args, **kwargs):
+    def quit(self, *args):
         if self._session.is_running():
             return self.hide()
         else:

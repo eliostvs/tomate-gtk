@@ -8,7 +8,7 @@ from wiring.scanning import register
 
 from tomate.pomodoro import Sessions, State
 from tomate.pomodoro.event import Subscriber, on, Events
-from tomate.pomodoro.session import SessionPayload
+from tomate.pomodoro.session import Payload as SessionPayload
 from .mode_button import ModeButton
 
 locale.textdomain("tomate")
@@ -37,7 +37,6 @@ class TaskButton(Subscriber):
 
     def _on_mode_changed(self, _, index):
         session_type = Sessions.by_index(index)
-
         self._session.change(session=session_type)
 
     @on(Events.Session, [State.started])
@@ -45,9 +44,8 @@ class TaskButton(Subscriber):
         self.widget.set_sensitive(False)
 
     @on(Events.Session, [State.finished, State.stopped])
-    def enable(self, sender=None, payload: Optional[SessionPayload] = None):
+    def enable(self, *args, payload: Optional[SessionPayload] = None):
         self.widget.set_sensitive(True)
 
         session_type = payload.type if payload else Sessions.pomodoro
-
         self.widget.set_selected(session_type.value)

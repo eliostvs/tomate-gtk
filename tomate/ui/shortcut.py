@@ -6,15 +6,13 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.config import Config
-
 logger = logging.getLogger(__name__)
 
 Accelerator = namedtuple("Accelerator", "shortcut key mod path")
 
 
 @register.factory("tomate.ui.shortcut", scope=SingletonScope)
-class ShortcutManager(object):
+class ShortcutManager:
     ACCEL_PATH_TEMPLATE = "<tomate>/Global/{}"
     START = "start"
     STOP = "stop"
@@ -22,7 +20,7 @@ class ShortcutManager(object):
     SHORTCUTS = {START: "<control>s", STOP: "<control>p", RESET: "<control>r"}
 
     @inject(config="tomate.config")
-    def __init__(self, config: Config, accel_group=Gtk.AccelGroup()):
+    def __init__(self, config, accel_group=Gtk.AccelGroup()):
         self._config = config
         self.accel_group = accel_group
 
@@ -34,30 +32,24 @@ class ShortcutManager(object):
     def change(self, name: str, shortcut: str) -> None:
         logger.debug("action=configure name=%s shortcut=%s", name, shortcut)
 
-        key, mod = Gtk.accelerator_parse(shortcut)
         accel_path = self.ACCEL_PATH_TEMPLATE.format(name)
-
+        key, mod = Gtk.accelerator_parse(shortcut)
         Gtk.AccelMap.change_entry(accel_path, key, mod, True)
 
-    def connect(self, name: str, fn: Callable[[], None]) -> None:
+    def connect(self, name: str, callback: Callable[[], None]) -> None:
         accel = self._get_accelerator(name)
-
         Gtk.AccelMap.add_entry(accel.path, accel.key, accel.mod)
-
-        self.accel_group.connect_by_path(accel.path, fn)
+        self.accel_group.connect_by_path(accel.path, callback)
 
         logger.debug("action=connect name=%s shortcut=%s", name, accel.shortcut)
 
     def label(self, name: str) -> str:
         accel = self._get_accelerator(name)
-
         return Gtk.accelerator_get_label(accel.key, accel.mod)
 
     def _get_accelerator(self, name: str) -> Accelerator:
         shortcut = self._config.get(
             self._config.SECTION_SHORTCUTS, name, fallback=self.SHORTCUTS.get(name)
         )
-
         key, mod = Gtk.accelerator_parse(shortcut)
-
         return Accelerator(shortcut, key, mod, self.ACCEL_PATH_TEMPLATE.format(name))

@@ -26,7 +26,7 @@ def test_dialog_info(subject, mock_config):
     assert subject.get_website_label() == "Tomate GTK on Github"
     assert subject.get_license_type() == Gtk.License.GPL_3_0
     assert subject.get_logo()
-    mock_config.get_icon_path.assert_called_once_with("tomate", 48)
+    mock_config.icon_path.assert_called_once_with("tomate", 48)
 
 
 def test_close_dialog(subject, mocker):

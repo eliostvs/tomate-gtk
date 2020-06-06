@@ -3,7 +3,6 @@ import locale
 import logging
 from locale import gettext as _
 
-import dbus.mainloop.glib
 import gi
 from wiring.scanning import scan_to_graph
 
@@ -25,13 +24,9 @@ def main():
         setup_logging(options)
 
         scan_to_graph(["tomate"], graph)
-
-        dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-
         app = Application.from_graph(graph)
 
         app.Run()
-
         if app.IsRunning():
             Gdk.notify_startup_complete()
 

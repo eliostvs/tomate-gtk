@@ -7,7 +7,7 @@ from wiring.scanning import register
 
 from tomate.pomodoro import State
 from tomate.pomodoro.event import Subscriber, Events, on
-from tomate.pomodoro.session import SessionPayload, Session
+from tomate.pomodoro.session import Payload as SessionPayload, Session
 from tomate.ui.shortcut import ShortcutManager
 
 locale.textdomain("tomate")
@@ -21,7 +21,7 @@ class Menu:
         lazy_proxy="tomate.proxy",
     )
     def __init__(self, about, preference, lazy_proxy):
-        self.window = lazy_proxy("tomate.ui.view")
+        self._window = lazy_proxy("tomate.ui.view")
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
@@ -35,19 +35,15 @@ class Menu:
 
         self.widget.show_all()
 
-    def _create_menu_item(self, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
+    def _create_menu_item(self, label: str, dialog) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(label)
-        menu_item.connect("activate", self._show_dialog_window, dialog)
+        menu_item.connect("activate", self._show_dialog, dialog)
 
         return menu_item
 
-    def _show_dialog_window(self, _, widget: Gtk.Widget) -> None:
-        widget.set_transient_for(self.toplevel)
-        widget.run()
-
-    @property
-    def toplevel(self) -> Gtk.Widget:
-        return self.window.widget
+    def _show_dialog(self, _, dialog: Gtk.Dialog) -> None:
+        dialog.set_transient_for(self._window.widget)
+        dialog.run()
 
 
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
@@ -116,11 +112,11 @@ class HeaderBar(Subscriber):
         self._reset_button.set_sensitive(False)
 
     @on(Events.Session, [State.stopped, State.finished])
-    def _on_session_stopped_or_finished(self, _, payload: SessionPayload):
+    def _on_session_end(self, _, payload: SessionPayload):
         self._start_button.set_visible(True)
         self._stop_button.set_visible(False)
-        self._reset_button.set_sensitive(bool(payload.finished_pomodoros))
-        self._update_title(len(payload.finished_pomodoros))
+        self._reset_button.set_sensitive(bool(payload.pomodoros))
+        self._update_title(payload.pomodoros)
 
     @on(Events.Session, [State.reset])
     def _on_session_reset(self, *args, **kwargs):
@@ -128,11 +124,9 @@ class HeaderBar(Subscriber):
 
         self._update_title(0)
 
-    def _update_title(self, finished_pomodoros: int):
+    def _update_title(self, pomodoros: int):
         self.widget.props.title = (
-            _("Session {}".format(finished_pomodoros))
-            if finished_pomodoros > 0
-            else _("No session yet")
+            _("Session {}".format(pomodoros)) if pomodoros > 0 else _("No session yet")
         )
 
     def _create_button(
@@ -146,7 +140,6 @@ class HeaderBar(Subscriber):
         )
         button = Gtk.Button(tooltip_text=tooltip, **props)
         button.add(image)
-
         button.connect("clicked", on_clicked)
 
         self._shortcuts.connect(shortcut_name, on_clicked)

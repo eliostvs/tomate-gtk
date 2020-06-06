@@ -16,7 +16,7 @@ DEFAULTS = {
     "long_break_interval": "4",
 }
 
-SettingsPayload = namedtuple("SettingsPayload", "action section option value")
+Payload = namedtuple("ConfigPayload", "action section option value")
 
 
 @register.factory("tomate.config", scope=SingletonScope)
@@ -25,7 +25,7 @@ class Config:
     SECTION_SHORTCUTS = "shortcuts"
     SECTION_TIMER = "timer"
 
-    @inject(dispatcher="tomate.events.setting")
+    @inject(dispatcher="tomate.events.config")
     def __init__(
         self, dispatcher, parser=RawConfigParser(defaults=DEFAULTS, strict=True)
     ):
@@ -35,44 +35,42 @@ class Config:
         self.load()
 
     def load(self):
-        logger.debug("action=load uri=%s", self.get_config_path())
+        logger.debug("action=load uri=%s", self.config_path())
 
-        self.parser.read(self.get_config_path())
+        self.parser.read(self.config_path())
 
     def save(self):
-        logger.debug("action=write uri=%s", self.get_config_path())
+        logger.debug("action=write uri=%s", self.config_path())
 
-        with open(self.get_config_path(), "w") as f:
+        with open(self.config_path(), "w") as f:
             self.parser.write(f)
 
-    def get_config_path(self):
+    def config_path(self):
         BaseDirectory.save_config_path(self.APP_NAME)
         return os.path.join(
             BaseDirectory.xdg_config_home, self.APP_NAME, self.APP_NAME + ".conf"
         )
 
-    def get_media_uri(self, *resources):
-        return "file://" + self.get_resource_path(self.APP_NAME, "media", *resources)
+    def media_uri(self, *resources):
+        return "file://" + self._resource_path(self.APP_NAME, "media", *resources)
 
-    def get_plugin_paths(self):
-        return self.load_data_paths(self.APP_NAME, "plugins")
+    def plugin_paths(self):
+        return remove_duplicates(self._load_data_paths(self.APP_NAME, "plugins"))
 
-    def get_icon_paths(self):
-        return self.load_data_paths("icons")
+    def icon_paths(self):
+        return remove_duplicates(self._load_data_paths("icons"))
 
-    def get_resource_path(self, *resources):
-        for resource in self.load_data_paths(*resources):
+    def _resource_path(self, *resources):
+        for resource in self._load_data_paths(*resources):
             if os.path.exists(resource):
                 return resource
 
-        raise EnvironmentError(
-            "Resource with path %s not found!" % os.path.join(*resources)
-        )
+        raise EnvironmentError("Resource '%s' not found!" % resources[-1])
 
-    def load_data_paths(self, *resources):
+    def _load_data_paths(self, *resources):
         return [path for path in BaseDirectory.load_data_paths(*resources)]
 
-    def get_icon_path(self, iconname, size=None, theme=None):
+    def icon_path(self, iconname, size=None, theme=None):
         icon_path = IconTheme.getIconPath(
             iconname, size, theme, extensions=["png", "svg", "xpm"]
         )
@@ -80,14 +78,14 @@ class Config:
         if icon_path is not None:
             return icon_path
 
-        raise EnvironmentError("Icon %s not found!" % icon_path)
+        raise EnvironmentError("Icon '%s' not found!" % iconname)
 
     def get_int(self, section, option):
         return self.get(section, option, "getint")
 
     def get(self, section, option, method="get", fallback=None):
-        section = Config.normalize(section)
-        option = Config.normalize(option)
+        section = self.normalize(section)
+        option = self.normalize(option)
 
         logger.debug("action=set section=%s option=%s", section, option)
 
@@ -97,8 +95,8 @@ class Config:
         return getattr(self.parser, method)(section, option, fallback=fallback)
 
     def set(self, section, option, value):
-        section = Config.normalize(section)
-        option = Config.normalize(option)
+        section = self.normalize(section)
+        option = self.normalize(option)
 
         logger.debug("action=set section=%s option=%s value=%s", section, option, value)
 
@@ -109,12 +107,14 @@ class Config:
 
         self.save()
 
-        payload = SettingsPayload(
-            action="set", section=section, option=option, value=value
-        )
+        payload = Payload(action="set", section=section, option=option, value=value)
 
         self._dispatcher.send(section, payload=payload)
 
     @staticmethod
     def normalize(name):
         return name.replace(" ", "_").lower()
+
+
+def remove_duplicates(original):
+    return list(set(original))

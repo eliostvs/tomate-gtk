@@ -1,115 +1,65 @@
-from unittest import mock
-
 import pytest
-from wiring import SingletonScope
+from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
+
+from tests.conftest import set_config
+from tomate.ui.shortcut import ShortcutManager
 
 
 @pytest.fixture
-def subject(mocker, mock_config):
-    mocker.patch("tomate.ui.shortcut.Gtk.AccelMap.add_entry")
-    mocker.patch("tomate.ui.shortcut.Gtk.AccelMap.change_entry")
-
-    from gi.repository import Gtk
-    from tomate.ui.shortcut import ShortcutManager
-
-    return ShortcutManager(mock_config, mock.Mock(Gtk.AccelGroup))
+def subject(graph, mock_config):
+    graph.register_instance("tomate.config", mock_config)
+    scan_to_graph(["tomate.ui.shortcut"], graph)
+    return graph.get("tomate.ui.shortcut")
 
 
 def test_label(subject, mock_config):
-    # given
-    shortcut_name = "start"
-    shortcut = "<control>s"
+    set_config(mock_config, "get", {("shortcuts", "start", "fallback"): "<control>s"})
 
-    def side_effect(section, option, fallback=None):
-        assert section == "shortcuts"
-        assert option == shortcut_name
-        assert fallback == shortcut
+    label = subject.label("start")
 
-        return shortcut
-
-    mock_config.get.side_effect = side_effect
-
-    # when
-    label = subject.label(shortcut_name)
-
-    # then
     assert label == "Ctrl+S"
 
 
 @pytest.mark.parametrize(
-    "option, shortcut",
+    "option,shortcut",
     (["start", "<control>s"], ["stop", "<control>p"], ["reset", "<control>r"]),
 )
 def test_connect(option, shortcut, subject, mocker, mock_config):
-    # given
-    from gi.repository import Gtk
-
-    fn = mocker.Mock()
-    key, mod = Gtk.accelerator_parse(shortcut)
-
-    def side_effect(section, _option, fallback=None):
-        assert section == "shortcuts"
-        assert _option == option
-        assert fallback == shortcut
-
-        return shortcut
-
-    mock_config.get.side_effect = side_effect
-
-    # when
-    subject.connect(option, fn)
-
-    # then
-    subject.accel_group.connect_by_path.assert_called_once_with(
-        "<tomate>/Global/{}".format(option), fn
-    )
-
-    Gtk.AccelMap.add_entry.assert_any_call(
-        "<tomate>/Global/{}".format(option), key, mod
-    )
-
-
-def test_change(subject):
-    # given
-    from gi.repository import Gtk
-
-    shortcut = "<Control>b"
-    key, mod = Gtk.accelerator_parse(shortcut)
-
-    # when
-    subject.change("name", shortcut)
-
-    # then
-    Gtk.AccelMap.change_entry.assert_called_once_with(
-        "<tomate>/Global/name", key, mod, True
-    )
-
-
-def test_initialize(subject, mocker):
-    # given
-    from gi.repository import Gtk
-
-    window = mocker.Mock(Gtk.Window)
-
-    # when
+    window = Gtk.Window()
     subject.initialize(window)
 
-    # then
-    window.add_accel_group.assert_called_once_with(subject.accel_group)
+    set_config(mock_config, "get", {("shortcuts", option, "fallback"): shortcut})
+
+    callback = mocker.Mock()
+    subject.connect(option, callback)
+
+    key, mod = Gtk.accelerator_parse(shortcut)
+    result = Gtk.accel_groups_activate(window, key, mod)
+
+    assert result is True
+    callback.assert_called_once_with(subject.accel_group, window, key, mod)
 
 
-def test_module(graph, mocker, subject):
-    spec = "tomate.ui.shortcut"
-    package = "tomate.ui.shortcut"
+def test_change(subject, mock_config, mocker):
+    window = Gtk.Window()
+    subject.initialize(window)
+    old = "<Control>b"
+    new = "<Control>a"
+    option = "start"
+    set_config(mock_config, "get", {("shortcuts", option, "fallback"): old})
 
-    scan_to_graph([package], graph)
+    subject.connect(option, mocker.Mock())
+    subject.change(option, new)
 
-    assert spec in graph.providers
+    key, mod = Gtk.accelerator_parse(new)
+    result = Gtk.accel_groups_activate(window, key, mod)
 
-    graph.register_instance("tomate.config", mocker.Mock())
+    assert result is True
 
-    provider = graph.providers[spec]
-    assert provider.scope == SingletonScope
 
-    assert isinstance(graph.get(spec), subject.__class__)
+def test_module(graph, subject):
+    instance = graph.get("tomate.ui.shortcut")
+
+    assert isinstance(instance, ShortcutManager)
+    assert instance is subject

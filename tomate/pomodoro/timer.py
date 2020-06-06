@@ -5,13 +5,13 @@ from wiring import inject, SingletonScope
 from wiring.scanning import register
 
 from . import State, SECONDS_IN_A_MINUTE
-from .event import ObservableProperty, Timer as Dispatcher
+from .event import ObservableProperty, Events
 from .fsm import fsm
 
 ONE_SECOND = 1
 
 
-class TimerPayload(namedtuple("TimerPayload", "time_left duration")):
+class Payload(namedtuple("TimerPayload", "time_left duration")):
     __slots__ = ()
 
     @property
@@ -42,7 +42,7 @@ class TimerPayload(namedtuple("TimerPayload", "time_left duration")):
 @register.factory("tomate.timer", scope=SingletonScope)
 class Timer:
     @inject(dispatcher="tomate.events.timer")
-    def __init__(self, dispatcher: Dispatcher):
+    def __init__(self, dispatcher: Events.Timer):
         self.duration = self.time_left = 0
         self._dispatcher = dispatcher
 
@@ -81,7 +81,7 @@ class Timer:
         return True
 
     def _trigger(self, event) -> None:
-        payload = TimerPayload(time_left=self.time_left, duration=self.duration)
+        payload = Payload(time_left=self.time_left, duration=self.duration)
         self._dispatcher.send(event, payload=payload)
 
     def _reset(self) -> None:
