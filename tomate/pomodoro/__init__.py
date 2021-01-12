@@ -6,9 +6,9 @@ SECONDS_IN_A_MINUTE = 60
 @enum.unique
 class Base(enum.Enum):
     @classmethod
-    def by_index(cls, number):
-        for (index, attr) in enumerate(cls):
-            if index == number:
+    def by_index(cls, index):
+        for (number, attr) in enumerate(cls):
+            if number == index:
                 return attr
 
 
