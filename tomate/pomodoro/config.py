@@ -3,6 +3,7 @@ import os
 from collections import namedtuple
 from configparser import RawConfigParser
 
+from blinker import Signal
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 from xdg import BaseDirectory, IconTheme
@@ -27,7 +28,7 @@ class Config:
 
     @inject(dispatcher="tomate.events.config")
     def __init__(
-        self, dispatcher, parser=RawConfigParser(defaults=DEFAULTS, strict=True)
+        self, dispatcher: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)
     ):
         self.parser = parser
         self._dispatcher = dispatcher
