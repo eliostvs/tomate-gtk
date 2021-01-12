@@ -1,6 +1,7 @@
 import uuid
 from collections import namedtuple
 
+from blinker import Signal
 from wiring import inject, SingletonScope
 from wiring.scanning import register
 
@@ -17,7 +18,7 @@ class Session(Subscriber):
     @inject(
         timer="tomate.timer", config="tomate.config", dispatcher="tomate.events.session"
     )
-    def __init__(self, timer: Timer, config, dispatcher: Events.Session):
+    def __init__(self, timer: Timer, config, dispatcher: Signal):
         self._config = config
         self._timer = timer
         self._dispatcher = dispatcher
