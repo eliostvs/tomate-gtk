@@ -36,7 +36,6 @@ def test_changes_selected_button_when_session_finishes(state, subject, mock_sess
         pomodoros=0,
         state=State.finished,
         duration=0,
-        task="",
     )
     Events.Session.send(state, payload=payload)
 

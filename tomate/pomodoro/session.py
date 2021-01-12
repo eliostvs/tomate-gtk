@@ -10,7 +10,7 @@ from .event import Subscriber, on, Events
 from .fsm import fsm
 from .timer import Payload as TimerPayload, Timer
 
-Payload = namedtuple("SessionPayload", "id state type pomodoros duration task")
+Payload = namedtuple("SessionPayload", "id state type pomodoros duration")
 
 
 @register.factory("tomate.session", scope=SingletonScope)
@@ -22,7 +22,6 @@ class Session(Subscriber):
         self._config = config
         self._timer = timer
         self._dispatcher = dispatcher
-        self._task_name = ""
         self.state = State.stopped
         self.current = Sessions.pomodoro
         self.pomodoros = 0
@@ -108,7 +107,6 @@ class Session(Subscriber):
             "duration": self.duration,
             "pomodoros": self.pomodoros,
             "type": self.current,
-            "task": self.task,
             "state": self.state,
         }
         defaults.update(kwargs)
@@ -131,16 +129,6 @@ class Session(Subscriber):
         option = self.current.name + "_duration"
         minutes = self._config.get_int("Timer", option)
         return int(minutes * SECONDS_IN_A_MINUTE)
-
-    @property
-    def task(self) -> str:
-        return self._task_name
-
-    @task.setter
-    def task(self, name: str) -> None:
-        if self.state in [State.stopped, State.finished]:
-            self._task_name = name
-            self._trigger(State.changed)
 
     def _trigger(self, event: State) -> None:
         self._dispatcher.send(event, payload=self._create_payload())

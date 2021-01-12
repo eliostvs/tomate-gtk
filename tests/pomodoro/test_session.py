@@ -62,7 +62,6 @@ class TestSessionStart:
             type=Sessions.pomodoro,
             pomodoros=0,
             duration=25 * SECONDS_IN_A_MINUTE,
-            task="",
         )
         subscriber.assert_called_once_with(State.started, payload=payload)
 
@@ -90,7 +89,6 @@ class TestSessionStop:
             state=State.stopped,
             duration=25 * SECONDS_IN_A_MINUTE,
             pomodoros=0,
-            task="",
         )
         subscriber.assert_called_once_with(State.stopped, payload=payload)
 
@@ -124,7 +122,6 @@ class TestSessionReset:
             type=current,
             pomodoros=0,
             duration=25 * SECONDS_IN_A_MINUTE,
-            task="",
         )
         subscriber.assert_called_once_with(State.reset, payload=payload)
 
@@ -179,7 +176,6 @@ class TestSessionEnd:
             type=scenario.before_session,
             pomodoros=scenario.after_pomodoros,
             duration=1,
-            task="",
         )
         finished.assert_called_once_with(State.finished, payload=finished_payload)
 
@@ -189,7 +185,6 @@ class TestSessionEnd:
             type=scenario.after_session,
             pomodoros=scenario.after_pomodoros,
             duration=1,
-            task="",
         )
         changed.assert_called_once_with(State.changed, payload=changed_payload)
 
@@ -220,22 +215,5 @@ class TestSessionChange:
             type=Sessions.longbreak,
             pomodoros=0,
             duration=15 * SECONDS_IN_A_MINUTE,
-            task="",
         )
         subscriber.assert_called_once_with(State.changed, payload=payload)
-
-
-class TestChangeTask:
-    @pytest.mark.parametrize("state", [State.stopped, State.finished])
-    def test_changes_task_when_session_is_not_running(self, state, subject):
-        subject.state = state
-        subject.task = "new task name"
-
-        assert subject.task == "new task name"
-
-    def test_doesnt_change_task_when_session_is_running(self, subject):
-        subject.state = State.started
-
-        subject.task = "new task name"
-
-        assert subject.task == ""

@@ -107,7 +107,6 @@ class TestHeaderBar:
             pomodoros=pomodoros,
             state=State.started,
             duration=0,
-            task="",
         )
 
         Session.send(state, payload=payload)

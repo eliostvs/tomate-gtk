@@ -31,7 +31,7 @@ def test_updates_countdown_when_session_state_changes(event, subject):
     Events.Session.send(
         event,
         payload=SessionPayload(
-            id="", state="", type="", pomodoros=0, task="", duration=duration
+            id="", state="", type="", pomodoros=0, duration=duration
         ),
     )
 
