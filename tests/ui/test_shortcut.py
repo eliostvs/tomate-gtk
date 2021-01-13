@@ -22,10 +22,10 @@ def test_label_with_fallback(subject):
 
 
 def test_connect(subject, mocker):
-    callback = mocker.Mock()
-    shortcut = "<control>s"
+    callback = mocker.Mock(return_value=True)
     subject.connect("start", callback, "")
 
+    shortcut = "<control>s"
     assert_shortcut_called(subject, shortcut)
 
     key, mod = Gtk.accelerator_parse(shortcut)
@@ -33,14 +33,12 @@ def test_connect(subject, mocker):
 
 
 def test_change(subject, mock_config, mocker):
-    window = Gtk.Window()
-    subject.initialize(window)
+    callback = mocker.Mock(return_value=True)
+    name = "start"
     shortcut = "<control>b"
-    option = "start"
-    callback = mocker.Mock()
 
-    subject.connect(option, callback, "")
-    subject.change(option, shortcut)
+    subject.connect(name, callback, "")
+    subject.change(name, shortcut)
 
     assert_shortcut_called(subject, shortcut)
 
