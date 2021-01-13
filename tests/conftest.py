@@ -6,6 +6,7 @@ import pytest
 from blinker import Namespace
 from gi.repository import Gtk, GLib
 from wiring import Graph
+from wiring.scanning import scan_to_graph
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
@@ -99,3 +100,28 @@ def mock_shortcut(mocker):
     instance.label.side_effect = lambda name, fallback: name
 
     return instance
+
+
+@pytest.fixture()
+def real_config(graph, dispatcher, monkeypatch):
+    monkeypatch.setenv("XDG_DATA_DIRS", TEST_DATA_DIR)
+    monkeypatch.setenv("XDG_DATA_HOME", TEST_DATA_DIR)
+    monkeypatch.setenv("XDG_CONFIG_HOME", TEST_DATA_DIR)
+
+    graph.register_instance("tomate.events.config", dispatcher)
+    scan_to_graph(["tomate.pomodoro.config"], graph)
+    return graph.get("tomate.config")
+
+
+@pytest.fixture()
+def real_shortcut(graph, real_config):
+    graph.register_instance("tomate.config", real_config)
+    scan_to_graph(["tomate.ui.shortcut"], graph)
+    return graph.get("tomate.ui.shortcut")
+
+
+def assert_shortcut_called(shortcut_manager, shortcut):
+    window = Gtk.Window()
+    shortcut_manager.initialize(window)
+    key, mod = Gtk.accelerator_parse(shortcut)
+    assert Gtk.accel_groups_activate(window, key, mod) is True

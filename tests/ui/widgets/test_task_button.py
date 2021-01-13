@@ -1,7 +1,7 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui
+from tests.conftest import refresh_gui, assert_shortcut_called
 from tomate.pomodoro import Sessions, State
 from tomate.pomodoro.event import Events
 from tomate.pomodoro.session import Payload as SessionPayload
@@ -9,8 +9,9 @@ from tomate.ui.widgets import TaskButton
 
 
 @pytest.fixture
-def subject(graph, mock_session):
+def subject(graph, mock_session, real_shortcut):
     graph.register_instance("tomate.session", mock_session)
+    graph.register_instance("tomate.ui.shortcut", real_shortcut)
     scan_to_graph(["tomate.ui.widgets.task_button"], graph)
     return graph.get("tomate.ui.taskbutton")
 
@@ -47,11 +48,19 @@ def test_changes_selected_button_when_session_finishes(state, subject, mock_sess
 @pytest.mark.parametrize(
     "session_type", [Sessions.pomodoro, Sessions.shortbreak, Sessions.longbreak]
 )
-def test_changes_session_type_when_respective_button_is_clicked(
-    session_type, subject, mock_session
-):
+def test_changes_session_type_when_task_button_is_clicked(session_type, subject, mock_session):
     subject.widget.emit("mode_changed", session_type.value)
 
     refresh_gui()
 
     mock_session.change.assert_called_once_with(session=session_type)
+
+
+@pytest.mark.parametrize(
+    "shortcut,session_type",
+    [("<control>1", Sessions.pomodoro),
+     ("<control>2", Sessions.shortbreak),
+     ("<control>3", Sessions.longbreak)]
+)
+def test_shortcuts(shortcut, session_type, subject, real_shortcut):
+    assert_shortcut_called(real_shortcut, shortcut)
