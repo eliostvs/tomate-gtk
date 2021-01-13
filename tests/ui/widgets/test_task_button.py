@@ -13,6 +13,11 @@ def subject(graph, mock_session, real_shortcut):
     graph.register_instance("tomate.session", mock_session)
     graph.register_instance("tomate.ui.shortcut", real_shortcut)
     scan_to_graph(["tomate.ui.widgets.task_button"], graph)
+
+    real_shortcut.disconnect("button.pomodoro", "<control>1")
+    real_shortcut.disconnect("button.shortbreak", "<control>2")
+    real_shortcut.disconnect("button.longbreak", "<control>3")
+
     return graph.get("tomate.ui.taskbutton")
 
 
@@ -56,6 +61,9 @@ def test_changes_session_type_when_task_button_is_clicked(session_type, subject,
     mock_session.change.assert_called_once_with(session=session_type)
 
 
-@pytest.mark.parametrize("shortcut", ["<control>1", "<control>2", "<control>3"])
-def test_shortcuts(shortcut, subject, real_shortcut):
+@pytest.mark.parametrize("shortcut, session_type", [
+    ("<control>1", Sessions.pomodoro), ("<control>2", Sessions.shortbreak), ("<control>3", Sessions.longbreak)
+])
+def test_shortcuts(shortcut, session_type, subject, real_shortcut, mock_session):
     assert_shortcut_called(real_shortcut, shortcut)
+    mock_session.change(session=session_type)
