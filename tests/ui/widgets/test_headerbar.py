@@ -2,7 +2,7 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui
+from tests.conftest import refresh_gui, assert_shortcut_called
 from tomate.pomodoro import Sessions, State
 from tomate.pomodoro.event import connect_events, Events, Session
 from tomate.pomodoro.session import Payload as SessionPayload
@@ -15,18 +15,22 @@ class TestHeaderBar:
         return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def subject(self, graph, mock_menu, mock_shortcut, mock_session, mocker):
+    def subject(self, graph, mock_menu, real_shortcut, mock_session, mocker):
         Session.receivers.clear()
 
         scan_to_graph(["tomate.ui.widgets.headerbar"], graph)
 
         graph.register_instance("tomate.ui.menu", mock_menu)
         graph.register_instance("tomate.session", mock_session)
-        graph.register_instance("tomate.ui.shortcut", mock_shortcut)
+        graph.register_instance("tomate.ui.shortcut", real_shortcut)
         graph.register_factory("tomate.ui.view", mocker.Mock)
         graph.register_factory("tomate.proxy", mocker.Mock)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
+
+        real_shortcut.disconnect("button.start", "<control>s")
+        real_shortcut.disconnect("button.stop", "<control>p")
+        real_shortcut.disconnect("button.reset", "<control>r")
 
         instance = graph.get("tomate.ui.headerbar")
 
@@ -39,10 +43,14 @@ class TestHeaderBar:
         assert isinstance(instance, HeaderBar)
         assert instance is subject
 
-    def test_connect_shortcuts(self, subject, mock_shortcut):
-        mock_shortcut.connect.assert_any_call("start", subject._start_session, "<control>s")
-        mock_shortcut.connect.assert_any_call("stop", subject._stop_session, "<control>p")
-        mock_shortcut.connect.assert_any_call("reset", subject._reset_session, "<control>r")
+    @pytest.mark.parametrize("shortcut,action", [
+        ("<control>s", "start"),
+        ("<control>p", "stop"),
+        ("<control>r", "reset"),
+    ])
+    def test_shortcuts(self, shortcut, action, mock_menu, real_shortcut, mock_session, subject):
+        assert_shortcut_called(real_shortcut, shortcut)
+        getattr(mock_session, action).assert_called()
 
     def test_start_then_session_when_start_button_is_clicked(self, subject, mock_session):
         subject._start_button.emit("clicked")
