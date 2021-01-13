@@ -12,7 +12,7 @@ def subject(graph, dispatcher):
 
 
 def test_label(subject):
-    label = subject.label("start")
+    label = subject.label("start", "")
 
     assert label == "Ctrl+S"
 
@@ -28,7 +28,7 @@ def test_connect(subject, mocker):
     subject.initialize(window)
 
     callback = mocker.Mock()
-    subject.connect("start", callback)
+    subject.connect("start", callback, "")
 
     assert_shortcut_called(subject.accel_group, window, "<control>s", callback)
 
@@ -40,7 +40,7 @@ def test_change(subject, mock_config, mocker):
     option = "start"
     callback = mocker.Mock()
 
-    subject.connect(option, callback)
+    subject.connect(option, callback, "")
     subject.change(option, new_shortcut)
 
     assert_shortcut_called(subject.accel_group, window, new_shortcut, callback)

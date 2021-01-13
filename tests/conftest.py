@@ -94,12 +94,7 @@ def run_loop_for(seconds: int = 1) -> None:
 def mock_shortcut(mocker):
     from tomate.ui.shortcut import ShortcutManager
 
-    instance = mocker.Mock(
-        ShortcutManager,
-        START=ShortcutManager.START,
-        STOP=ShortcutManager.STOP,
-        RESET=ShortcutManager.RESET,
-    )
+    instance = mocker.Mock(ShortcutManager)
 
     instance.label.side_effect = lambda name, fallback: name
 
