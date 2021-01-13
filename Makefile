@@ -1,7 +1,7 @@
 .SILENT:
 
 DATAPATH     = XDG_DATA_DIRS=$(CURDIR)/data:/home/$(USER)/.local/share:/usr/local/share:/usr/share
-DEBUG 		 = TOMATE_DEBUG=true
+DEBUG 		   = TOMATE_DEBUG=true
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
@@ -24,8 +24,8 @@ format:
 	black $(PACKAGE)
 
 test: clean
-	echo "Current path: $(CURDIR)"
-	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(cmd) -v --cov=$(PACKAGE)
+	echo "Variables $(DATAPATH) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) files=$(files)"
+	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(files) -v --cov=$(PACKAGE)
 
 run:
 	$(DATAPATH) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v
