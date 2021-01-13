@@ -24,9 +24,7 @@ class PreferenceDialog(Gtk.Dialog):
         switcher = Gtk.StackSwitcher(halign=Gtk.Align.CENTER)
         switcher.set_stack(stack)
 
-        content_area = Gtk.Box(
-            orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_bottom=12
-        )
+        content_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_bottom=12)
         content_area.pack_start(switcher, False, False, 0)
         content_area.pack_start(stack, False, False, 0)
         content_area.show_all()
@@ -120,9 +118,7 @@ class ExtensionTab:
         self.plugin_model = Gtk.ListStore(*GridPlugin.MODEL)
 
         self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model)
-        self.plugin_list.get_selection().connect(
-            "changed", self._on_selected_item_changed
-        )
+        self.plugin_list.get_selection().connect("changed", self._on_selected_item_changed)
         self.plugin_list.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         renderer = Gtk.CellRendererToggle()
@@ -147,9 +143,7 @@ class ExtensionTab:
         self.settings_button.set_sensitive(False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)
 
-        settings_button_container = Gtk.Box(
-            orientation=Gtk.Orientation.HORIZONTAL, spacing=6
-        )
+        settings_button_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         settings_button_container.pack_end(self.settings_button, False, False, 0)
 
         self.widget = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -181,9 +175,7 @@ class ExtensionTab:
 
         if selected is not None:
             grid_plugin = GridPlugin.from_iter(model, selected)
-            self.settings_button.set_sensitive(
-                grid_plugin.is_enable & grid_plugin.has_settings
-            )
+            self.settings_button.set_sensitive(grid_plugin.is_enable & grid_plugin.has_settings)
 
     def _on_row_toggled(self, _, path):
         plugin = GridPlugin.from_path(self.plugin_model, path)

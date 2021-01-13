@@ -54,8 +54,6 @@ class ShortcutManager:
         return Gtk.accelerator_get_label(accel.key, accel.mod)
 
     def _get_accelerator(self, name: str, fallback=None) -> Accelerator:
-        shortcut = self._config.get(
-            self._config.SECTION_SHORTCUTS, name, fallback=fallback
-        )
+        shortcut = self._config.get(self._config.SECTION_SHORTCUTS, name, fallback=fallback)
         key, mod = Gtk.accelerator_parse(shortcut)
         return Accelerator(shortcut, key, mod, self.ACCEL_PATH_TEMPLATE.format(name))

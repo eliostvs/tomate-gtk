@@ -26,9 +26,7 @@ class Menu:
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
-        self._preference_item = self._create_menu_item(
-            _("Preferences"), preference.widget
-        )
+        self._preference_item = self._create_menu_item(_("Preferences"), preference.widget)
         self.widget.add(self._preference_item)
 
         self._about_item = self._create_menu_item(_("About"), about.widget)

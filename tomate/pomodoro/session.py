@@ -15,9 +15,7 @@ Payload = namedtuple("SessionPayload", "id state type pomodoros duration")
 
 @register.factory("tomate.session", scope=SingletonScope)
 class Session(Subscriber):
-    @inject(
-        timer="tomate.timer", config="tomate.config", dispatcher="tomate.events.session"
-    )
+    @inject(timer="tomate.timer", config="tomate.config", dispatcher="tomate.events.session")
     def __init__(self, timer: Timer, config, dispatcher: Signal):
         self._config = config
         self._timer = timer
@@ -86,9 +84,7 @@ class Session(Subscriber):
     def _trigger_session_finished(self, duration: int, previous: Sessions):
         self._dispatcher.send(
             State.finished,
-            payload=self._create_payload(
-                state=State.finished, duration=duration, type=previous
-            ),
+            payload=self._create_payload(state=State.finished, duration=duration, type=previous),
         )
 
     def _current_session_is(self, session_type: Sessions) -> bool:

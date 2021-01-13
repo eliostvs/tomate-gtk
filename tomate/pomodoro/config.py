@@ -27,9 +27,7 @@ class Config:
     SECTION_TIMER = "timer"
 
     @inject(dispatcher="tomate.events.config")
-    def __init__(
-        self, dispatcher: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)
-    ):
+    def __init__(self, dispatcher: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
         self.parser = parser
         self._dispatcher = dispatcher
 
@@ -48,9 +46,7 @@ class Config:
 
     def config_path(self):
         BaseDirectory.save_config_path(self.APP_NAME)
-        return os.path.join(
-            BaseDirectory.xdg_config_home, self.APP_NAME, self.APP_NAME + ".conf"
-        )
+        return os.path.join(BaseDirectory.xdg_config_home, self.APP_NAME, self.APP_NAME + ".conf")
 
     def media_uri(self, *resources):
         return "file://" + self._resource_path(self.APP_NAME, "media", *resources)
@@ -72,9 +68,7 @@ class Config:
         return [path for path in BaseDirectory.load_data_paths(*resources)]
 
     def icon_path(self, iconname, size=None, theme=None):
-        icon_path = IconTheme.getIconPath(
-            iconname, size, theme, extensions=["png", "svg", "xpm"]
-        )
+        icon_path = IconTheme.getIconPath(iconname, size, theme, extensions=["png", "svg", "xpm"])
 
         if icon_path is not None:
             return icon_path

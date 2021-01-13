@@ -44,9 +44,7 @@ class TestHeaderBar:
         mock_shortcut.connect.assert_any_call("stop", subject._stop_session, "<control>p")
         mock_shortcut.connect.assert_any_call("reset", subject._reset_session, "<control>r")
 
-    def test_start_then_session_when_start_button_is_clicked(
-        self, subject, mock_session
-    ):
+    def test_start_then_session_when_start_button_is_clicked(self, subject, mock_session):
         subject._start_button.emit("clicked")
 
         refresh_gui()
@@ -60,9 +58,7 @@ class TestHeaderBar:
 
         mock_session.stop.assert_called_once_with()
 
-    def test_reset_the_session_when_reset_button_is_clicked(
-        self, subject, mock_session
-    ):
+    def test_reset_the_session_when_reset_button_is_clicked(self, subject, mock_session):
         subject._reset_button.emit("clicked")
 
         refresh_gui()
@@ -89,9 +85,7 @@ class TestHeaderBar:
         "state,pomodoros,title",
         [(State.stopped, 0, "No session yet"), (State.finished, 1, "Session 1")],
     )
-    def test_buttons_visibility_and_title_in_the_first_session(
-        self, state, title, pomodoros, subject, mock_session
-    ):
+    def test_buttons_visibility_and_title_in_the_first_session(self, state, title, pomodoros, subject, mock_session):
         payload = SessionPayload(
             id="",
             type=Sessions.pomodoro,
@@ -142,9 +136,7 @@ class TestHeaderBarMenu:
         refresh_gui()
 
         mock_preference.widget.run.assert_called_once_with()
-        mock_preference.widget.set_transient_for.assert_called_once_with(
-            mock_view.widget
-        )
+        mock_preference.widget.set_transient_for.assert_called_once_with(mock_view.widget)
 
     def test_open_about_dialog(self, subject, mock_view, mock_about):
         subject._about_item.emit("activate")
