@@ -6,7 +6,6 @@ from tests.conftest import refresh_gui
 from tomate.pomodoro import Sessions, State
 from tomate.pomodoro.event import connect_events, Events, Session
 from tomate.pomodoro.session import Payload as SessionPayload
-from tomate.ui.shortcut import ShortcutManager
 from tomate.ui.widgets import HeaderBarMenu, HeaderBar
 
 
@@ -40,18 +39,10 @@ class TestHeaderBar:
         assert isinstance(instance, HeaderBar)
         assert instance is subject
 
-    def test_connect_shortcuts(self, mock_shortcut, subject):
-        mock_shortcut.connect.assert_any_call(
-            ShortcutManager.START, subject._start_session
-        )
-
-        mock_shortcut.connect.assert_any_call(
-            ShortcutManager.STOP, subject._stop_session
-        )
-
-        mock_shortcut.connect.assert_any_call(
-            ShortcutManager.RESET, subject._reset_session
-        )
+    def test_connect_shortcuts(self, subject, mock_shortcut):
+        mock_shortcut.connect.assert_any_call("start", subject._start_session, "<control>s")
+        mock_shortcut.connect.assert_any_call("stop", subject._stop_session, "<control>p")
+        mock_shortcut.connect.assert_any_call("reset", subject._reset_session, "<control>r")
 
     def test_start_then_session_when_start_button_is_clicked(
         self, subject, mock_session

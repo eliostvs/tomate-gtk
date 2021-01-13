@@ -1,4 +1,5 @@
 import locale
+from collections import namedtuple
 from locale import gettext as _
 
 from gi.repository import Gtk
@@ -46,6 +47,9 @@ class Menu:
         dialog.run()
 
 
+Shortcut = namedtuple("Shortcut", "name default")
+
+
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
 class HeaderBar(Subscriber):
     @inject(
@@ -67,7 +71,7 @@ class HeaderBar(Subscriber):
             Gtk.STOCK_MEDIA_PLAY,
             "Starts the session",
             self._start_session,
-            shortcuts.START,
+            Shortcut(name="start", default="<control>s"),
         )
         self.widget.pack_start(self._start_button)
 
@@ -75,7 +79,7 @@ class HeaderBar(Subscriber):
             Gtk.STOCK_MEDIA_STOP,
             "Stops the session",
             self._stop_session,
-            shortcuts.STOP,
+            Shortcut(name="stop", default="<control>p"),
             visible=False,
             no_show_all=True,
         )
@@ -85,7 +89,7 @@ class HeaderBar(Subscriber):
             Gtk.STOCK_CLEAR,
             "Clear the count of sessions",
             self._reset_session,
-            shortcuts.RESET,
+            Shortcut(name="reset", default="<control>r"),
             sensitive=False,
         )
         self.widget.pack_start(self._reset_button)
@@ -130,18 +134,18 @@ class HeaderBar(Subscriber):
         )
 
     def _create_button(
-        self, icon_name: str, tooltip_text: str, on_clicked, shortcut_name: str, **props
+        self, icon_name: str, tooltip_text: str, on_clicked, shortcut: Shortcut, **props
     ) -> Gtk.Button:
         image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
         image.show()
 
         tooltip = "{} ({})".format(
-            _(tooltip_text), self._shortcuts.label(shortcut_name)
+            _(tooltip_text), self._shortcuts.label(shortcut.name, shortcut.default)
         )
         button = Gtk.Button(tooltip_text=tooltip, **props)
         button.add(image)
         button.connect("clicked", on_clicked)
 
-        self._shortcuts.connect(shortcut_name, on_clicked)
+        self._shortcuts.connect(shortcut.name, on_clicked, shortcut.default)
 
         return button

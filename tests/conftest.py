@@ -101,6 +101,6 @@ def mock_shortcut(mocker):
         RESET=ShortcutManager.RESET,
     )
 
-    instance.label.side_effect = lambda name: name
+    instance.label.side_effect = lambda name, fallback: name
 
     return instance
