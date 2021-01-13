@@ -2,64 +2,62 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import set_config
-from tomate.ui.shortcut import ShortcutManager
-
 
 @pytest.fixture
-def subject(graph, mock_config):
-    graph.register_instance("tomate.config", mock_config)
+def subject(graph, dispatcher):
+    from tomate.pomodoro.config import Config
+    graph.register_instance("tomate.config", Config(dispatcher))
     scan_to_graph(["tomate.ui.shortcut"], graph)
     return graph.get("tomate.ui.shortcut")
 
 
-def test_label(subject, mock_config):
-    set_config(mock_config, "get", {("shortcuts", "start", "fallback"): "<control>s"})
-
+def test_label(subject):
     label = subject.label("start")
 
     assert label == "Ctrl+S"
 
 
-@pytest.mark.parametrize(
-    "option,shortcut",
-    (["start", "<control>s"], ["stop", "<control>p"], ["reset", "<control>r"]),
-)
-def test_connect(option, shortcut, subject, mocker, mock_config):
+def test_label_with_fallback(subject):
+    label = subject.label("stop", "<control>p")
+
+    assert label == "Ctrl+P"
+
+
+def test_connect(subject, mocker):
     window = Gtk.Window()
     subject.initialize(window)
 
-    set_config(mock_config, "get", {("shortcuts", option, "fallback"): shortcut})
-
     callback = mocker.Mock()
-    subject.connect(option, callback)
+    subject.connect("start", callback)
 
-    key, mod = Gtk.accelerator_parse(shortcut)
-    result = Gtk.accel_groups_activate(window, key, mod)
-
-    assert result is True
-    callback.assert_called_once_with(subject.accel_group, window, key, mod)
+    assert_shortcut_called(subject.accel_group, window, "<control>s", callback)
 
 
 def test_change(subject, mock_config, mocker):
     window = Gtk.Window()
     subject.initialize(window)
-    old = "<Control>b"
-    new = "<Control>a"
+    new_shortcut = "<control>b"
     option = "start"
-    set_config(mock_config, "get", {("shortcuts", option, "fallback"): old})
+    callback = mocker.Mock()
 
-    subject.connect(option, mocker.Mock())
-    subject.change(option, new)
+    subject.connect(option, callback)
+    subject.change(option, new_shortcut)
 
-    key, mod = Gtk.accelerator_parse(new)
-    result = Gtk.accel_groups_activate(window, key, mod)
-
-    assert result is True
+    assert_shortcut_called(subject.accel_group, window, new_shortcut, callback)
 
 
 def test_module(graph, subject):
+    from tomate.ui.shortcut import ShortcutManager
+
     instance = graph.get("tomate.ui.shortcut")
 
     assert isinstance(instance, ShortcutManager)
     assert instance is subject
+
+
+def assert_shortcut_called(accel_group, window, shortcut, callback):
+    key, mod = Gtk.accelerator_parse(shortcut)
+    result = Gtk.accel_groups_activate(window, key, mod)
+
+    assert result is True
+    callback.assert_called_once_with(accel_group, window, key, mod)

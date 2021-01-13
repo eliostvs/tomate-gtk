@@ -36,20 +36,26 @@ class ShortcutManager:
         key, mod = Gtk.accelerator_parse(shortcut)
         Gtk.AccelMap.change_entry(accel_path, key, mod, True)
 
-    def connect(self, name: str, callback: Callable[[], None]) -> None:
-        accel = self._get_accelerator(name)
+    def connect(self, name: str, callback: Callable[[], None], fallback=None) -> None:
+        if fallback is None:
+            fallback = self.SHORTCUTS.get(name)
+
+        accel = self._get_accelerator(name, fallback)
         Gtk.AccelMap.add_entry(accel.path, accel.key, accel.mod)
         self.accel_group.connect_by_path(accel.path, callback)
 
         logger.debug("action=connect name=%s shortcut=%s", name, accel.shortcut)
 
-    def label(self, name: str) -> str:
-        accel = self._get_accelerator(name)
+    def label(self, name: str, fallback=None) -> str:
+        if fallback is None:
+            fallback = self.SHORTCUTS.get(name)
+
+        accel = self._get_accelerator(name, fallback)
         return Gtk.accelerator_get_label(accel.key, accel.mod)
 
-    def _get_accelerator(self, name: str) -> Accelerator:
+    def _get_accelerator(self, name: str, fallback=None) -> Accelerator:
         shortcut = self._config.get(
-            self._config.SECTION_SHORTCUTS, name, fallback=self.SHORTCUTS.get(name)
+            self._config.SECTION_SHORTCUTS, name, fallback=fallback
         )
         key, mod = Gtk.accelerator_parse(shortcut)
         return Accelerator(shortcut, key, mod, self.ACCEL_PATH_TEMPLATE.format(name))
