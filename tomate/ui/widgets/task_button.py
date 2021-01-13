@@ -37,7 +37,7 @@ class TaskButton(Subscriber):
         self._create_button(
             _("Pomodoro"),
             Shortcut(
-                name="pomodoro",
+                name="button.pomodoro",
                 session_type=Sessions.pomodoro.value,
                 default="<control>1",
             ),
@@ -45,7 +45,7 @@ class TaskButton(Subscriber):
         self._create_button(
             _("Short Break"),
             Shortcut(
-                name="short_break",
+                name="button.shortbreak",
                 session_type=Sessions.shortbreak.value,
                 default="<control>2",
             ),
@@ -53,7 +53,7 @@ class TaskButton(Subscriber):
         self._create_button(
             _("Long Break"),
             Shortcut(
-                name="long_break",
+                name="button.longbreak",
                 session_type=Sessions.longbreak.value,
                 default="<control>3",
             ),
