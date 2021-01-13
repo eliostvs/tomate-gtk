@@ -120,8 +120,8 @@ def real_shortcut(graph, real_config):
     return graph.get("tomate.ui.shortcut")
 
 
-def assert_shortcut_called(shortcut_manager, shortcut):
+def assert_shortcut_called(shortcut_manager, shortcut, want=True):
     window = Gtk.Window()
     shortcut_manager.initialize(window)
     key, mod = Gtk.accelerator_parse(shortcut)
-    assert Gtk.accel_groups_activate(window, key, mod) is True
+    assert Gtk.accel_groups_activate(window, key, mod) is want
