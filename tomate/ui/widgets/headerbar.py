@@ -68,16 +68,16 @@ class HeaderBar(Subscriber):
         self._start_button = self._create_button(
             Gtk.STOCK_MEDIA_PLAY,
             "Starts the session",
-            self._start_session,
-            Shortcut(name="start", default="<control>s"),
+            lambda *_: self._session.start(),
+            Shortcut(name="button.start", default="<control>s"),
         )
         self.widget.pack_start(self._start_button)
 
         self._stop_button = self._create_button(
             Gtk.STOCK_MEDIA_STOP,
             "Stops the session",
-            self._stop_session,
-            Shortcut(name="stop", default="<control>p"),
+            lambda *_: self._session.stop(),
+            Shortcut(name="button.stop", default="<control>p"),
             visible=False,
             no_show_all=True,
         )
@@ -86,8 +86,8 @@ class HeaderBar(Subscriber):
         self._reset_button = self._create_button(
             Gtk.STOCK_CLEAR,
             "Clear the count of sessions",
-            self._reset_session,
-            Shortcut(name="reset", default="<control>r"),
+            lambda *_: self._session.reset(),
+            Shortcut(name="button.reset", default="<control>r"),
             sensitive=False,
         )
         self.widget.pack_start(self._reset_button)
@@ -97,15 +97,6 @@ class HeaderBar(Subscriber):
         button.add(icon)
 
         self.widget.pack_end(button)
-
-    def _start_session(self, *args):
-        self._session.start()
-
-    def _stop_session(self, *args):
-        self._session.stop()
-
-    def _reset_session(self, *args):
-        self._session.reset()
 
     @on(Events.Session, [State.started])
     def _on_session_started(self, *args, **kwargs):
