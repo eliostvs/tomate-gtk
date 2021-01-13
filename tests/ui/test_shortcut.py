@@ -1,14 +1,12 @@
 import pytest
 from gi.repository import Gtk
-from wiring.scanning import scan_to_graph
+
+from tests.conftest import assert_shortcut_called
 
 
 @pytest.fixture
-def subject(graph, dispatcher):
-    from tomate.pomodoro.config import Config
-    graph.register_instance("tomate.config", Config(dispatcher))
-    scan_to_graph(["tomate.ui.shortcut"], graph)
-    return graph.get("tomate.ui.shortcut")
+def subject(real_shortcut):
+    return real_shortcut
 
 
 def test_label(subject):
@@ -24,26 +22,30 @@ def test_label_with_fallback(subject):
 
 
 def test_connect(subject, mocker):
-    window = Gtk.Window()
-    subject.initialize(window)
-
     callback = mocker.Mock()
+    shortcut = "<control>s"
     subject.connect("start", callback, "")
 
-    assert_shortcut_called(subject.accel_group, window, "<control>s", callback)
+    assert_shortcut_called(subject, shortcut)
+
+    key, mod = Gtk.accelerator_parse(shortcut)
+    callback.assert_called_once_with(subject.accel_group, mocker.ANY, key, mod)
 
 
 def test_change(subject, mock_config, mocker):
     window = Gtk.Window()
     subject.initialize(window)
-    new_shortcut = "<control>b"
+    shortcut = "<control>b"
     option = "start"
     callback = mocker.Mock()
 
     subject.connect(option, callback, "")
-    subject.change(option, new_shortcut)
+    subject.change(option, shortcut)
 
-    assert_shortcut_called(subject.accel_group, window, new_shortcut, callback)
+    assert_shortcut_called(subject, shortcut)
+
+    key, mod = Gtk.accelerator_parse(shortcut)
+    callback.assert_called_once_with(subject.accel_group, mocker.ANY, key, mod)
 
 
 def test_module(graph, subject):
@@ -53,11 +55,3 @@ def test_module(graph, subject):
 
     assert isinstance(instance, ShortcutManager)
     assert instance is subject
-
-
-def assert_shortcut_called(accel_group, window, shortcut, callback):
-    key, mod = Gtk.accelerator_parse(shortcut)
-    result = Gtk.accel_groups_activate(window, key, mod)
-
-    assert result is True
-    callback.assert_called_once_with(accel_group, window, key, mod)
