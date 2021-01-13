@@ -42,6 +42,7 @@ class TaskButton(Subscriber):
                 default="<control>1",
             ),
         )
+
         self._create_button(
             _("Short Break"),
             Shortcut(
@@ -50,6 +51,7 @@ class TaskButton(Subscriber):
                 default="<control>2",
             ),
         )
+
         self._create_button(
             _("Long Break"),
             Shortcut(
@@ -58,6 +60,7 @@ class TaskButton(Subscriber):
                 default="<control>3",
             ),
         )
+
         self.widget.connect("mode_changed", self._on_mode_changed)
 
     def _create_button(self, label: str, shortcut: Shortcut):
