@@ -34,7 +34,7 @@ class ShortcutManager:
         Gtk.AccelMap.add_entry(self._accel_path(name), key, mods)
         self.accel_group.connect_by_path(self._accel_path(name), callback)
 
-        logger.debug("action=connect name=%s shortcut=%s", name)
+        logger.debug("action=connect name=%s shortcut=%s", name, shortcut)
 
     def disconnect(self, name: str, fallback: str = None):
         shortcut = self._shortcut(name, fallback)
