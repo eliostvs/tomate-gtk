@@ -1,5 +1,9 @@
 ### [Unreleased]
 
+#### Added
+
+- Keyboard shortcuts to change the type of the session to pomodoro (control + 1), short break (control + 2) and long break (control + 3)
+
 #### Changed
 
 - Join python-tomate and tomate-gtk projects
