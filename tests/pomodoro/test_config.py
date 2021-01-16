@@ -61,8 +61,7 @@ def test_set_option(subject, tmpdir, monkeypatch):
 
     subject.set("section", "option", "value")
 
-    text = "[section]\noption = value"
-    assert text in config.read()
+    assert subject.get("section", "option") == "value"
 
 
 def test_get_icon_path(subject):
@@ -90,3 +89,13 @@ def test_get_option_with_fallback(subject):
 
 def test_get_defaults_option(subject):
     assert subject.get("Timer", "shortbreak_duration") == "5"
+
+
+def test_remove_section(subject, tmpdir):
+    tmp_path = tmpdir.mkdir("tmp").join("tomate.config")
+    subject.config_path = lambda: tmp_path.strpath
+
+    subject.set("section", "option", "value")
+    subject.remove("section", "option")
+
+    assert subject.parser.has_option("section", "option") is False

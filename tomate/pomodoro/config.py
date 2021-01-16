@@ -81,30 +81,36 @@ class Config:
     def get(self, section, option, method="get", fallback=None):
         section = self.normalize(section)
         option = self.normalize(option)
-
-        logger.debug("action=set section=%s option=%s", section, option)
-
         if not self.parser.has_section(section):
             self.parser.add_section(section)
+
+        logger.debug("action=set section=%s option=%s", section, option)
 
         return getattr(self.parser, method)(section, option, fallback=fallback)
 
     def set(self, section, option, value):
         section = self.normalize(section)
         option = self.normalize(option)
-
-        logger.debug("action=set section=%s option=%s value=%s", section, option, value)
-
         if not self.parser.has_section(section):
             self.parser.add_section(section)
 
         self.parser.set(section, option, value)
-
         self.save()
 
         payload = Payload(action="set", section=section, option=option, value=value)
-
         self._dispatcher.send(section, payload=payload)
+
+        logger.debug("action=set section=%s option=%s value=%s", section, option, value)
+
+    def remove(self, section, option):
+        section = self.normalize(section)
+        option = self.normalize(option)
+        self.parser.remove_option(section, option)
+
+        payload = Payload(action="remove", section=section, option=option, value="")
+        self._dispatcher.send(section, payload=payload)
+
+        logger.debug("action=remove section=%s option=%s", section, option)
 
     @staticmethod
     def normalize(name):
