@@ -187,9 +187,9 @@ class ExtensionTab:
             self._deactivate_plugin(plugin)
 
     def _on_plugin_settings_clicked(self, _):
-        logger.debug("action=openPluginSettings")
         model, selected = self.plugin_list.get_selection().get_selected()
         grid_plugin = GridPlugin.from_iter(model, selected)
+        logger.debug("action=openPluginSettings name=%s", grid_plugin.name)
         grid_plugin.open_settings(self.toplevel)
 
     def _deactivate_plugin(self, plugin):
