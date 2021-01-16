@@ -24,7 +24,7 @@ clean:
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
 
 test: clean
-	echo "Variables $(DATAPATH) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) files=$(files)"
+	echo "$(DATAPATH) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) files=$(files)"
 	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(files) -v --cov=$(PACKAGE)
 
 run:
