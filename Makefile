@@ -16,12 +16,12 @@ else
 	ARGS =
 endif
 
+format:
+	black $(PACKAGE)
+
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__" \) -print0 | xargs -0 rm -rf
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
-
-format:
-	black $(PACKAGE)
 
 test: clean
 	echo "Variables $(DATAPATH) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) files=$(files)"
