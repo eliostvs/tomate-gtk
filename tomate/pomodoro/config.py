@@ -33,6 +33,9 @@ class Config:
 
         self.load()
 
+    def __getattr__(self, attr):
+        return getattr(self.parser, attr)
+
     def load(self):
         logger.debug("action=load uri=%s", self.config_path())
 
