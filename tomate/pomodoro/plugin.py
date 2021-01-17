@@ -14,6 +14,14 @@ from .event import connect_events, disconnect_events
 logger = logging.getLogger(__name__)
 
 
+class StubbySettingsWindow:
+    def __init__(self, parent):
+        pass
+
+    def run(self) -> None:
+        pass
+
+
 class Plugin(IPlugin):
     has_settings = False
 
@@ -25,8 +33,8 @@ class Plugin(IPlugin):
         super(Plugin, self).deactivate()
         disconnect_events(self)
 
-    def open_settings(self, parent):
-        pass
+    def settings_window(self, parent) -> StubbySettingsWindow:
+        return StubbySettingsWindow(parent)
 
 
 @register.factory("tomate.plugin", scope=SingletonScope)
