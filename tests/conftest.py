@@ -103,14 +103,18 @@ def mock_shortcut(mocker):
 
 
 @pytest.fixture()
-def real_config(graph, dispatcher, monkeypatch):
+def real_config(graph, dispatcher, monkeypatch, tmpdir):
     monkeypatch.setenv("XDG_DATA_DIRS", TEST_DATA_DIR)
     monkeypatch.setenv("XDG_DATA_HOME", TEST_DATA_DIR)
     monkeypatch.setenv("XDG_CONFIG_HOME", TEST_DATA_DIR)
 
     graph.register_instance("tomate.events.config", dispatcher)
     scan_to_graph(["tomate.pomodoro.config"], graph)
-    return graph.get("tomate.config")
+
+    instance = graph.get("tomate.config")
+    tmp_path = tmpdir.mkdir("tomate").join("tomate.config")
+    instance.config_path = lambda: tmp_path.strpath
+    return instance
 
 
 @pytest.fixture()

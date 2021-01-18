@@ -1,6 +1,7 @@
 .SILENT:
 
-DATAPATH     = XDG_DATA_DIRS=$(CURDIR)/data:/home/$(USER)/.local/share:/usr/local/share:/usr/share
+DATAPATH     = $(CURDIR)/tests/data
+XDGPATHS		 = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=/usr/local/share:/usr/share
 DEBUG 		   = TOMATE_DEBUG=true
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
@@ -24,11 +25,11 @@ clean:
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
 
 test: clean
-	echo "$(DATAPATH) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) files=$(files)"
-	$(DATAPATH) $(PYTHONPATH) $(ARGS) pytest $(files) -v --cov=$(PACKAGE)
+	echo "$(XDGPATHS) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) PYTEST=$(files)"
+	$(XDGPATHS) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
 
 run:
-	$(DATAPATH) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v
+	$(XDGPATHS) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v
 
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)

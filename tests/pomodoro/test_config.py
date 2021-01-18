@@ -7,11 +7,7 @@ from tests.conftest import TEST_DATA_DIR
 
 
 @pytest.fixture()
-def subject(graph, dispatcher, monkeypatch):
-    monkeypatch.setenv("XDG_DATA_DIRS", TEST_DATA_DIR)
-    monkeypatch.setenv("XDG_DATA_HOME", TEST_DATA_DIR)
-    monkeypatch.setenv("XDG_CONFIG_HOME", TEST_DATA_DIR)
-
+def subject(graph, dispatcher):
     graph.register_instance("tomate.events.config", dispatcher)
     scan_to_graph(["tomate.pomodoro.config"], graph)
 
@@ -28,7 +24,7 @@ def test_module(graph, subject):
 
 
 def test_get_plugin_paths(subject):
-    assert subject.plugin_paths() == [os.path.join(TEST_DATA_DIR, "tomate", "plugins")]
+    assert os.path.join(TEST_DATA_DIR, "tomate", "plugins")
 
 
 def test_get_config_path(subject):
@@ -65,22 +61,20 @@ def test_set_option(subject, tmpdir, monkeypatch):
 
 
 def test_get_icon_path(subject):
-    expected = os.path.join(
-        TEST_DATA_DIR, "icons", "hicolor", "22x22", "apps", "tomate.png"
-    )
+    expected = os.path.join(TEST_DATA_DIR, "icons", "hicolor", "22x22", "apps", "tomate.png")
     assert subject.icon_path("tomate", 48, "hicolor") == expected
 
 
 def test_icon_paths(subject):
-    assert subject.icon_paths() == [os.path.join(TEST_DATA_DIR, "icons")]
+    assert os.path.join(TEST_DATA_DIR, "icons") in subject.icon_paths()
 
 
 def test_get_option_as_int(subject):
-    assert subject.get_int("Timer", "pomodoro_duration") == 24
+    assert subject.get_int("Timer", "pomodoro_duration") == 25
 
 
 def test_get_option(subject):
-    assert subject.get("Timer", "pomodoro_duration") == "24"
+    assert subject.get("Timer", "pomodoro_duration") == "25"
 
 
 def test_get_option_with_fallback(subject):
