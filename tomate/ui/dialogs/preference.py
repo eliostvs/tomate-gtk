@@ -249,7 +249,7 @@ class GridPlugin(object):
         return getattr(self._row[self.INSTANCE], "has_settings", False)
 
     def open_settings(self, toplevel):
-        self.instance.open_settings(toplevel)
+        self.instance.settings_window(toplevel).run()
 
     @staticmethod
     def create_row(plugin, config):
