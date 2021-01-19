@@ -51,7 +51,7 @@ def test_get_icon_path_raises_when_icon_not_found(subject):
     assert str(excinfo.value) == "Icon 'foo' not found!"
 
 
-def test_set_option(subject, tmpdir, monkeypatch):
+def test_set_option(subject, tmpdir):
     config = tmpdir.mkdir("tmp").join("tomate.config")
     subject.config_path = lambda: config.strpath
 
