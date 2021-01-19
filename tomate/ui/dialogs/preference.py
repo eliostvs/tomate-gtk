@@ -257,7 +257,7 @@ class GridPlugin(object):
             plugin.name,
             plugin.plugin_object.is_activated,
             GridPlugin.pixbuf(plugin, config),
-            GridPlugin.markup(plugin),
+            GridPlugin.description(plugin),
             plugin.plugin_object,
         ]
 
@@ -268,7 +268,7 @@ class GridPlugin(object):
         return GdkPixbuf.Pixbuf.new_from_file(icon_path)
 
     @staticmethod
-    def markup(plugin):
+    def description(plugin):
         return "<b>{name}</b> ({version})" "\n<small>{description}</small>".format(
             name=plugin.name, version=plugin.version, description=plugin.description
         )
