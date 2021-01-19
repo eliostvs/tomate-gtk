@@ -43,11 +43,14 @@ class TestHeaderBar:
         assert isinstance(instance, HeaderBar)
         assert instance is subject
 
-    @pytest.mark.parametrize("shortcut,action", [
-        ("<control>s", "start"),
-        ("<control>p", "stop"),
-        ("<control>r", "reset"),
-    ])
+    @pytest.mark.parametrize(
+        "shortcut,action",
+        [
+            ("<control>s", "start"),
+            ("<control>p", "stop"),
+            ("<control>r", "reset"),
+        ],
+    )
     def test_shortcuts(self, shortcut, action, mock_menu, real_shortcut, mock_session, subject):
         assert_shortcut_called(real_shortcut, shortcut)
         getattr(mock_session, action).assert_called()
@@ -93,7 +96,9 @@ class TestHeaderBar:
         "state,pomodoros,title",
         [(State.stopped, 0, "No session yet"), (State.finished, 1, "Session 1")],
     )
-    def test_buttons_visibility_and_title_in_the_first_session(self, state, title, pomodoros, subject, mock_session):
+    def test_buttons_visibility_and_title_in_the_first_session(
+        self, state, title, pomodoros, subject, mock_session
+    ):
         payload = SessionPayload(
             id="",
             type=Sessions.pomodoro,
