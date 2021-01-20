@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 @register.factory("tomate.ui.preference", scope=SingletonScope)
 class PreferenceDialog(Gtk.Dialog):
     @inject(
-        duration_tab="tomate.ui.preference.timer",
+        timer_tab="tomate.ui.preference.timer",
         extension_tab="tomate.ui.preference.extension",
     )
-    def __init__(self, duration_tab, extension_tab):
+    def __init__(self, timer_tab, extension_tab):
         stack = Gtk.Stack()
-        stack.add_titled(duration_tab.widget, "timer", _("Timer"))
+        stack.add_titled(timer_tab.widget, "timer", _("Timer"))
         stack.add_titled(extension_tab.widget, "extension", _("Extensions"))
 
         switcher = Gtk.StackSwitcher(halign=Gtk.Align.CENTER)
