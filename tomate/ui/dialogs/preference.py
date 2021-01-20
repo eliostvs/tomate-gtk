@@ -98,6 +98,7 @@ class TimerTab:
         button.set_hexpand(True)
         button.set_halign(Gtk.Align.START)
         button.set_value(self._config.get_int("Timer", option))
+        button.set_name(option)
         button.connect("value-changed", self._on_change, option)
 
         return label, button
@@ -117,7 +118,9 @@ class ExtensionTab:
 
         self.plugin_model = Gtk.ListStore(*GridPlugin.MODEL)
 
-        self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model)
+        self.plugin_list = Gtk.TreeView(
+            headers_visible=False, model=self.plugin_model, name="pluginList"
+        )
         self.plugin_list.get_selection().connect("changed", self._on_selected_item_changed)
         self.plugin_list.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
@@ -140,6 +143,7 @@ class ExtensionTab:
         self.settings_button = Gtk.Button.new_from_icon_name(
             Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU
         )
+        self.settings_button.set_name("pluginSettingsButton")
         self.settings_button.set_sensitive(False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)
 

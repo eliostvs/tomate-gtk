@@ -1,12 +1,12 @@
 from collections import namedtuple
+from unittest.mock import Mock
 
 import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui
-from tests.conftest import set_config
 from tomate.ui.dialogs import TimerTab, GridPlugin
+from tomate.ui.test import Q, T
 
 PACKAGE = "tomate.ui.dialogs.preference"
 
@@ -18,36 +18,44 @@ def plugin_manager():
     return PluginManager()
 
 
+@pytest.fixture()
+def window():
+    return Gtk.Label()
+
+
+TestPlugin = namedtuple("TestPlugin", "name version description plugin_object")
+
+
+@pytest.fixture()
+def enabled_plugin():
+    return TestPlugin(
+        name="Enabled",
+        version="1.0.0",
+        description="Description",
+        plugin_object=Mock(has_settings=False, is_activated=True),
+    )
+
+
+@pytest.fixture()
+def disabled_plugin():
+    return TestPlugin(
+        name="Disabled",
+        version="2.0.0",
+        description="Description",
+        plugin_object=Mock(has_settings=True, is_activated=False),
+    )
+
+
 class TestExtensionTab:
     SPEC = "tomate.ui.preference.extension"
     CATEGORY = "Default"
 
     @pytest.fixture
-    def enabled_plugin(self, mocker):
-        plugin = mocker.Mock()
-        plugin.name = "Enabled"
-        plugin.version = "1.0.0"
-        plugin.description = "Description"
-        plugin.plugin_object.has_settings = False
-        plugin.plugin_object.is_activated = True
-        return plugin
-
-    @pytest.fixture
-    def disabled_plugin(self, mocker):
-        plugin = mocker.Mock()
-        plugin.name = "Disabled"
-        plugin.version = "1.0.0"
-        plugin.description = "Description"
-        plugin.plugin_object.has_settings = True
-        plugin.plugin_object.is_activated = False
-        return plugin
-
-    @pytest.fixture
-    def subject(self, graph, mock_config, plugin_manager, enabled_plugin):
+    def subject(self, graph, real_config, plugin_manager):
         scan_to_graph([PACKAGE], graph)
 
         graph.register_instance("tomate.plugin", plugin_manager)
-        graph.register_instance("tomate.config", mock_config)
+        graph.register_instance("tomate.config", real_config)
 
         return graph.get(self.SPEC)
 
@@ -59,44 +67,58 @@ class TestExtensionTab:
         assert isinstance(instance, ExtensionTab)
         assert instance is subject
 
-    def test_clean_plugin_list(
+    def test_refresh_load_available_plugins(
         self, subject, plugin_manager, enabled_plugin, disabled_plugin
     ):
         plugin_manager.appendPluginToCategory(enabled_plugin, self.CATEGORY)
         plugin_manager.appendPluginToCategory(disabled_plugin, self.CATEGORY)
         subject.refresh()
-        assert subject.plugin_model.iter_n_children() == 2
+
+        plugin_list = Q.select(subject.widget, Q.name("pluginList"))
+        assert plugin_list is not None
+        assert T.query(plugin_list, T.model, len) == 2
 
         plugin_manager.removePluginFromCategory(enabled_plugin, self.CATEGORY)
         plugin_manager.removePluginFromCategory(disabled_plugin, self.CATEGORY)
         subject.refresh()
-        assert subject.plugin_list.get_model().iter_n_children() == 0
 
-    def test_refreshes_select_first_plugin(
-        self, subject, plugin_manager, enabled_plugin
+        assert T.query(plugin_list, T.model, len) == 0
+
+    @pytest.mark.parametrize(
+        "plugin, row",
+        [
+            (
+                "enabled_plugin",
+                ["Enabled", True, "<b>Enabled</b> (1.0.0)\n<small>Description</small>"],
+            ),
+            (
+                "disabled_plugin",
+                ["Disabled", False, "<b>Disabled</b> (2.0.0)\n<small>Description</small>"],
+            ),
+        ],
+    )
+    def test_refresh_select_first_plugin(
+        self, plugin, row, subject, enabled_plugin, disabled_plugin, plugin_manager
     ):
-        plugin_manager.appendPluginToCategory(enabled_plugin, self.CATEGORY)
+        plugin_manager.appendPluginToCategory(locals()[plugin], self.CATEGORY)
         subject.refresh()
 
-        model, selected = subject.plugin_list.get_selection().get_selected()
+        columns = T.items_columns(GridPlugin.NAME, GridPlugin.ACTIVE, GridPlugin.DETAIL)
+        assert T.query(Q.select(subject.widget, Q.name("pluginList")), T.model, columns) == [row]
+        assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is False
 
-        assert model.get_value(selected, GridPlugin.NAME) == "Enabled"
-        assert model.get_value(selected, GridPlugin.ACTIVE) is True
-        assert subject.settings_button.get_sensitive() is False
-        detail = "<b>Enabled</b> (1.0.0)\n<small>Description</small>"
-        assert model.get_value(selected, GridPlugin.DETAIL) == detail
-
-    def test_selects_plugin(self, subject, plugin_manager, disabled_plugin):
+    def test_select_plugin(self, subject, disabled_plugin, plugin_manager):
         plugin_manager.appendPluginToCategory(disabled_plugin, self.CATEGORY)
         subject.refresh()
 
-        selection = subject.plugin_list.get_selection()
-        selection.select_path("0")
+        T.query(
+            Q.select(subject.widget, Q.name("pluginList")),
+            T.column("Active"),
+            T.cell(0),
+            Q.emit("toggled", "0"),
+        )
 
-        model, selected = selection.get_selected()
-        assert model.get_value(selected, GridPlugin.NAME) == "Disabled"
-        assert model.get_value(selected, GridPlugin.ACTIVE) is False
-        assert subject.settings_button.get_sensitive() is False
+        assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is True
 
     def test_open_plugin_settings(self, subject, plugin_manager, disabled_plugin):
         plugin_manager.appendPluginToCategory(disabled_plugin, "Default")
@@ -104,38 +126,9 @@ class TestExtensionTab:
         subject.set_toplevel(toplevel)
         subject.refresh()
 
-        subject.settings_button.emit("clicked")
+        Q.select(subject.widget, Q.name("pluginSettingsButton")).emit("clicked")
 
-        disabled_plugin.plugin_object.open_settings.assert_called_once_with(toplevel)
-
-    Scenario = namedtuple("Scenario", "plugin name active settings")
-
-    @pytest.mark.parametrize(
-        "scenario",
-        [
-            Scenario("enabled_plugin", "Enabled", False, False),
-            Scenario("disabled_plugin", "Disabled", True, True),
-        ],
-    )
-    def test_enables_configurable_plugin(
-        self,
-        scenario: Scenario,
-        subject,
-        plugin_manager,
-        enabled_plugin,
-        disabled_plugin,
-    ):
-        plugin_manager.appendPluginToCategory(locals()[scenario.plugin], self.CATEGORY)
-        subject.refresh()
-
-        path = Gtk.TreePath.new_from_string("0")
-        subject._on_row_toggled(None, path)
-
-        selection = subject.plugin_list.get_selection()
-        model, selected = selection.get_selected()
-        assert model.get_value(selected, GridPlugin.NAME) == scenario.name
-        assert model.get_value(selected, GridPlugin.ACTIVE) is scenario.active
-        assert subject.settings_button.get_sensitive() is scenario.settings
+        disabled_plugin.plugin_object.settings_window.assert_called_once_with(toplevel)
 
 
 class TestPreference:
@@ -150,9 +143,9 @@ class TestPreference:
         return mocker.Mock(widget=Gtk.Label())
 
     @pytest.fixture
-    def subject(self, graph, plugin_manager, mock_config, mock_proxy):
+    def subject(self, graph, plugin_manager, real_config, mock_proxy):
         graph.register_instance("tomate.plugin", plugin_manager)
-        graph.register_instance("tomate.config", mock_config)
+        graph.register_instance("tomate.config", real_config)
         graph.register_instance("tomate.proxy", mock_proxy)
 
         scan_to_graph([PACKAGE], graph)
@@ -181,18 +174,10 @@ class TestPreference:
 
 class TestTimerTab:
     SPEC = "tomate.ui.preference.timer"
-    Scenario = namedtuple("Scenario", "option duration attr")
 
     @pytest.fixture
-    def subject(self, graph, mock_config):
-        config = {
-            ("Timer", "pomodoro_duration"): 24,
-            ("Timer", "longbreak_duration"): 14,
-            ("Timer", "shortbreak_duration"): 4,
-        }
-        set_config(mock_config, "get_int", config)
-
-        graph.register_instance("tomate.config", mock_config)
+    def subject(self, graph, real_config):
+        graph.register_instance("tomate.config", real_config)
         scan_to_graph([PACKAGE], graph)
         return graph.get(self.SPEC)
 
@@ -203,21 +188,18 @@ class TestTimerTab:
         assert instance is subject
 
     @pytest.mark.parametrize(
-        "scenario",
+        "option, value",
         [
-            Scenario("pomodoro_duration", 24, "pomodoro"),
-            Scenario("longbreak_duration", 14, "longbreak"),
-            Scenario("shortbreak_duration", 4, "shortbreak"),
+            ("pomodoro_duration", 24),
+            ("shortbreak_duration", 4),
+            ("longbreak_duration", 14),
         ],
     )
-    def test_save_config_when_pomodoro_duration_value_changes(
-        self, scenario: Scenario, mock_config, subject
-    ):
-        option = getattr(subject, scenario.attr)
-        option.emit("value-changed")
+    def test_save_config_when_task_duration_change(self, option, value, real_config, subject):
+        spin_button = Q.select(subject.widget, Q.name(option))
+        assert spin_button is not None
 
-        refresh_gui()
+        spin_button.set_value(value)
+        spin_button.emit("value-changed")
 
-        mock_config.set.assert_called_once_with(
-            "Timer", scenario.option, str(scenario.duration)
-        )
+        assert real_config.get_int("Timer", option) == value
