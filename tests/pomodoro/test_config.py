@@ -24,9 +24,9 @@ def test_module(graph, subject):
 
 
 def test_get_plugin_paths(subject):
-    expected = ["/usr/share/tomate/plugins", os.path.join(TEST_DATA_DIR, "tomate", "plugins")]
+    expected = os.path.join(TEST_DATA_DIR, "tomate", "plugins")
 
-    assert sorted(subject.plugin_paths()) == sorted(expected)
+    assert expected in subject.plugin_paths()
 
 
 def test_get_config_path(subject):
