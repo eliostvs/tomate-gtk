@@ -25,7 +25,7 @@ clean:
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
 
 test: clean
-	echo "$(XDGPATHS) $(PYTHONPATH) ARGS=$(ARGS) PACKAGE=$(PACKAGE) PYTEST=$(files)"
+	echo "$(XDGPATHS) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
 	$(XDGPATHS) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
 
 run:
