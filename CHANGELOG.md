@@ -2,7 +2,7 @@
 
 #### Added
 
-- Keyboard shortcuts to change the type of the session to pomodoro (control + 1), short break (control + 2) and long break (control + 3)
+- Keyboard shortcuts to change the type of the session: pomodoro (control + 1), short break (control + 2) and long break (control + 3)
 
 #### Changed
 
@@ -12,7 +12,6 @@
 - Change session payload fields
 - Change Events.Setting to Events.Config
 - Trigger State.finished and State.changed in the end of a session
-- Remove 'get' from config methods
 
 ### 0.11.0
 
