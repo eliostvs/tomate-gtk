@@ -41,7 +41,7 @@ def test_disconnect(subject, mocker):
     assert_shortcut_called(subject, shortcut, want=False)
 
 
-def test_change(subject, mock_config, mocker):
+def test_change(subject, mocker):
     callback = mocker.Mock(return_value=True)
     name = "start"
     shortcut = "<control>b"
