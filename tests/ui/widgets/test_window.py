@@ -2,7 +2,7 @@ import pytest
 from gi.repository import Gtk, Gdk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui, assert_shortcut_called
+from tests.conftest import assert_shortcut_called
 from tomate.pomodoro import State, Sessions
 from tomate.pomodoro.event import Events, connect_events
 from tomate.pomodoro.session import Payload as SessionPayload
@@ -86,8 +86,6 @@ class TestWindowQuit:
         mock_session.is_running.return_value = False
 
         subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
-
-        refresh_gui()
 
         main_quit.assert_called_once_with()
 
