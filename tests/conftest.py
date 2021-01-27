@@ -54,15 +54,10 @@ def dispatcher():
 
 
 @pytest.fixture()
-def mock_timer(mocker):
-    from tomate.pomodoro.timer import Timer
-
-    return mocker.Mock(Timer)
-
-
-@pytest.fixture()
 def graph():
-    return Graph()
+    g = Graph()
+    g.register_instance(Graph, g)
+    return g
 
 
 @pytest.fixture()
