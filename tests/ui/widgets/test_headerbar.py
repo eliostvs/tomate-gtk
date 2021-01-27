@@ -18,19 +18,23 @@ class TestHeaderBar:
     def subject(self, graph, mock_menu, real_shortcut, mock_session, mocker):
         Session.receivers.clear()
 
-        scan_to_graph(["tomate.ui.widgets.headerbar"], graph)
-
         graph.register_instance("tomate.ui.menu", mock_menu)
         graph.register_instance("tomate.session", mock_session)
         graph.register_instance("tomate.ui.shortcut", real_shortcut)
         graph.register_factory("tomate.ui.view", mocker.Mock)
-        graph.register_factory("tomate.proxy", mocker.Mock)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
 
         real_shortcut.disconnect("button.start", "<control>s")
         real_shortcut.disconnect("button.stop", "<control>p")
         real_shortcut.disconnect("button.reset", "<control>r")
+
+        namespaces = [
+            "tomate.pomodoro.proxy",
+            "tomate.ui.widgets.headerbar",
+        ]
+
+        scan_to_graph(namespaces, graph)
 
         instance = graph.get("tomate.ui.headerbar")
 
@@ -126,15 +130,17 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def subject(self, mock_proxy, mock_about, mock_preference, mock_view, graph):
+    def subject(self, mock_about, mock_preference, mock_view, graph):
         Events.View.receivers.clear()
 
         graph.register_instance("tomate.ui.view", mock_view)
-        graph.register_instance("tomate.proxy", mock_proxy)
         graph.register_instance("tomate.ui.about", mock_about)
         graph.register_instance("tomate.ui.preference", mock_preference)
 
-        scan_to_graph(["tomate.ui.widgets.headerbar"], graph)
+        namespaces = ["tomate.ui.widgets.headerbar", "tomate.pomodoro.proxy"]
+
+        scan_to_graph(namespaces, graph)
+
         return graph.get("tomate.ui.headerbar.menu")
 
     def test_module(self, graph, subject):

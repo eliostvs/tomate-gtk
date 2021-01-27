@@ -65,16 +65,6 @@ def mock_view(mocker):
     return mocker.Mock(widget=mocker.Mock(Gtk.Window))
 
 
-@pytest.fixture
-def mock_proxy(mocker, mock_view):
-    from tomate.pomodoro.proxy import lazy_proxy
-
-    return mocker.Mock(
-        lazy_proxy,
-        side_effect=lambda spec: mock_view if spec == "tomate.ui.view" else None,
-    )
-
-
 def refresh_gui(delay: int = 0) -> None:
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
