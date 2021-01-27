@@ -1,38 +1,28 @@
 import pytest
 from gi.repository import Gtk, Gdk
-from wiring import Graph
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui
-from tomate.pomodoro import State
+from tests.conftest import refresh_gui, assert_shortcut_called
+from tomate.pomodoro import State, Sessions
 from tomate.pomodoro.event import Events, connect_events
-from tomate.ui.widgets import Window, TaskButton, TrayIcon, Countdown, HeaderBar
-
-
-@pytest.fixture()
-def mock_taskbutton(mocker):
-    return mocker.Mock(TaskButton, widget=Gtk.Label())
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.ui.widgets import Window, TrayIcon
 
 
 @pytest.fixture
-def subject(
-    graph, mock_shortcut, mock_taskbutton, dispatcher, mock_config, mock_session, mocker
-):
+def subject(graph, dispatcher, real_config, mock_session):
     Events.Session.receivers.clear()
 
     graph.register_instance("tomate.session", mock_session)
-    graph.register_instance(
-        "tomate.ui.headerbar", mocker.Mock(HeaderBar, widget=Gtk.Label())
-    )
-    graph.register_instance(
-        "tomate.ui.countdown", mocker.Mock(Countdown, widget=Gtk.Label())
-    )
-    graph.register_instance("tomate.ui.taskbutton", mock_taskbutton)
-    graph.register_instance("tomate.ui.shortcut", mock_shortcut)
     graph.register_instance("tomate.events.view", dispatcher)
-    graph.register_instance("tomate.config", mock_config)
-    graph.register_instance(Graph, graph)
-    scan_to_graph(["tomate.ui.widgets.window"], graph)
+    graph.register_instance("tomate.config", real_config)
+
+    namespaces = [
+        "tomate.ui",
+        "tomate.pomodoro.plugin",
+        "tomate.pomodoro.proxy",
+    ]
+    scan_to_graph(namespaces, graph)
     instance = graph.get("tomate.ui.view")
 
     connect_events(instance)
@@ -47,12 +37,10 @@ def test_module(graph, subject):
     assert instance is subject
 
 
-def test_initializes_shortcuts(subject, mock_shortcut):
-    assert mock_shortcut.initialize(subject.widget)
+def test_shortcuts_are_connected(subject, graph):
+    shortcut_manager = graph.get("tomate.ui.shortcut")
 
-
-def test_enables_session_buttons(subject, mock_taskbutton):
-    assert mock_taskbutton.enable.called_once_with()
+    assert_shortcut_called(shortcut_manager, "<control>s", window=subject.widget)
 
 
 def test_starts_loop(mocker, subject):
@@ -61,10 +49,6 @@ def test_starts_loop(mocker, subject):
     subject.run()
 
     gtk_main.assert_called_once_with()
-
-
-def test_uses_correct_icon_size(subject, mock_config):
-    mock_config.icon_path.assert_called_once_with("tomate", 22)
 
 
 class TestWindowHide:
@@ -81,9 +65,7 @@ class TestWindowHide:
         assert result is Gtk.true
         subscriber.assert_called_once_with(State.hid)
 
-    def test_deletes_when_tray_icon_plugin_is_registered(
-        self, subject, dispatcher, graph, mocker
-    ):
+    def test_deletes_when_tray_icon_plugin_is_registered(self, subject, dispatcher, graph, mocker):
         graph.register_factory(TrayIcon, mocker.Mock)
 
         subscriber = mocker.Mock()
@@ -109,9 +91,7 @@ class TestWindowQuit:
 
         main_quit.assert_called_once_with()
 
-    def test_hides_when_timer_is_running(
-        self, subject, mock_session, dispatcher, mocker
-    ):
+    def test_hides_when_timer_is_running(self, subject, mock_session, dispatcher, mocker):
         mock_session.is_running.return_value = True
 
         subscriber = mocker.Mock()
@@ -128,7 +108,14 @@ def test_shows_window_when_session_finishes(subject, dispatcher, mocker):
     subscriber = mocker.Mock()
     dispatcher.connect(subscriber, sender=State.showed, weak=False)
 
-    Events.Session.send(State.finished)
+    payload = SessionPayload(
+        id="",
+        type=Sessions.pomodoro,
+        pomodoros=0,
+        state=State.started,
+        duration=0,
+    )
+    Events.Session.send(State.finished, payload=payload)
 
     assert subject.widget.get_visible()
     subscriber.assert_called_once_with(State.showed)

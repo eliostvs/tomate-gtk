@@ -76,17 +76,6 @@ def run_loop_for(seconds: int = 1) -> None:
     Gtk.main()
 
 
-@pytest.fixture
-def mock_shortcut(mocker):
-    from tomate.ui.shortcut import ShortcutManager
-
-    instance = mocker.Mock(ShortcutManager)
-
-    instance.label.side_effect = lambda name, fallback: name
-
-    return instance
-
-
 @pytest.fixture()
 def real_config(graph, dispatcher, tmpdir):
     graph.register_instance("tomate.events.config", dispatcher)
@@ -105,8 +94,10 @@ def real_shortcut(graph, real_config):
     return graph.get("tomate.ui.shortcut")
 
 
-def assert_shortcut_called(shortcut_manager, shortcut, want=True):
-    window = Gtk.Window()
+def assert_shortcut_called(shortcut_manager, shortcut, want=True, window=None):
+    if window is None:
+        window = Gtk.Window()
+
     shortcut_manager.initialize(window)
     key, mod = Gtk.accelerator_parse(shortcut)
     assert Gtk.accel_groups_activate(window, key, mod) is want
