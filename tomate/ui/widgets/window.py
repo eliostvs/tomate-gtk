@@ -55,13 +55,12 @@ class Window(Subscriber):
 
         self.widget.add(box)
         self.widget.connect("delete-event", self.quit)
-        self.widget.show_all()
 
         shortcuts.initialize(self.widget)
-
         task_button.enable()
 
     def run(self):
+        self.widget.show_all()
         Gtk.main()
 
     def quit(self, *args):
