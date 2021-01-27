@@ -39,20 +39,18 @@ class Window(Subscriber):
         self._dispatcher = dispatcher
         self._graph = graph
 
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.pack_start(countdown.widget, False, False, 0)
+        box.pack_start(task_button.widget, False, False, 0)
+
         self.widget = Gtk.Window(
             title="Tomate",
             icon=GdkPixbuf.Pixbuf.new_from_file(config.icon_path("tomate", 22)),
             window_position=Gtk.WindowPosition.CENTER,
             resizable=False,
         )
-
         self.widget.set_size_request(350, -1)
         self.widget.set_titlebar(headerbar.widget)
-
-        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        box.pack_start(countdown.widget, False, False, 0)
-        box.pack_start(task_button.widget, False, False, 0)
-
         self.widget.add(box)
         self.widget.connect("delete-event", self.quit)
 
