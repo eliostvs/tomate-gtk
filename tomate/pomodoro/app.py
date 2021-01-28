@@ -13,11 +13,11 @@ class Application(dbus.service.Object):
     BUS_INTERFACE = "com.github.Tomate"
     SPEC = "tomate.app"
 
-    @inject(bus="dbus.session", window="tomate.ui.view", plugin="tomate.plugin")
-    def __init__(self, bus, window, plugin):
+    @inject(bus="dbus.session", view="tomate.ui.view", plugin="tomate.plugin")
+    def __init__(self, bus, view, plugin):
         dbus.service.Object.__init__(self, bus, self.BUS_PATH)
         self.state = State.stopped
-        self.window = window
+        self.view = view
 
         plugin.collectPlugins()
 
@@ -28,10 +28,10 @@ class Application(dbus.service.Object):
     @dbus.service.method(BUS_INTERFACE, out_signature="b")
     def Run(self):
         if self.IsRunning():
-            self.window.show()
+            self.view.show()
         else:
             self.state = State.started
-            self.window.run()
+            self.view.run()
 
         return True
 
