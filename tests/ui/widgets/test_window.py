@@ -45,10 +45,12 @@ def test_shortcuts_are_connected(subject, graph):
 
 def test_starts_loop(mocker, subject):
     gtk_main = mocker.patch("tomate.ui.widgets.window.Gtk.main")
+    show_all = mocker.patch("tomate.ui.widgets.window.Gtk.Window.show_all")
 
     subject.run()
 
     gtk_main.assert_called_once_with()
+    show_all.assert_called_once_with()
 
 
 class TestWindowHide:
