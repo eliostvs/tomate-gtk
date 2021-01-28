@@ -40,19 +40,19 @@ def test_search_plugin_on_init(subject, mock_plugin):
 
 
 class TestRun:
-    def test_shows_window_when_app_is_running(self, subject):
+    def test_shows_window_when_app_is_running(self, subject, mock_view):
         subject.state = State.stopped
 
         subject.Run()
 
-        subject.window.run.assert_called_once_with()
+        mock_view.run.assert_called_once_with()
 
-    def test_runs_window_when_app_is_not_running(self, subject):
+    def test_runs_window_when_app_is_not_running(self, subject, mock_view):
         subject.state = State.started
 
         subject.Run()
 
-        subject.window.show.assert_called_once_with()
+        mock_view.show.assert_called_once_with()
         assert subject.state is State.started
 
 
