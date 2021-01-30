@@ -1,7 +1,7 @@
 .SILENT:
 
 DATAPATH     = $(CURDIR)/tests/data
-DEBUG 		   = TOMATE_DEBUG=true
+DEBUG        = TOMATE_DEBUG=true
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
@@ -9,7 +9,7 @@ PYTHON       ?= python
 PYTHONPATH   = PYTHONPATH=$(CURDIR)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
-XDGPATHS		 = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=/usr/local/share:/usr/share
+XDGPATHS     = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=/usr/local/share:/usr/share
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	ARGS = xvfb-run -a
