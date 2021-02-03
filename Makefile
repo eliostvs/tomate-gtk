@@ -9,7 +9,7 @@ PYTHON       ?= python
 PYTHONPATH   = PYTHONPATH=$(CURDIR)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
-XDGPATHS     = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=/usr/local/share:/usr/share
+XDGPATHS     = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH)
 
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	ARGS = xvfb-run -a
