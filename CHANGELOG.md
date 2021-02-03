@@ -1,85 +1,103 @@
-### [Unreleased]
+# Changelog
 
-#### Added
+All notable changes to this project will be documented in this file.
 
-- Keyboard shortcuts to change the type of the session: pomodoro (control + 1), short break (control + 2) and long break (control + 3)
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-#### Changed
+## [Unreleased]
+
+### Added
+
+- Session buttons keyboard shortcuts
+
+### Changed
 
 - Join python-tomate and tomate-gtk projects
-- Move enums to package init module
-- Change tomate.events.setting event namespace to tomate.events.config
-- Change session payload fields
-- Change Events.Setting to Events.Config
-- Trigger State.finished and State.changed in the end of a session
+- Move enums to base package
+- Rename tomate.events.setting namespace to tomate.events.config
+- Session payload fields
+- Rename Events.Setting to Events.Config
+- Trigger more events when the session ends
 
-### 0.11.0
+## 0.11.0
 
-#### Added
+### Added
 
-- Keyboard shortcuts to start (control + s), stop (control + p) and reset (control + r) sessions
+- Session keyboard shortcuts
 
-### 0.10.0
+## 0.10.0
 
-#### Changed
+### Changed
 
 - The timer, session and settings now emit a payload object instead of a dictionary
 
-### 0.9.2
+## 0.9.2
 
-#### Fixed
+### Fixed
 
 - Timer countdown blinking
 
-### 0.9.1
+## 0.9.1
 
-#### Changed
+### Changed
 
 - Arch linux installation instructions
 
-### 0.9.0
+## 0.9.0
 
-#### Changed
+### Changed
 
 - Change UI to use a headerbar widget instead of a toolbar
 - The Task enum was renamed to Sessions
 
-#### Removed
+### Removed
 
 - Show notifications in then main widget (**show\_message view interface**)
 
-### 0.8.0
+## 0.8.0
 
-#### Added
+## Added
 
 - Show notifications in the main widget (**show\_message** view interface)
 
-#### Fixed
+### Fixed
 
 - Reopen from command line
 
-#### Changed
+### Changed
 
-- Arch install instructions
+- Arch installation instructions
 
-### 0.7.0
+## 0.7.0
+
+### Added
 
 - Using wiring.scanning
-- Add plugin settings
+- Add plugin settings window
+  
+### Changed
+
 - Python 3 only
 
-### 0.6.0
+## 0.6.0
 
-- Using py.test
+### Added
+
 - Add menu widget
 
-### 0.5.0
+## 0.5.0
 
-- Remove linux package metadata
+### Fixed
+
 - Fix Gtk warnings
 
-### 0.4.0
+## 0.4.0
+
+### Added
 
 - Using the new event system
-- Python 2/3 compatible (only for Ubuntu/Debian/Arch)
+  
+### Removed
+
 - Remove appindicator3 dependency
