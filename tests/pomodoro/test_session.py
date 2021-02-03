@@ -3,10 +3,10 @@ from collections import namedtuple
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import run_loop_for
 from tomate.pomodoro import Sessions, State, SECONDS_IN_A_MINUTE
 from tomate.pomodoro.event import Events, connect_events
 from tomate.pomodoro.session import Session, Payload as SessionPayload
+from tomate.ui.test import run_loop_for
 
 
 @pytest.fixture()

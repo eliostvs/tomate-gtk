@@ -3,7 +3,7 @@ import time
 
 import pytest
 from blinker import Namespace
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 from wiring import Graph
 from wiring.scanning import scan_to_graph
 
@@ -38,11 +38,6 @@ def refresh_gui(delay: int = 0) -> None:
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
     time.sleep(delay)
-
-
-def run_loop_for(seconds: int = 1) -> None:
-    GLib.timeout_add_seconds(seconds, Gtk.main_quit)
-    Gtk.main()
 
 
 @pytest.fixture()

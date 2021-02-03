@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Callable, Optional, Any, List
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 class Q:
@@ -78,3 +78,8 @@ class T:
             return tree_column.get_cells()[position]
 
         return select
+
+
+def run_loop_for(seconds: int = 1) -> None:
+    GLib.timeout_add_seconds(seconds, Gtk.main_quit)
+    Gtk.main()

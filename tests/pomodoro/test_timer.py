@@ -1,10 +1,10 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import run_loop_for
 from tomate.pomodoro import SECONDS_IN_A_MINUTE
 from tomate.pomodoro import State
 from tomate.pomodoro.timer import Timer, Payload as TimerPayload, format_time_left
+from tomate.ui.test import run_loop_for
 
 
 @pytest.fixture()
