@@ -1,7 +1,7 @@
-Tomate GTK
-==========
+Tomate
+======
 
-A open source timer for the Pomodoro Technique®.
+A Pomodoro timer written in Gtk3 and Python for Linux desktops.
 
 About the technique
 -------------------
