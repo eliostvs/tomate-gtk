@@ -1,5 +1,15 @@
+.DELETE_ON_ERROR:
+.ONESHELL:
+.SHELLFLAGS   := -eu -o pipefail -c
 .SILENT:
+MAKEFLAGS     += --no-builtin-rules
+MAKEFLAGS     += --warn-undefined-variables
+SHELL         = bash
 
+ifeq ($(origin .RECIPEPREFIX), undefined)
+	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
+endif
+  
 DATAPATH     = $(CURDIR)/tests/data
 DEBUG        = TOMATE_DEBUG=true
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
@@ -14,23 +24,28 @@ XDGPATH      = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH)
 ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
 	ARGS = xvfb-run -a
 else
-	ARGS =
+	ARGS ?=
 endif
 
+.PHONY: format
 format:
 	black $(PACKAGE)
 
+.PHONY: clean
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__" \) -print0 | xargs -0 rm -rf
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache
 
+.PHONY: test
 test: clean
 	echo "$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
 	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
 
+.PHONY: run
 run:
 	$(XDGPATH) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v
 
+.PHONY: trigger-build
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
 
@@ -41,22 +56,28 @@ release-%:
 	git flow release start $(VERSION)
 	GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$(VERSION)" -T $(VERSION) $(VERSION) -p
 
+.PHONY: docker-run
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
 	-v $(CURDIR):/code \
 	-v $(HOME)/.Xauthority:/root/.Xauthority \
 	$(DOCKER_IMAGE) run
 
+.PHONY: docker-clean
 docker-clean:
 	docker rmi $(DOCKER_IMAGE) 2> /dev/null || echo $(DOCKER_IMAGE) not found!
 
+.PHONY: docker-test
 docker-test:
 	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE)
 
+.PHONY: docker-pull
 docker-pull:
 	docker pull $(DOCKER_IMAGE)
 
+.PHONY: docker-all
 docker-all: docker-pull docker-clean docker-test
 
+.PHONY: docker-enter
 docker-enter:
 	docker run --rm -v $(CURDIR):$(WORKDIR) -it --workdir $(WORKDIR) --entrypoint="bash" $(DOCKER_IMAGE)
