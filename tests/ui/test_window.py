@@ -6,7 +6,8 @@ from tests.conftest import assert_shortcut_called
 from tomate.pomodoro import State, Sessions
 from tomate.pomodoro.event import Events, connect_events
 from tomate.pomodoro.session import Payload as SessionPayload
-from tomate.ui.widgets import Window, TrayIcon
+from tomate.ui import Window
+from tomate.ui.widgets import TrayIcon
 
 
 @pytest.fixture
@@ -44,8 +45,8 @@ def test_shortcuts_are_connected(subject, graph):
 
 
 def test_starts_loop(mocker, subject):
-    gtk_main = mocker.patch("tomate.ui.widgets.window.Gtk.main")
-    show_all = mocker.patch("tomate.ui.widgets.window.Gtk.Window.show_all")
+    gtk_main = mocker.patch("tomate.ui.window.Gtk.main")
+    show_all = mocker.patch("tomate.ui.window.Gtk.Window.show_all")
 
     subject.run()
 
@@ -84,7 +85,7 @@ class TestWindowHide:
 
 class TestWindowQuit:
     def test_quits_when_timer_is_not_running(self, subject, mock_session, mocker):
-        main_quit = mocker.patch("tomate.ui.widgets.window.Gtk.main_quit")
+        main_quit = mocker.patch("tomate.ui.window.Gtk.main_quit")
         mock_session.is_running.return_value = False
 
         subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
