@@ -13,6 +13,8 @@ from tomate.ui.widgets import Countdown
 
 @pytest.fixture
 def subject(graph):
+    Events.Session.receivers.clear()
+    Events.Timer.receivers.clear()
     scan_to_graph(["tomate.ui.widgets.countdown"], graph)
     return graph.get("tomate.ui.countdown")
 
