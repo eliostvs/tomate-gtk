@@ -45,5 +45,5 @@ setup(
     url="https://github.com/eliostvs/tomate-gtk",
     version="0.11.0",
     zip_safe=False,
-    entry_points={"console_scripts": ["tomate-gtk=ui.__main__:main"]},
+    entry_points={"console_scripts": ["tomate-gtk=tomate.__main__:main"]},
 )
