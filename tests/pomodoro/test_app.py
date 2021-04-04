@@ -11,16 +11,16 @@ DBusGMainLoop(set_as_default=True)
 
 
 @pytest.fixture()
-def mock_plugin(mocker):
+def plugin_manager(mocker):
     from yapsy.PluginManager import PluginManager
 
     return mocker.Mock(PluginManager)
 
 
 @pytest.fixture()
-def subject(graph, view, mock_plugin, mocker):
+def subject(graph, view, plugin_manager, mocker):
     graph.register_instance("tomate.ui.view", view)
-    graph.register_instance("tomate.plugin", mock_plugin)
+    graph.register_instance("tomate.plugin", plugin_manager)
     graph.register_instance("dbus.session", mocker.Mock())
 
     scan_to_graph(["tomate.pomodoro.app"], graph)
@@ -35,8 +35,8 @@ def test_module(graph, subject):
     assert instance is subject
 
 
-def test_search_plugin_on_init(subject, mock_plugin):
-    mock_plugin.collectPlugins.assert_called_once()
+def test_search_plugin_on_init(subject, plugin_manager):
+    plugin_manager.collectPlugins.assert_called_once()
 
 
 class TestRun:
@@ -64,10 +64,10 @@ class TestFromGraph:
         DBusTestCase.tearDownClass()
 
     def test_create_app_instance_when_is_not_registered_in_dbus(
-        self, graph, view, mock_plugin
+        self, graph, view, plugin_manager
     ):
         graph.register_instance("tomate.ui.view", view)
-        graph.register_instance("tomate.plugin", mock_plugin)
+        graph.register_instance("tomate.plugin", plugin_manager)
         scan_to_graph(["tomate.pomodoro.app"], graph)
 
         instance = Application.from_graph(graph, DBusTestCase.get_dbus())
