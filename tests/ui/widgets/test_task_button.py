@@ -9,14 +9,14 @@ from tomate.ui.widgets import TaskButton
 
 
 @pytest.fixture
-def subject(graph, session, real_shortcut):
+def subject(graph, session, shortcut_manager):
     graph.register_instance("tomate.session", session)
-    graph.register_instance("tomate.ui.shortcut", real_shortcut)
+    graph.register_instance("tomate.ui.shortcut", shortcut_manager)
     scan_to_graph(["tomate.ui.widgets.task_button"], graph)
 
-    real_shortcut.disconnect("button.pomodoro", "<control>1")
-    real_shortcut.disconnect("button.shortbreak", "<control>2")
-    real_shortcut.disconnect("button.longbreak", "<control>3")
+    shortcut_manager.disconnect("button.pomodoro", "<control>1")
+    shortcut_manager.disconnect("button.shortbreak", "<control>2")
+    shortcut_manager.disconnect("button.longbreak", "<control>3")
 
     return graph.get("tomate.ui.taskbutton")
 
@@ -64,6 +64,6 @@ def test_changes_session_type_when_task_button_is_clicked(session_type, subject,
 @pytest.mark.parametrize("shortcut, session_type", [
     ("<control>1", Sessions.pomodoro), ("<control>2", Sessions.shortbreak), ("<control>3", Sessions.longbreak)
 ])
-def test_shortcuts(shortcut, session_type, subject, real_shortcut, session):
-    assert_shortcut_called(real_shortcut, shortcut)
+def test_shortcuts(shortcut, session_type, subject, shortcut_manager, session):
+    assert_shortcut_called(shortcut_manager, shortcut)
     session.change(session=session_type)

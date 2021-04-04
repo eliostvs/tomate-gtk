@@ -52,7 +52,7 @@ def real_config(graph, dispatcher, tmpdir):
 
 
 @pytest.fixture()
-def real_shortcut(graph, real_config):
+def shortcut_manager(graph, real_config):
     graph.register_instance("tomate.config", real_config)
     scan_to_graph(["tomate.ui.shortcut"], graph)
     return graph.get("tomate.ui.shortcut")

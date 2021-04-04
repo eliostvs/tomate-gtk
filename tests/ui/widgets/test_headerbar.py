@@ -15,19 +15,19 @@ class TestHeaderBar:
         return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def subject(self, graph, mock_menu, real_shortcut, session, mocker):
+    def subject(self, graph, mock_menu, shortcut_manager, session, mocker):
         Session.receivers.clear()
 
         graph.register_instance("tomate.ui.menu", mock_menu)
         graph.register_instance("tomate.session", session)
-        graph.register_instance("tomate.ui.shortcut", real_shortcut)
+        graph.register_instance("tomate.ui.shortcut", shortcut_manager)
         graph.register_factory("tomate.ui.view", mocker.Mock)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
 
-        real_shortcut.disconnect("button.start", "<control>s")
-        real_shortcut.disconnect("button.stop", "<control>p")
-        real_shortcut.disconnect("button.reset", "<control>r")
+        shortcut_manager.disconnect("button.start", "<control>s")
+        shortcut_manager.disconnect("button.stop", "<control>p")
+        shortcut_manager.disconnect("button.reset", "<control>r")
 
         namespaces = [
             "tomate.pomodoro.proxy",
@@ -55,8 +55,8 @@ class TestHeaderBar:
             ("<control>r", "reset"),
         ],
     )
-    def test_shortcuts(self, shortcut, action, mock_menu, real_shortcut, session, subject):
-        assert_shortcut_called(real_shortcut, shortcut)
+    def test_shortcuts(self, shortcut, action, mock_menu, shortcut_manager, session, subject):
+        assert_shortcut_called(shortcut_manager, shortcut)
         getattr(session, action).assert_called()
 
     def test_start_then_session_when_start_button_is_clicked(self, subject, session):

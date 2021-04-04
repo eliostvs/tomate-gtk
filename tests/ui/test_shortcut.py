@@ -5,8 +5,8 @@ from tests.conftest import assert_shortcut_called
 
 
 @pytest.fixture
-def subject(real_shortcut):
-    return real_shortcut
+def subject(shortcut_manager):
+    return shortcut_manager
 
 
 def test_label(subject):
