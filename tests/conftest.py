@@ -30,7 +30,7 @@ def graph():
 
 
 @pytest.fixture()
-def mock_view(mocker):
+def view(mocker):
     return mocker.Mock(widget=mocker.Mock(Gtk.Window))
 
 

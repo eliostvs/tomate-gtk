@@ -18,8 +18,8 @@ def mock_plugin(mocker):
 
 
 @pytest.fixture()
-def subject(graph, mock_view, mock_plugin, mocker):
-    graph.register_instance("tomate.ui.view", mock_view)
+def subject(graph, view, mock_plugin, mocker):
+    graph.register_instance("tomate.ui.view", view)
     graph.register_instance("tomate.plugin", mock_plugin)
     graph.register_instance("dbus.session", mocker.Mock())
 
@@ -40,19 +40,19 @@ def test_search_plugin_on_init(subject, mock_plugin):
 
 
 class TestRun:
-    def test_shows_window_when_app_is_running(self, subject, mock_view):
+    def test_shows_window_when_app_is_running(self, subject, view):
         subject.state = State.stopped
 
         subject.Run()
 
-        mock_view.run.assert_called_once_with()
+        view.run.assert_called_once_with()
 
-    def test_runs_window_when_app_is_not_running(self, subject, mock_view):
+    def test_runs_window_when_app_is_not_running(self, subject, view):
         subject.state = State.started
 
         subject.Run()
 
-        mock_view.show.assert_called_once_with()
+        view.show.assert_called_once_with()
         assert subject.state is State.started
 
 
@@ -64,9 +64,9 @@ class TestFromGraph:
         DBusTestCase.tearDownClass()
 
     def test_create_app_instance_when_is_not_registered_in_dbus(
-        self, graph, mock_view, mock_plugin
+        self, graph, view, mock_plugin
     ):
-        graph.register_instance("tomate.ui.view", mock_view)
+        graph.register_instance("tomate.ui.view", view)
         graph.register_instance("tomate.plugin", mock_plugin)
         scan_to_graph(["tomate.pomodoro.app"], graph)
 

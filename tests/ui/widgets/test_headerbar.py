@@ -130,10 +130,10 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def subject(self, mock_about, mock_preference, mock_view, graph):
+    def subject(self, mock_about, mock_preference, view, graph):
         Events.View.receivers.clear()
 
-        graph.register_instance("tomate.ui.view", mock_view)
+        graph.register_instance("tomate.ui.view", view)
         graph.register_instance("tomate.ui.about", mock_about)
         graph.register_instance("tomate.ui.preference", mock_preference)
 
@@ -149,18 +149,18 @@ class TestHeaderBarMenu:
         assert isinstance(instance, HeaderBarMenu)
         assert instance is subject
 
-    def test_open_preference_dialog(self, subject, mock_view, mock_preference):
+    def test_open_preference_dialog(self, subject, view, mock_preference):
         subject._preference_item.emit("activate")
 
         refresh_gui()
 
         mock_preference.widget.run.assert_called_once_with()
-        mock_preference.widget.set_transient_for.assert_called_once_with(mock_view.widget)
+        mock_preference.widget.set_transient_for.assert_called_once_with(view.widget)
 
-    def test_open_about_dialog(self, subject, mock_view, mock_about):
+    def test_open_about_dialog(self, subject, view, mock_about):
         subject._about_item.emit("activate")
 
         refresh_gui()
 
-        mock_about.widget.set_transient_for.assert_called_once_with(mock_view.widget)
+        mock_about.widget.set_transient_for.assert_called_once_with(view.widget)
         mock_about.widget.run.assert_called_once_with()
