@@ -9,8 +9,8 @@ from tomate.ui.widgets import TaskButton
 
 
 @pytest.fixture
-def subject(graph, mock_session, real_shortcut):
-    graph.register_instance("tomate.session", mock_session)
+def subject(graph, session, real_shortcut):
+    graph.register_instance("tomate.session", session)
     graph.register_instance("tomate.ui.shortcut", real_shortcut)
     scan_to_graph(["tomate.ui.widgets.task_button"], graph)
 
@@ -35,7 +35,7 @@ def test_disables_buttons_when_session_starts(subject):
 
 
 @pytest.mark.parametrize("state", [State.finished, State.stopped])
-def test_changes_selected_button_when_session_finishes(state, subject, mock_session):
+def test_changes_selected_button_when_session_finishes(state, subject, session):
     payload = SessionPayload(
         id="",
         type=Sessions.shortbreak,
@@ -47,23 +47,23 @@ def test_changes_selected_button_when_session_finishes(state, subject, mock_sess
 
     assert subject.widget.get_sensitive() is True
     assert subject.widget.get_selected() is Sessions.shortbreak.value
-    mock_session.change.assert_called_once_with(session=Sessions.shortbreak)
+    session.change.assert_called_once_with(session=Sessions.shortbreak)
 
 
 @pytest.mark.parametrize(
     "session_type", [Sessions.pomodoro, Sessions.shortbreak, Sessions.longbreak]
 )
-def test_changes_session_type_when_task_button_is_clicked(session_type, subject, mock_session):
+def test_changes_session_type_when_task_button_is_clicked(session_type, subject, session):
     subject.widget.emit("mode_changed", session_type.value)
 
     refresh_gui()
 
-    mock_session.change.assert_called_once_with(session=session_type)
+    session.change.assert_called_once_with(session=session_type)
 
 
 @pytest.mark.parametrize("shortcut, session_type", [
     ("<control>1", Sessions.pomodoro), ("<control>2", Sessions.shortbreak), ("<control>3", Sessions.longbreak)
 ])
-def test_shortcuts(shortcut, session_type, subject, real_shortcut, mock_session):
+def test_shortcuts(shortcut, session_type, subject, real_shortcut, session):
     assert_shortcut_called(real_shortcut, shortcut)
-    mock_session.change(session=session_type)
+    session.change(session=session_type)

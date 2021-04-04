@@ -11,7 +11,7 @@ TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
 @pytest.fixture()
-def mock_session(mocker):
+def session(mocker):
     from tomate.pomodoro.session import Session
 
     return mocker.Mock(spec=Session)

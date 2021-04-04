@@ -11,10 +11,10 @@ from tomate.ui.widgets import TrayIcon
 
 
 @pytest.fixture
-def subject(graph, dispatcher, real_config, mock_session):
+def subject(graph, dispatcher, real_config, session):
     Events.Session.receivers.clear()
 
-    graph.register_instance("tomate.session", mock_session)
+    graph.register_instance("tomate.session", session)
     graph.register_instance("tomate.events.view", dispatcher)
     graph.register_instance("tomate.config", real_config)
 
@@ -84,16 +84,16 @@ class TestWindowHide:
 
 
 class TestWindowQuit:
-    def test_quits_when_timer_is_not_running(self, subject, mock_session, mocker):
+    def test_quits_when_timer_is_not_running(self, subject, session, mocker):
         main_quit = mocker.patch("tomate.ui.window.Gtk.main_quit")
-        mock_session.is_running.return_value = False
+        session.is_running.return_value = False
 
         subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
         main_quit.assert_called_once_with()
 
-    def test_hides_when_timer_is_running(self, subject, mock_session, dispatcher, mocker):
-        mock_session.is_running.return_value = True
+    def test_hides_when_timer_is_running(self, subject, session, dispatcher, mocker):
+        session.is_running.return_value = True
 
         subscriber = mocker.Mock()
         dispatcher.connect(subscriber, sender=State.hid, weak=False)

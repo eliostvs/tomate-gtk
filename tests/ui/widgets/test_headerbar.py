@@ -15,11 +15,11 @@ class TestHeaderBar:
         return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def subject(self, graph, mock_menu, real_shortcut, mock_session, mocker):
+    def subject(self, graph, mock_menu, real_shortcut, session, mocker):
         Session.receivers.clear()
 
         graph.register_instance("tomate.ui.menu", mock_menu)
-        graph.register_instance("tomate.session", mock_session)
+        graph.register_instance("tomate.session", session)
         graph.register_instance("tomate.ui.shortcut", real_shortcut)
         graph.register_factory("tomate.ui.view", mocker.Mock)
         graph.register_factory("tomate.ui.about", mocker.Mock)
@@ -55,30 +55,30 @@ class TestHeaderBar:
             ("<control>r", "reset"),
         ],
     )
-    def test_shortcuts(self, shortcut, action, mock_menu, real_shortcut, mock_session, subject):
+    def test_shortcuts(self, shortcut, action, mock_menu, real_shortcut, session, subject):
         assert_shortcut_called(real_shortcut, shortcut)
-        getattr(mock_session, action).assert_called()
+        getattr(session, action).assert_called()
 
-    def test_start_then_session_when_start_button_is_clicked(self, subject, mock_session):
+    def test_start_then_session_when_start_button_is_clicked(self, subject, session):
         subject._start_button.emit("clicked")
 
         refresh_gui()
 
-        mock_session.start.assert_called_once_with()
+        session.start.assert_called_once_with()
 
-    def test_stop_the_session_when_stop_button_is_clicked(self, subject, mock_session):
+    def test_stop_the_session_when_stop_button_is_clicked(self, subject, session):
         subject._stop_button.emit("clicked")
 
         refresh_gui()
 
-        mock_session.stop.assert_called_once_with()
+        session.stop.assert_called_once_with()
 
-    def test_reset_the_session_when_reset_button_is_clicked(self, subject, mock_session):
+    def test_reset_the_session_when_reset_button_is_clicked(self, subject, session):
         subject._reset_button.emit("clicked")
 
         refresh_gui()
 
-        mock_session.reset.assert_called_once_with()
+        session.reset.assert_called_once_with()
 
     def test_enable_only_the_stop_button_when_session_starts(self, subject):
         Session.send(State.started)
@@ -87,7 +87,7 @@ class TestHeaderBar:
         assert subject._start_button.get_visible() is False
         assert subject._reset_button.get_sensitive() is False
 
-    def test_disables_reset_button_when_session_is_reset(self, subject, mock_session):
+    def test_disables_reset_button_when_session_is_reset(self, subject, session):
         subject._reset_button.set_sensitive(True)
         subject.widget.props.title = "foo"
 
@@ -101,7 +101,7 @@ class TestHeaderBar:
         [(State.stopped, 0, "No session yet"), (State.finished, 1, "Session 1")],
     )
     def test_buttons_visibility_and_title_in_the_first_session(
-        self, state, title, pomodoros, subject, mock_session
+        self, state, title, pomodoros, subject, session
     ):
         payload = SessionPayload(
             id="",
