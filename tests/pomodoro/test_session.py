@@ -10,7 +10,7 @@ from tomate.ui.test import run_loop_for
 
 
 @pytest.fixture()
-def subject(graph, dispatcher, real_config, mocker):
+def subject(graph, dispatcher, config, mocker):
     Events.Config.receivers.clear()
     Events.Timer.receivers.clear()
 
@@ -18,7 +18,7 @@ def subject(graph, dispatcher, real_config, mocker):
 
     graph.register_instance("tomate.events.timer", Events.Timer)
     graph.register_instance("tomate.events.session", dispatcher)
-    graph.register_instance("tomate.config", real_config)
+    graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.pomodoro.timer", "tomate.pomodoro.session"], graph)
     instance = graph.get("tomate.session")
 
@@ -147,15 +147,15 @@ class TestSessionEnd:
         ],
     )
     def test_ends_when_session_is_running(
-        self, scenario: EndScenario, subject, dispatcher, real_config, mocker
+        self, scenario: EndScenario, subject, dispatcher, config, mocker
     ):
         subject.current = scenario.before_session
         subject.pomodoros = scenario.before_pomodoros
 
-        real_config.set("Time", "pomodoro_duration", 0.02)
-        real_config.set("Timer", "pomodoro_duration", 0.02)
-        real_config.set("Timer", "longbreak_duration", 0.02)
-        real_config.set("Timer", "shortbreak_duration", 0.02)
+        config.set("Time", "pomodoro_duration", 0.02)
+        config.set("Timer", "pomodoro_duration", 0.02)
+        config.set("Timer", "longbreak_duration", 0.02)
+        config.set("Timer", "shortbreak_duration", 0.02)
 
         changed = mocker.Mock()
         dispatcher.connect(changed, sender=State.changed, weak=False)

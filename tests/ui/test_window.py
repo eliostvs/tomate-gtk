@@ -11,12 +11,12 @@ from tomate.ui.widgets import TrayIcon
 
 
 @pytest.fixture
-def subject(graph, dispatcher, real_config, session):
+def subject(graph, dispatcher, config, session):
     Events.Session.receivers.clear()
 
     graph.register_instance("tomate.session", session)
     graph.register_instance("tomate.events.view", dispatcher)
-    graph.register_instance("tomate.config", real_config)
+    graph.register_instance("tomate.config", config)
 
     namespaces = [
         "tomate.ui",

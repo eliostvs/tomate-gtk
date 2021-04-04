@@ -7,8 +7,8 @@ from tomate import __version__
 
 
 @pytest.fixture
-def subject(graph, real_config):
-    graph.register_instance("tomate.config", real_config)
+def subject(graph, config):
+    graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.ui.dialogs.about"], graph)
 
     return graph.get("tomate.ui.about")

@@ -41,7 +41,7 @@ def refresh_gui(delay: int = 0) -> None:
 
 
 @pytest.fixture()
-def real_config(graph, dispatcher, tmpdir):
+def config(graph, dispatcher, tmpdir):
     graph.register_instance("tomate.events.config", dispatcher)
     scan_to_graph(["tomate.pomodoro.config"], graph)
 
@@ -52,8 +52,8 @@ def real_config(graph, dispatcher, tmpdir):
 
 
 @pytest.fixture()
-def shortcut_manager(graph, real_config):
-    graph.register_instance("tomate.config", real_config)
+def shortcut_manager(graph, config):
+    graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.ui.shortcut"], graph)
     return graph.get("tomate.ui.shortcut")
 

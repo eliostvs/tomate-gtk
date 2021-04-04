@@ -38,11 +38,11 @@ def disabled_plugin():
 
 
 @pytest.fixture
-def subject(graph, plugin_manager, real_config, mocker):
+def subject(graph, plugin_manager, config, mocker):
     mocker.patch("tomate.ui.dialogs.preference.Gtk.Dialog.run")
 
     graph.register_instance("tomate.plugin", plugin_manager)
-    graph.register_instance("tomate.config", real_config)
+    graph.register_instance("tomate.config", config)
 
     scan_to_graph(["tomate.ui.dialogs.preference"], graph)
 
@@ -148,11 +148,11 @@ def test_timer_module(graph, subject):
         ("longbreak_duration", 14),
     ],
 )
-def test_save_config_when_task_duration_change(option, value, real_config, subject):
+def test_save_config_when_task_duration_change(option, value, config, subject):
     spin_button = Q.select(subject.widget, Q.name(option))
     assert spin_button is not None
 
     spin_button.set_value(value)
     spin_button.emit("value-changed")
 
-    assert real_config.get_int("Timer", option) == value
+    assert config.get_int("Timer", option) == value

@@ -9,8 +9,8 @@ from tomate.pomodoro.plugin import PluginManager, Plugin, suppress_errors
 
 
 @pytest.fixture()
-def subject(graph, real_config):
-    graph.register_instance("tomate.config", real_config)
+def subject(graph, config):
+    graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.pomodoro.plugin"], graph)
     return graph.get("tomate.plugin")
 
