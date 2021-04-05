@@ -29,7 +29,7 @@ endif
 
 .PHONY: format
 format:
-	black $(PACKAGE)
+	black $(PACKAGE) tests/
 
 .PHONY: clean
 clean:
