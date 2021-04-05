@@ -4,8 +4,7 @@ from gi.repository import Gtk
 from wiring import Interface, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import State
-from tomate.pomodoro.event import on, Events
+from tomate.pomodoro.event import Bus, Events, on
 
 
 class TrayIcon(Interface):
@@ -34,12 +33,12 @@ class Menu:
 
         self.widget.show_all()
 
-    @on(Events.View, [State.showed])
-    def _on_view_show(self, *args, **kwargs):
+    @on(Bus, [Events.WINDOW_SHOW])
+    def _on_window_show(self, *args, **kwargs):
         self.hide_item.set_visible(True)
         self.show_item.set_visible(False)
 
-    @on(Events.View, [State.hid])
-    def _on_view_hide(self, *args, **kwargs):
+    @on(Bus, [Events.WINDOW_HIDE])
+    def _on_window_hide(self, *args, **kwargs):
         self.hide_item.set_visible(False)
         self.show_item.set_visible(True)

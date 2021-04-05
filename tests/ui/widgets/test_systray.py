@@ -3,8 +3,7 @@ from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
-from tomate.pomodoro import State
-from tomate.pomodoro.event import Events, connect_events
+from tomate.pomodoro.event import Bus, Events, connect_events
 from tomate.ui.widgets import TrayIconMenu
 
 
@@ -15,7 +14,7 @@ def view():
 
 @pytest.fixture
 def subject(graph, view):
-    Events.View.receivers.clear()
+    Bus.receivers.clear()
 
     graph.register_instance("tomate.ui.view", view)
     scan_to_graph(["tomate.ui.widgets.systray"], graph)
@@ -52,11 +51,9 @@ def test_show_window_when_hide_item_is_clicked(view, subject):
     assert view.get_visible() is True
 
 
-@pytest.mark.parametrize(
-    "event,hide,show", [(State.hid, False, True), (State.showed, True, False)]
-)
+@pytest.mark.parametrize("event,hide,show", [(Events.WINDOW_HIDE, False, True), (Events.WINDOW_SHOW, True, False)])
 def test_change_items_visibility(event, hide, show, subject):
-    Events.View.send(event)
+    Bus.send(event)
 
     assert subject.hide_item.get_visible() is hide
     assert subject.show_item.get_visible() is show

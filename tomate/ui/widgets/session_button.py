@@ -2,14 +2,18 @@ import locale
 import logging
 from collections import namedtuple
 from locale import gettext as _
-from typing import Optional
+from typing import Union
 
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Sessions, State
-from tomate.pomodoro.event import Subscriber, on, Events
-from tomate.pomodoro.session import Payload as SessionPayload, Session
+from tomate.pomodoro.event import Bus, Events, Subscriber, on
+from tomate.pomodoro.session import (
+    EndPayload as SessionEndPayload,
+    Payload as SessionPayload,
+    Session,
+    Type as SessionType,
+)
 from .mode_button import ModeButton
 from ..shortcut import ShortcutManager
 
@@ -20,7 +24,7 @@ Shortcut = namedtuple("Shortcut", "name default session_type")
 
 
 @register.factory("tomate.ui.taskbutton", scope=SingletonScope)
-class TaskButton(Subscriber):
+class SessionButton(Subscriber):
     @inject(session="tomate.session", shortcuts="tomate.ui.shortcut")
     def __init__(self, session: Session, shortcuts: ShortcutManager):
         self._session = session
@@ -38,7 +42,7 @@ class TaskButton(Subscriber):
             _("Pomodoro"),
             Shortcut(
                 name="button.pomodoro",
-                session_type=Sessions.pomodoro.value,
+                session_type=SessionType.POMODORO.value,
                 default="<control>1",
             ),
         )
@@ -47,7 +51,7 @@ class TaskButton(Subscriber):
             _("Short Break"),
             Shortcut(
                 name="button.shortbreak",
-                session_type=Sessions.shortbreak.value,
+                session_type=SessionType.SHORT_BREAK.value,
                 default="<control>2",
             ),
         )
@@ -56,7 +60,7 @@ class TaskButton(Subscriber):
             _("Long Break"),
             Shortcut(
                 name="button.longbreak",
-                session_type=Sessions.longbreak.value,
+                session_type=SessionType.LONG_BREAK.value,
                 default="<control>3",
             ),
         )
@@ -64,9 +68,7 @@ class TaskButton(Subscriber):
         self.widget.connect("mode_changed", self._on_mode_changed)
 
     def _create_button(self, label: str, shortcut: Shortcut):
-        tooltip_text = "{} ({})".format(
-            label, self._shortcuts.label(shortcut.name, shortcut.default)
-        )
+        tooltip_text = "{} ({})".format(label, self._shortcuts.label(shortcut.name, shortcut.default))
         self.widget.append_text(label, tooltip_text=tooltip_text)
 
         self._shortcuts.connect(
@@ -75,17 +77,21 @@ class TaskButton(Subscriber):
             shortcut.default,
         )
 
-    def _on_mode_changed(self, _, index):
-        session_type = Sessions.by_index(index)
-        self._session.change(session=session_type)
+    def _on_mode_changed(self, _, number):
+        self._session.change(session=SessionType.of(number))
+        logger.debug("action=change session=%s", SessionType.of(number))
 
-    @on(Events.Session, [State.started])
-    def disable(self, *args, **kwargs):
-        self.widget.set_sensitive(False)
-
-    @on(Events.Session, [State.finished, State.stopped])
-    def enable(self, *args, payload: Optional[SessionPayload] = None):
+    def init(self):
         self.widget.set_sensitive(True)
+        self.widget.set_selected(SessionType.POMODORO.value)
 
-        session_type = payload.type if payload else Sessions.pomodoro
-        self.widget.set_selected(session_type.value)
+    @on(Bus, [Events.SESSION_START])
+    def _on_session_start(self, *_, **__):
+        self.widget.set_sensitive(False)
+        logger.debug("action=disable")
+
+    @on(Bus, [Events.SESSION_INTERRUPT, Events.SESSION_END])
+    def _on_session_stop(self, *_, payload: Union[SessionPayload, SessionEndPayload]):
+        self.widget.set_sensitive(True)
+        self.widget.set_selected(payload.type.value)
+        logger.debug("action=enable session=%s", payload.type)

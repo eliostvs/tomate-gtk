@@ -1,90 +1,92 @@
+import blinker
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import SECONDS_IN_A_MINUTE
-from tomate.pomodoro import State
-from tomate.pomodoro.timer import Timer, Payload as TimerPayload, format_time_left
+from tomate.pomodoro.event import Events
+from tomate.pomodoro.timer import Payload as TimerPayload, State, Timer, format_time_left
 from tomate.ui.test import run_loop_for
 
 
-@pytest.fixture()
-def subject(graph, dispatcher):
-    graph.register_instance("tomate.events.timer", dispatcher)
+def create_bus():
+    return blinker.NamedSignal("Test")
+
+
+def test_module(graph):
+    graph.register_instance("tomate.bus", create_bus())
     scan_to_graph(["tomate.pomodoro.timer"], graph)
-    return graph.get("tomate.timer")
 
-
-def test_module(graph, subject):
     instance = graph.get("tomate.timer")
 
     assert isinstance(instance, Timer)
-    assert instance is subject
 
 
 class TestTimerStart:
-    def test_doesnt_start_when_timer_is_already_running(self, subject):
-        subject.state = State.started
+    def test_does_not_start_when_timer_is_already_running(self):
+        subject = Timer(create_bus())
+        subject.state = State.STARTED
 
-        assert not subject.start(SECONDS_IN_A_MINUTE)
+        assert not subject.start(60)
 
-    @pytest.mark.parametrize("state", [State.finished, State.stopped])
-    def test_starts_when_timer_not_started_yet(
-        self, state, subject, dispatcher, mocker
-    ):
+    @pytest.mark.parametrize("state", [State.ENDED, State.STOPPED])
+    def test_starts_when_timer_not_started_yet(self, state, mocker):
+        bus = create_bus()
+        subject = Timer(bus)
         subject.state = state
 
         subscriber = mocker.Mock()
-        dispatcher.connect(subscriber, sender=State.started, weak=False)
+        bus.connect(subscriber, sender=Events.TIMER_START, weak=False)
 
-        result = subject.start(SECONDS_IN_A_MINUTE)
+        result = subject.start(60)
 
         assert result is True
-        subscriber.assert_called_once_with(
-            State.started, payload=TimerPayload(time_left=60, duration=60)
-        )
+        subscriber.assert_called_once_with(Events.TIMER_START, payload=TimerPayload(time_left=60, duration=60))
 
 
 class TestTimerStop:
-    @pytest.mark.parametrize("state", [State.finished, State.stopped])
-    def test_doesnt_stop_when_timer_is_not_running(self, state, subject):
+    @pytest.mark.parametrize("state", [State.ENDED, State.STOPPED])
+    def test_does_not_stop_when_timer_is_not_running(self, state):
+        subject = Timer(create_bus())
         subject.state = state
+
         assert not subject.stop()
 
-    def test_stops_when_timer_is_running(self, subject, dispatcher, mocker):
+    def test_stops_when_timer_is_running(self, mocker):
+        bus = create_bus()
+        subject = Timer(bus)
         subscriber = mocker.Mock()
-        dispatcher.connect(subscriber, sender=State.stopped, weak=False)
+        bus.connect(subscriber, sender=Events.TIMER_STOP, weak=False)
 
-        subject.start(SECONDS_IN_A_MINUTE)
+        subject.start(60)
         result = subject.stop()
 
         assert result is True
-        subscriber.assert_called_once_with(
-            State.stopped, payload=TimerPayload(time_left=0, duration=0)
-        )
+        assert subject.is_running() is False
+        subscriber.assert_called_once_with(Events.TIMER_STOP, payload=TimerPayload(time_left=0, duration=0))
 
 
 class TestTimerEnd:
-    @pytest.mark.parametrize("state", [State.finished, State.stopped])
-    def test_doesnt_end_when_timer_is_not_running(self, state, subject):
+    @pytest.mark.parametrize("state", [State.ENDED, State.STOPPED])
+    def test_does_not_end_when_timer_is_not_running(self, state):
+        subject = Timer(create_bus())
         subject.state = state
+
         assert not subject.end()
 
-    def test_ends_when_timer_is_running(self, subject, dispatcher, mocker):
+    def test_ends_when_time_is_up(self, mocker):
+        bus = create_bus()
+        subject = Timer(bus)
         changed = mocker.Mock()
-        dispatcher.connect(changed, sender=State.changed, weak=False)
+        subject._bus.connect(changed, sender=Events.TIMER_UPDATE, weak=False)
 
         finished = mocker.Mock()
-        dispatcher.connect(finished, sender=State.finished, weak=False)
+        bus.connect(finished, sender=Events.TIMER_END, weak=False)
 
         subject.start(1)
         run_loop_for(2)
 
-        changed.assert_called_once_with(
-            State.changed, payload=TimerPayload(time_left=0, duration=1)
-        )
-        finished.assert_called_once_with(
-            State.finished, payload=TimerPayload(time_left=0, duration=1)
-        )
+        assert subject.is_running() is False
+        changed.assert_called_once_with(Events.TIMER_UPDATE, payload=TimerPayload(time_left=0, duration=1))
+        finished.assert_called_once_with(Events.TIMER_END, payload=TimerPayload(time_left=0, duration=1))
 
 
 class TestTimerPayload:

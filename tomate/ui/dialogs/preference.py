@@ -3,7 +3,7 @@ import logging
 from locale import gettext as _
 
 from gi.repository import GdkPixbuf, Gtk, Pango
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
 locale.textdomain("tomate")
@@ -118,9 +118,7 @@ class ExtensionTab:
 
         self.plugin_model = Gtk.ListStore(*GridPlugin.MODEL)
 
-        self.plugin_list = Gtk.TreeView(
-            headers_visible=False, model=self.plugin_model, name="pluginList"
-        )
+        self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model, name="pluginList")
         self.plugin_list.get_selection().connect("changed", self._on_selected_item_changed)
         self.plugin_list.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
@@ -140,9 +138,7 @@ class ExtensionTab:
         plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         plugin_list_container.add(self.plugin_list)
 
-        self.settings_button = Gtk.Button.new_from_icon_name(
-            Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU
-        )
+        self.settings_button = Gtk.Button.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU)
         self.settings_button.set_name("pluginSettingsButton")
         self.settings_button.set_sensitive(False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)

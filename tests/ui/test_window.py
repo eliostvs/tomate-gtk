@@ -1,21 +1,18 @@
 import pytest
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk, Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import assert_shortcut_called
-from tomate.pomodoro import State, Sessions
-from tomate.pomodoro.event import Events, connect_events
-from tomate.pomodoro.session import Payload as SessionPayload
+from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload
+from tomate.pomodoro.event import Bus, Events, connect_events
 from tomate.ui import Window
 from tomate.ui.widgets import TrayIcon
 
 
 @pytest.fixture
-def subject(graph, dispatcher, config, session):
-    Events.Session.receivers.clear()
-
+def subject(graph, bus, config, session):
+    Bus.receivers.clear()
     graph.register_instance("tomate.session", session)
-    graph.register_instance("tomate.events.view", dispatcher)
+    graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.config", config)
 
     namespaces = [
@@ -38,13 +35,13 @@ def test_module(graph, subject):
     assert instance is subject
 
 
-def test_shortcuts_are_connected(subject, graph):
+def test_shortcuts(subject, graph):
     shortcut_manager = graph.get("tomate.ui.shortcut")
 
     assert_shortcut_called(shortcut_manager, "<control>s", window=subject.widget)
 
 
-def test_starts_loop(mocker, subject):
+def test_start(mocker, subject):
     gtk_main = mocker.patch("tomate.ui.window.Gtk.main")
     show_all = mocker.patch("tomate.ui.window.Gtk.Window.show_all")
 
@@ -55,32 +52,27 @@ def test_starts_loop(mocker, subject):
 
 
 class TestWindowHide:
-    def test_iconify_when_tray_icon_plugin_is_not_registered(
-        self, subject, dispatcher, graph, mocker
-    ):
+    def test_iconify_when_tray_icon_plugin_is_not_registered(self, subject, bus, graph, mocker):
         graph.providers.clear()
-
         subscriber = mocker.Mock()
-        dispatcher.connect(subscriber, sender=State.hid, weak=False)
+        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
 
         result = subject.hide()
 
         assert result is Gtk.true
-        subscriber.assert_called_once_with(State.hid)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
 
-    def test_deletes_when_tray_icon_plugin_is_registered(self, subject, dispatcher, graph, mocker):
+    def test_deletes_when_tray_icon_plugin_is_registered(self, subject, bus, graph, mocker):
         graph.register_factory(TrayIcon, mocker.Mock)
-
         subscriber = mocker.Mock()
-        dispatcher.connect(subscriber, sender=State.hid, weak=False)
-
+        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
         subject.widget.set_visible(True)
 
         result = subject.hide()
 
         assert result
         assert subject.widget.get_visible() is False
-        subscriber.assert_called_once_with(State.hid)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
 
 
 class TestWindowQuit:
@@ -92,31 +84,23 @@ class TestWindowQuit:
 
         main_quit.assert_called_once_with()
 
-    def test_hides_when_timer_is_running(self, subject, session, dispatcher, mocker):
+    def test_hides_when_timer_is_running(self, subject, session, bus, mocker):
         session.is_running.return_value = True
-
         subscriber = mocker.Mock()
-        dispatcher.connect(subscriber, sender=State.hid, weak=False)
+        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
 
         subject.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
-        subscriber.assert_called_once_with(State.hid)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
 
 
-def test_shows_window_when_session_finishes(subject, dispatcher, mocker):
+def test_shows_window_when_session_end(subject, bus, mocker):
     subject.widget.set_visible(False)
-
     subscriber = mocker.Mock()
-    dispatcher.connect(subscriber, sender=State.showed, weak=False)
+    bus.connect(subscriber, sender=Events.WINDOW_SHOW, weak=False)
+    payload = create_session_end_payload(previous=create_session_payload())
 
-    payload = SessionPayload(
-        id="",
-        type=Sessions.pomodoro,
-        pomodoros=0,
-        state=State.started,
-        duration=0,
-    )
-    Events.Session.send(State.finished, payload=payload)
+    Bus.send(Events.SESSION_END, payload=payload)
 
     assert subject.widget.get_visible()
-    subscriber.assert_called_once_with(State.showed)
+    subscriber.assert_called_once_with(Events.WINDOW_SHOW)

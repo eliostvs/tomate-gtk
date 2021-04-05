@@ -3,9 +3,10 @@ import os
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import State
 from tomate.pomodoro.event import on
-from tomate.pomodoro.plugin import PluginManager, Plugin, suppress_errors
+from tomate.pomodoro.plugin import Plugin, PluginManager, suppress_errors
+
+TEST_EVENT = "TEST_EVENT"
 
 
 @pytest.fixture()
@@ -23,32 +24,32 @@ def test_module(graph, subject):
 
 
 @pytest.fixture()
-def plugin(dispatcher):
+def plugin(bus):
     class Subject(Plugin):
-        @on(dispatcher, [State.finished])
+        @on(bus, [TEST_EVENT])
         def bar(self, sender):
             return sender
 
     return Subject()
 
 
-def test_disconnect_events_when_plugin_deactivate(plugin, dispatcher):
+def test_disconnects_events_when_plugin_deactivate(plugin, bus):
     plugin.deactivate()
 
-    result = dispatcher.send(State.finished)
+    result = bus.send(TEST_EVENT)
 
     assert result == []
 
 
-def test_connect_events_when_plugin_active(plugin, dispatcher):
+def test_connects_events_when_plugin_activate(plugin, bus):
     plugin.activate()
 
-    result = dispatcher.send(State.finished)
+    result = bus.send(TEST_EVENT)
 
-    assert result == [(plugin.bar, State.finished)]
+    assert result == [(plugin.bar, TEST_EVENT)]
 
 
-def test_doesnt_raise_exception_when_debug_is_disabled():
+def test_does_not_raise_exception_when_debug_is_disabled():
     os.environ.unsetenv("TOMATE_DEBUG")
 
     @suppress_errors

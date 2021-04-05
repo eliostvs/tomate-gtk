@@ -9,16 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Session buttons keyboard shortcuts
+- Shortcuts to session buttons
+- EndPayload session
+- Events enum
 
 ### Changed
 
+- Timer, Session and App have their own state values
+- Simplify event system
 - Join python-tomate and tomate-gtk projects
-- Move enums to base package
-- Rename tomate.events.setting namespace to tomate.events.config
-- Session payload fields
-- Rename Events.Setting to Events.Config
-- Trigger more events when the session ends
+- Common session payload fields
+
+### Removed
+
+- Remove Session, Timer, Config, and View blinker.Signal objects
+- Remove State and Session enums
 
 ## 0.11.0
 

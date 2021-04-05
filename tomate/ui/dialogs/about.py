@@ -1,5 +1,5 @@
 from gi.repository import GdkPixbuf, Gtk
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
 

@@ -7,10 +7,9 @@ from tests.conftest import TEST_DATA_DIR
 
 
 @pytest.fixture()
-def subject(graph, dispatcher):
-    graph.register_instance("tomate.events.config", dispatcher)
+def subject(graph, bus):
+    graph.register_instance("tomate.bus", bus)
     scan_to_graph(["tomate.pomodoro.config"], graph)
-
     return graph.get("tomate.config")
 
 
@@ -53,13 +52,19 @@ def test_get_icon_path_raises_when_icon_not_found(subject):
     assert str(excinfo.value) == "Icon 'foo' not found!"
 
 
-def test_set_option(subject, tmpdir):
+def test_set_option(subject, tmpdir, bus, mocker):
+    from tomate.pomodoro.config import Payload
+
     config = tmpdir.mkdir("tmp").join("tomate.config")
     subject.config_path = lambda: config.strpath
+
+    subscriber = mocker.Mock()
+    bus.connect(subscriber, sender="config.section", weak=False)
 
     subject.set("section", "option", "value")
 
     assert subject.get("section", "option") == "value"
+    subscriber.assert_called_once_with("config.section", payload=Payload("set", "section", "option", "value"))
 
 
 def test_get_icon_path(subject):

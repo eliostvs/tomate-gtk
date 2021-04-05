@@ -1,25 +1,30 @@
+import enum
 import functools
 import logging
 
-from blinker import Namespace
+from blinker import NamedSignal
 from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
-
-class Dispatcher(Namespace):
-    def __getattr__(self, attr):
-        try:
-            return self[attr]
-        except KeyError:
-            raise AttributeError(attr)
+Bus = NamedSignal("Tomate")
 
 
-Events = Dispatcher()
-Session = Events.signal("Session")
-Timer = Events.signal("Timer")
-Config = Events.signal("Config")
-View = Events.signal("View")
+@enum.unique
+class Events(enum.Enum):
+    TIMER_START = 0
+    TIMER_UPDATE = 1
+    TIMER_STOP = 2
+    TIMER_END = 3
+
+    SESSION_START = 4
+    SESSION_INTERRUPT = 5
+    SESSION_CHANGE = 6
+    SESSION_END = 7
+    SESSION_RESET = 8
+
+    WINDOW_SHOW = 9
+    WINDOW_HIDE = 10
 
 
 def on(event, senders):
@@ -41,11 +46,7 @@ def on(event, senders):
 
 
 def methods_with_events(obj):
-    return [
-        getattr(obj, attr)
-        for attr in dir(obj)
-        if getattr(getattr(obj, attr), "_has_event", False) is True
-    ]
+    return [getattr(obj, attr) for attr in dir(obj) if getattr(getattr(obj, attr), "_has_event", False) is True]
 
 
 def connect_events(obj):
@@ -85,42 +86,4 @@ class Subscriber(metaclass=SubscriberMeta):
     pass
 
 
-class ObservableProperty(object):
-    def __init__(self, initial, callback, attr="_state", event=None):
-        self.initial = initial
-        self.callback = callback
-        self.attr = attr
-        self.event = event
-
-    def __get__(self, instance, owner):
-        if instance is None or not hasattr(instance, self.attr):
-            value = self.initial
-        else:
-            value = getattr(instance, self.attr)
-
-        logger.debug(
-            "instance=%s action=observable_get attr=%s, value=%s",
-            instance.__class__.__name__,
-            self.attr,
-            value,
-        )
-
-        return value
-
-    def __set__(self, instance, value):
-        logger.debug(
-            "instance=%s action=observable_set attr=%s value=%s",
-            instance.__class__.__name__,
-            self.attr,
-            value,
-        )
-
-        setattr(instance, self.attr, value)
-        event = value if self.event is None else self.event
-        self.callback(instance, event)
-
-
-register.instance("tomate.events.session")(Session)
-register.instance("tomate.events.timer")(Timer)
-register.instance("tomate.events.config")(Config)
-register.instance("tomate.events.view")(View)
+register.instance("tomate.bus")(Bus)

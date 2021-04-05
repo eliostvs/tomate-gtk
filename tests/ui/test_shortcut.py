@@ -1,12 +1,16 @@
 import pytest
 from gi.repository import Gtk
+from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_shortcut_called
 
 
 @pytest.fixture
-def subject(shortcut_manager):
-    return shortcut_manager
+def subject(graph, config, bus):
+    graph.register_instance("tomate.bus", bus)
+    graph.register_instance("tomate.config", config)
+    scan_to_graph(["tomate.ui.shortcut"], graph)
+    return graph.get("tomate.ui.shortcut")
 
 
 def test_label(subject):

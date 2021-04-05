@@ -26,7 +26,7 @@ class fsm:
         current_target = getattr(instance, self.attr, None)
 
         logger.debug(
-            "action=change instance=%s attr=%s from=%s to=%s",
+            "action=change attribute=%s.%s from=%s to=%s",
             instance.__class__.__name__,
             self.attr,
             current_target,
@@ -43,20 +43,18 @@ class fsm:
     @wrapt.decorator
     def __call__(self, wrapped, instance, args, kwargs):
         logger.debug(
-            "action=beforeCall instance=%s method=%s",
+            "action=before method=%s.%s",
             instance.__class__.__name__,
             wrapped.__name__,
         )
 
         if self.is_valid_transition(instance) and self.is_valid_condition(instance):
             result = wrapped(*args, **kwargs)
-
             self.change_state(instance)
-
             self.call_exit_action(instance)
 
             logger.debug(
-                "action=call instance=%s method=%s result=true",
+                "action=after method=%s.%s called=true",
                 instance.__class__.__name__,
                 wrapped.__name__,
             )
@@ -64,9 +62,10 @@ class fsm:
             return result
 
         logger.debug(
-            "action=call instance=%s method=%s result=false",
+            "action=after method=%s.%s called=false transition=%s",
             instance.__class__.__name__,
             wrapped.__name__,
+            self.is_valid_transition(instance),
         )
 
         return False

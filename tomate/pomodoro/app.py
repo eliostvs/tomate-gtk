@@ -1,9 +1,14 @@
+import enum
+
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from . import State
+
+class State(enum.Enum):
+    STOPPED = 1
+    STARTED = 2
 
 
 @register.factory("tomate.app", scope=SingletonScope)
@@ -16,21 +21,21 @@ class Application(dbus.service.Object):
     @inject(bus="dbus.session", view="tomate.ui.view", plugin="tomate.plugin")
     def __init__(self, bus, view, plugin):
         dbus.service.Object.__init__(self, bus, self.BUS_PATH)
-        self.state = State.stopped
+        self.state = State.STOPPED
         self.view = view
 
         plugin.collectPlugins()
 
     @dbus.service.method(BUS_INTERFACE, out_signature="b")
     def IsRunning(self):
-        return self.state == State.started
+        return self.state == State.STARTED
 
     @dbus.service.method(BUS_INTERFACE, out_signature="b")
     def Run(self):
         if self.IsRunning():
             self.view.show()
         else:
-            self.state = State.started
+            self.state = State.STARTED
             self.view.run()
 
         return True

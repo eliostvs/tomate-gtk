@@ -1,14 +1,15 @@
+import enum
 from collections import namedtuple
 
+import blinker
 from gi.repository import GLib
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from . import State, SECONDS_IN_A_MINUTE
-from .event import ObservableProperty, Events
+from .event import Events
 from .fsm import fsm
 
-ONE_SECOND = 1
+SECONDS_IN_A_MINUTE = 60
 
 
 class Payload(namedtuple("TimerPayload", "time_left duration")):
@@ -39,55 +40,61 @@ class Payload(namedtuple("TimerPayload", "time_left duration")):
 # Thanks Pierre!
 
 
+class State(enum.Enum):
+    STOPPED = 1
+    STARTED = 2
+    ENDED = 3
+
+
 @register.factory("tomate.timer", scope=SingletonScope)
 class Timer:
-    @inject(dispatcher="tomate.events.timer")
-    def __init__(self, dispatcher: Events.Timer):
-        self.duration = self.time_left = 0
-        self._dispatcher = dispatcher
+    ONE_SECOND = 1
 
-    @fsm(target=State.started, source=[State.finished, State.stopped])
+    @inject(bus="tomate.bus")
+    def __init__(self, bus: blinker.Signal):
+        self.duration = self.time_left = 0
+        self.state = State.STOPPED
+        self._bus = bus
+
+    @fsm(target=State.STARTED, source=[State.ENDED, State.STOPPED], exit=lambda self: self._trigger(Events.TIMER_START))
     def start(self, seconds: int) -> bool:
         self.duration = self.time_left = seconds
-
-        GLib.timeout_add_seconds(ONE_SECOND, self._update)
-
+        GLib.timeout_add_seconds(Timer.ONE_SECOND, self._update)
         return True
 
-    @fsm(target=State.stopped, source=[State.started])
+    @fsm(target=State.STOPPED, source=[State.STARTED], exit=lambda self: self._trigger(Events.TIMER_STOP))
     def stop(self) -> bool:
         self._reset()
-
         return True
 
-    def timer_is_up(self) -> bool:
+    def _is_up(self) -> bool:
         return self.time_left <= 0
 
-    @fsm(target=State.finished, source=[State.started], condition=timer_is_up)
+    def is_running(self) -> bool:
+        return self.state == State.STARTED
+
+    @fsm(
+        target=State.ENDED, source=[State.STARTED], condition=_is_up, exit=lambda self: self._trigger(Events.TIMER_END)
+    )
     def end(self) -> bool:
         return True
 
     def _update(self) -> bool:
-        if self.state != State.started:
+        if self.state != State.STARTED:
             return False
 
-        if self.timer_is_up():
+        if self._is_up():
             return self.end()
 
         self.time_left -= 1
-
-        self._trigger(State.changed)
-
+        self._trigger(Events.TIMER_UPDATE)
         return True
-
-    def _trigger(self, event) -> None:
-        payload = Payload(time_left=self.time_left, duration=self.duration)
-        self._dispatcher.send(event, payload=payload)
 
     def _reset(self) -> None:
         self.duration = self.time_left = 0
 
-    state = ObservableProperty(initial=State.stopped, callback=_trigger)
+    def _trigger(self, event) -> None:
+        self._bus.send(event, payload=Payload(time_left=self.time_left, duration=self.duration))
 
 
 def format_time_left(seconds: int) -> str:

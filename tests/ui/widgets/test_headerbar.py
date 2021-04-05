@@ -2,23 +2,21 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui, assert_shortcut_called
-from tomate.pomodoro import Sessions, State
-from tomate.pomodoro.event import connect_events, Events, Session
-from tomate.pomodoro.session import Payload as SessionPayload
-from tomate.ui.widgets import HeaderBarMenu, HeaderBar
+from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload, refresh_gui
+from tomate.pomodoro.event import Bus, Events, connect_events
+from tomate.ui.widgets import HeaderBar, HeaderBarMenu
 
 
 class TestHeaderBar:
     @pytest.fixture
-    def mock_menu(self, mocker):
+    def menu(self, mocker):
         return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def subject(self, graph, mock_menu, shortcut_manager, session, mocker):
-        Session.receivers.clear()
+    def subject(self, graph, menu, shortcut_manager, session, mocker):
+        Bus.receivers.clear()
 
-        graph.register_instance("tomate.ui.menu", mock_menu)
+        graph.register_instance("tomate.ui.menu", menu)
         graph.register_instance("tomate.session", session)
         graph.register_instance("tomate.ui.shortcut", shortcut_manager)
         graph.register_factory("tomate.ui.view", mocker.Mock)
@@ -55,7 +53,7 @@ class TestHeaderBar:
             ("<control>r", "reset"),
         ],
     )
-    def test_shortcuts(self, shortcut, action, mock_menu, shortcut_manager, session, subject):
+    def test_shortcuts(self, shortcut, action, menu, shortcut_manager, session, subject):
         assert_shortcut_called(shortcut_manager, shortcut)
         getattr(session, action).assert_called()
 
@@ -81,7 +79,7 @@ class TestHeaderBar:
         session.reset.assert_called_once_with()
 
     def test_enable_only_the_stop_button_when_session_starts(self, subject):
-        Session.send(State.started)
+        Bus.send(Events.SESSION_START)
 
         assert subject._stop_button.get_visible() is True
         assert subject._start_button.get_visible() is False
@@ -89,29 +87,23 @@ class TestHeaderBar:
 
     def test_disables_reset_button_when_session_is_reset(self, subject, session):
         subject._reset_button.set_sensitive(True)
-        subject.widget.props.title = "foo"
 
-        Session.send(State.reset)
+        Bus.send(Events.SESSION_RESET)
 
         assert subject._reset_button.get_sensitive() is False
         assert subject.widget.props.title == "No session yet"
 
     @pytest.mark.parametrize(
-        "state,pomodoros,title",
-        [(State.stopped, 0, "No session yet"), (State.finished, 1, "Session 1")],
+        "event,pomodoros,title,payload",
+        [
+            (Events.SESSION_INTERRUPT, 0, "No session yet", create_session_payload()),
+            (Events.SESSION_END, 1, "Session 1", create_session_end_payload(previous=create_session_payload())),
+        ],
     )
     def test_buttons_visibility_and_title_in_the_first_session(
-        self, state, title, pomodoros, subject, session
+        self, event, title, pomodoros, subject, session, payload
     ):
-        payload = SessionPayload(
-            id="",
-            type=Sessions.pomodoro,
-            pomodoros=pomodoros,
-            state=State.started,
-            duration=0,
-        )
-
-        Session.send(state, payload=payload)
+        Bus.send(event, payload=payload)
 
         assert subject._start_button.get_visible() is True
         assert subject._stop_button.get_visible() is False
@@ -122,20 +114,20 @@ class TestHeaderBar:
 
 class TestHeaderBarMenu:
     @pytest.fixture
-    def mock_preference(self, mocker):
+    def preference(self, mocker):
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture()
-    def mock_about(self, mocker):
+    def about(self, mocker):
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def subject(self, mock_about, mock_preference, view, graph):
-        Events.View.receivers.clear()
+    def subject(self, about, preference, view, graph):
+        Bus.receivers.clear()
 
         graph.register_instance("tomate.ui.view", view)
-        graph.register_instance("tomate.ui.about", mock_about)
-        graph.register_instance("tomate.ui.preference", mock_preference)
+        graph.register_instance("tomate.ui.about", about)
+        graph.register_instance("tomate.ui.preference", preference)
 
         namespaces = ["tomate.ui.widgets.headerbar", "tomate.pomodoro.proxy"]
 
@@ -149,18 +141,18 @@ class TestHeaderBarMenu:
         assert isinstance(instance, HeaderBarMenu)
         assert instance is subject
 
-    def test_open_preference_dialog(self, subject, view, mock_preference):
+    def test_open_preference_dialog(self, subject, view, preference):
         subject._preference_item.emit("activate")
 
         refresh_gui()
 
-        mock_preference.widget.run.assert_called_once_with()
-        mock_preference.widget.set_transient_for.assert_called_once_with(view.widget)
+        preference.widget.run.assert_called_once_with()
+        preference.widget.set_transient_for.assert_called_once_with(view.widget)
 
-    def test_open_about_dialog(self, subject, view, mock_about):
+    def test_open_about_dialog(self, subject, view, about):
         subject._about_item.emit("activate")
 
         refresh_gui()
 
-        mock_about.widget.set_transient_for.assert_called_once_with(view.widget)
-        mock_about.widget.run.assert_called_once_with()
+        about.widget.set_transient_for.assert_called_once_with(view.widget)
+        about.widget.run.assert_called_once_with()

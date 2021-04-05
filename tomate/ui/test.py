@@ -1,7 +1,7 @@
 from functools import reduce
-from typing import Callable, Optional, Any, List
+from typing import Any, Callable, List, Optional
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 
 
 class Q:

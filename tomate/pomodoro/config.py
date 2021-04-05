@@ -4,7 +4,7 @@ from collections import namedtuple
 from configparser import RawConfigParser
 
 from blinker import Signal
-from wiring import inject, SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 from xdg import BaseDirectory, IconTheme
 
@@ -26,10 +26,10 @@ class Config:
     SECTION_SHORTCUTS = "shortcuts"
     SECTION_TIMER = "timer"
 
-    @inject(dispatcher="tomate.events.config")
-    def __init__(self, dispatcher: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
+    @inject(bus="tomate.bus")
+    def __init__(self, bus: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
         self.parser = parser
-        self._dispatcher = dispatcher
+        self._bus = bus
 
         self.load()
 
@@ -87,7 +87,7 @@ class Config:
         if not self.parser.has_section(section):
             self.parser.add_section(section)
 
-        logger.debug("action=set section=%s option=%s", section, option)
+        logger.debug("action=get section=%s option=%s", section, option)
 
         return getattr(self.parser, method)(section, option, fallback=fallback)
 
@@ -101,7 +101,7 @@ class Config:
         self.save()
 
         payload = Payload(action="set", section=section, option=option, value=value)
-        self._dispatcher.send(section, payload=payload)
+        self._bus.send("config.{}".format(section), payload=payload)
 
         logger.debug("action=set section=%s option=%s value=%s", section, option, value)
 
@@ -111,7 +111,7 @@ class Config:
         self.parser.remove_option(section, option)
 
         payload = Payload(action="remove", section=section, option=option, value="")
-        self._dispatcher.send(section, payload=payload)
+        self._bus.send(section, payload=payload)
 
         logger.debug("action=remove section=%s option=%s", section, option)
 

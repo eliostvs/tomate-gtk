@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class StubbySettingsWindow:
-    def __init__(self, parent):
+    def __init__(self, _):
         pass
 
     def run(self) -> None:
@@ -48,7 +48,7 @@ class PluginManager:
         self._plugin_manager.setPluginInfoExtension("plugin")
         self._plugin_manager.setConfigParser(config.parser, config.save)
 
-        logger.debug("action=initPluginManager paths=%s extension=.plugin", config.plugin_paths())
+        logger.debug("action=init paths=%s", config.plugin_paths())
 
     def __getattr__(self, attr):
         logger.debug("action=getattr attr=%s", attr)

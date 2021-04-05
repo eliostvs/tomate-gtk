@@ -1,4 +1,4 @@
-from wiring import injected, Graph
+from wiring import Graph, injected
 from wiring.scanning import register
 
 

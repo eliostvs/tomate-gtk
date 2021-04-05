@@ -82,7 +82,7 @@ def test_refresh_load_available_plugins(subject, plugin_manager, enabled_plugin,
 
 
 @pytest.mark.parametrize(
-    "plugin, row",
+    "plugin,row",
     [
         (
             "enabled_plugin",
@@ -94,9 +94,7 @@ def test_refresh_load_available_plugins(subject, plugin_manager, enabled_plugin,
         ),
     ],
 )
-def test_refresh_select_first_plugin(
-    plugin, row, subject, enabled_plugin, disabled_plugin, plugin_manager
-):
+def test_refresh_select_first_plugin(plugin, row, subject, enabled_plugin, disabled_plugin, plugin_manager):
     from tomate.ui.dialogs import GridPlugin
 
     plugin_manager.appendPluginToCategory(locals()[plugin], PLUGIN_CATEGORY)
