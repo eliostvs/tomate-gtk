@@ -79,7 +79,7 @@ class Session(Subscriber):
 
     @fsm(source=[State.STARTED], target=State.ENDED, condition=timer_is_up)
     @on(Bus, [Events.TIMER_END])
-    def end(self, _, payload: TimerPayload) -> bool:
+    def _end(self, _, payload: TimerPayload) -> bool:
         previous = self._create_payload(duration=payload.duration)
 
         if self.current == Type.POMODORO:

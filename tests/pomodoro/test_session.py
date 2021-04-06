@@ -110,12 +110,12 @@ class TestSessionEnd:
     def test_does_end_when_session_is_not_running(self, state, subject):
         subject.state = state
 
-        assert not subject.end(None, None)
+        assert not subject._end(None, None)
 
     def test_does_not_end_when_session_start_but_time_still_running(self, subject):
         subject.start()
 
-        assert not subject.end(None, None)
+        assert not subject._end(None, None)
 
     @pytest.mark.parametrize(
         "initial_session,initial_pomodoros,final_session,final_pomodoros",
