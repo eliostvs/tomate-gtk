@@ -102,27 +102,24 @@ class HeaderBar(Subscriber):
 
     @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
+        logger.debug("action=enable_stop")
         self._start_button.set_visible(False)
         self._stop_button.set_visible(True)
         self._reset_button.set_sensitive(False)
 
-        logger.debug("action=enable_stop")
-
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def _on_session_stop(self, _, payload: Union[SessionEndPayload, SessionPayload]) -> None:
+        logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
         self._start_button.set_visible(True)
         self._stop_button.set_visible(False)
         self._reset_button.set_sensitive(bool(payload.pomodoros))
         self._update_title(payload.pomodoros)
 
-        logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
-
     @on(Events.SESSION_RESET)
     def _on_session_reset(self, *_, **__):
+        logger.debug("action=disable_reset")
         self._reset_button.set_sensitive(False)
         self._update_title(0)
-
-        logger.debug("action=disable_reset")
 
     def _update_title(self, pomodoros: int) -> None:
         self.widget.props.title = _("Session {}".format(pomodoros)) if pomodoros else _("No session yet")

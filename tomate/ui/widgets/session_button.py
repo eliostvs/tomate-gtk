@@ -84,8 +84,8 @@ class SessionButton(Subscriber):
         )
 
     def _on_mode_changed(self, _, number):
-        self._session.change(session=SessionType.of(number))
         logger.debug("action=change session=%s", SessionType.of(number))
+        self._session.change(session=SessionType.of(number))
 
     def init(self):
         self.widget.set_sensitive(True)
@@ -93,11 +93,11 @@ class SessionButton(Subscriber):
 
     @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
-        self.widget.set_sensitive(False)
         logger.debug("action=disable")
+        self.widget.set_sensitive(False)
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def _on_session_stop(self, _, payload: Union[SessionPayload, SessionEndPayload]):
+        logger.debug("action=enable session=%s", payload.type)
         self.widget.set_sensitive(True)
         self.widget.set_selected(payload.type.value)
-        logger.debug("action=enable session=%s", payload.type)

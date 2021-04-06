@@ -60,8 +60,8 @@ class Session(Subscriber):
         source=[State.STOPPED, State.ENDED], target=State.STARTED, exit=lambda self: self._trigger(Events.SESSION_START)
     )
     def start(self) -> bool:
-        self._timer.start(self.duration)
         logger.debug("action=start")
+        self._timer.start(self.duration)
         return True
 
     def is_running(self) -> bool:
@@ -74,14 +74,14 @@ class Session(Subscriber):
         exit=lambda self: self._trigger(Events.SESSION_INTERRUPT),
     )
     def stop(self) -> bool:
-        self._timer.stop()
         logger.debug("action=stop")
+        self._timer.stop()
         return True
 
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_RESET))
     def reset(self) -> bool:
-        self.pomodoros = 0
         logger.debug("action=reset")
+        self.pomodoros = 0
         return True
 
     @on(Events.CONFIG_CHANGE)

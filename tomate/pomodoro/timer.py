@@ -1,4 +1,5 @@
 import enum
+import logging
 from collections import namedtuple
 
 import blinker
@@ -9,6 +10,7 @@ from wiring.scanning import register
 from .event import Events
 from .fsm import fsm
 
+logger = logging.getLogger(__name__)
 SECONDS_IN_A_MINUTE = 60
 
 
@@ -58,12 +60,14 @@ class Timer:
 
     @fsm(target=State.STARTED, source=[State.ENDED, State.STOPPED], exit=lambda self: self._trigger(Events.TIMER_START))
     def start(self, seconds: int) -> bool:
+        logger.debug("action=start")
         self.duration = self.time_left = seconds
         GLib.timeout_add_seconds(Timer.ONE_SECOND, self._update)
         return True
 
     @fsm(target=State.STOPPED, source=[State.STARTED], exit=lambda self: self._trigger(Events.TIMER_STOP))
     def stop(self) -> bool:
+        logger.debug("action=reset")
         self._reset()
         return True
 
@@ -77,9 +81,12 @@ class Timer:
         target=State.ENDED, source=[State.STARTED], condition=_is_up, exit=lambda self: self._trigger(Events.TIMER_END)
     )
     def end(self) -> bool:
+        logger.debug("action=end")
         return True
 
     def _update(self) -> bool:
+        logger.debug("action=update time_left=%d duration=%d", self.time_left, self.duration)
+
         if self.state != State.STARTED:
             return False
 

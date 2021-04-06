@@ -58,8 +58,8 @@ class Window(Subscriber):
         session_button.init()
 
     def run(self):
-        self.widget.show_all()
         logger.debug("action=run")
+        self.widget.show_all()
         Gtk.main()
 
     def quit(self, *_):
@@ -82,7 +82,6 @@ class Window(Subscriber):
 
     @on(Events.SESSION_END)
     def show(self, *_, **__):
+        logger.debug("action=show")
         self._bus.send(Events.WINDOW_SHOW)
         self.widget.present_with_time(time.time())
-
-        logger.debug("action=show")

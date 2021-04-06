@@ -29,7 +29,6 @@ class Countdown(Subscriber):
     def _update(self, duration: int) -> None:
         formatted_duration = format_time_left(duration)
         self.widget.set_markup(self.timer_markup(formatted_duration))
-
         logger.debug("action=update value=%s", formatted_duration)
 
     @staticmethod
