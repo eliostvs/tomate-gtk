@@ -11,14 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Shortcuts to session buttons
 - EndPayload session
-- Events enum
 
 ### Changed
 
 - Timer, Session and App have their own state values
-- Simplify event system
 - Join python-tomate and tomate-gtk projects
-- Common session payload fields
+- Session payload events
+- Event API
 
 ### Removed
 

@@ -8,6 +8,8 @@ from wiring import SingletonScope, inject
 from wiring.scanning import register
 from xdg import BaseDirectory, IconTheme
 
+from tomate.pomodoro.event import Events
+
 logger = logging.getLogger(__name__)
 
 DEFAULTS = {
@@ -30,7 +32,6 @@ class Config:
     def __init__(self, bus: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
         self.parser = parser
         self._bus = bus
-
         self.load()
 
     def __getattr__(self, attr):
@@ -100,10 +101,11 @@ class Config:
         self.parser.set(section, option, value)
         self.save()
 
-        payload = Payload(action="set", section=section, option=option, value=value)
-        self._bus.send("config.{}".format(section), payload=payload)
-
         logger.debug("action=set section=%s option=%s value=%s", section, option, value)
+        self._bus.send(
+            Events.CONFIG_CHANGE,
+            payload=Payload(action="set", section=section, option=option, value=value),
+        )
 
     def remove(self, section, option):
         section = self.normalize(section)

@@ -2,13 +2,14 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload, refresh_gui
-from tomate.pomodoro.event import Bus, Events
+from tomate.pomodoro.event import Events
 from tomate.pomodoro.session import Type as SessionType
 from tomate.ui.widgets import SessionButton
 
 
 @pytest.fixture
-def subject(graph, session, shortcut_manager):
+def subject(graph, session, bus, shortcut_manager):
+    graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.session", session)
     graph.register_instance("tomate.ui.shortcut", shortcut_manager)
     scan_to_graph(["tomate.ui.widgets.session_button"], graph)
@@ -27,8 +28,8 @@ def test_module(graph, subject):
     assert instance is subject
 
 
-def test_disables_buttons_when_session_starts(subject):
-    Bus.send(Events.SESSION_START)
+def test_disables_buttons_when_session_starts(bus, subject):
+    bus.send(Events.SESSION_START)
 
     assert subject.widget.get_sensitive() is False
 
@@ -43,8 +44,8 @@ def test_disables_buttons_when_session_starts(subject):
         ),
     ],
 )
-def test_changes_selected_button_when_session_finishes(event, payload, subject, session):
-    Bus.send(event, payload=payload)
+def test_changes_selected_button_when_session_finishes(event, payload, bus, subject, session):
+    bus.send(event, payload=payload)
 
     assert subject.widget.get_sensitive() is True
     assert subject.widget.get_selected() is SessionType.SHORT_BREAK.value

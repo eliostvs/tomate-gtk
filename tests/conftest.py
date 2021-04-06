@@ -1,6 +1,7 @@
 import os
 import time
 
+import blinker
 import pytest
 from gi.repository import Gtk
 from wiring import Graph
@@ -17,10 +18,7 @@ def session(mocker):
 
 @pytest.fixture()
 def bus():
-    from tomate.pomodoro.event import Bus
-
-    Bus.receivers.clear()
-    return Bus
+    return blinker.NamedSignal("test")
 
 
 @pytest.fixture()

@@ -3,14 +3,13 @@ from gi.repository import Gdk, Gtk
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload
-from tomate.pomodoro.event import Bus, Events, connect_events
+from tomate.pomodoro.event import Events
 from tomate.ui import Window
 from tomate.ui.widgets import TrayIcon
 
 
 @pytest.fixture
 def subject(graph, bus, config, session):
-    Bus.receivers.clear()
     graph.register_instance("tomate.session", session)
     graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.config", config)
@@ -21,11 +20,7 @@ def subject(graph, bus, config, session):
         "tomate.pomodoro.proxy",
     ]
     scan_to_graph(namespaces, graph)
-    instance = graph.get("tomate.ui.view")
-
-    connect_events(instance)
-
-    return instance
+    return graph.get("tomate.ui.view")
 
 
 def test_module(graph, subject):
@@ -100,7 +95,7 @@ def test_shows_window_when_session_end(subject, bus, mocker):
     bus.connect(subscriber, sender=Events.WINDOW_SHOW, weak=False)
     payload = create_session_end_payload(previous=create_session_payload())
 
-    Bus.send(Events.SESSION_END, payload=payload)
+    bus.send(Events.SESSION_END, payload=payload)
 
     assert subject.widget.get_visible()
     subscriber.assert_called_once_with(Events.WINDOW_SHOW)

@@ -4,10 +4,11 @@ from collections import namedtuple
 from locale import gettext as _
 from typing import Union
 
+import blinker
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Bus, Events, Subscriber, on
+from tomate.pomodoro.event import Events, Subscriber, on
 from tomate.pomodoro.session import (
     EndPayload as SessionEndPayload,
     Payload as SessionPayload,
@@ -25,8 +26,13 @@ Shortcut = namedtuple("Shortcut", "name default session_type")
 
 @register.factory("tomate.ui.taskbutton", scope=SingletonScope)
 class SessionButton(Subscriber):
-    @inject(session="tomate.session", shortcuts="tomate.ui.shortcut")
-    def __init__(self, session: Session, shortcuts: ShortcutManager):
+    @inject(
+        bus="tomate.bus",
+        session="tomate.session",
+        shortcuts="tomate.ui.shortcut",
+    )
+    def __init__(self, bus: blinker.Signal, session: Session, shortcuts: ShortcutManager):
+        self.connect(bus)
         self._session = session
         self._shortcuts = shortcuts
 
@@ -85,13 +91,13 @@ class SessionButton(Subscriber):
         self.widget.set_sensitive(True)
         self.widget.set_selected(SessionType.POMODORO.value)
 
-    @on(Bus, [Events.SESSION_START])
+    @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
         self.widget.set_sensitive(False)
         logger.debug("action=disable")
 
-    @on(Bus, [Events.SESSION_INTERRUPT, Events.SESSION_END])
-    def _on_session_stop(self, *_, payload: Union[SessionPayload, SessionEndPayload]):
+    @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
+    def _on_session_stop(self, _, payload: Union[SessionPayload, SessionEndPayload]):
         self.widget.set_sensitive(True)
         self.widget.set_selected(payload.type.value)
         logger.debug("action=enable session=%s", payload.type)

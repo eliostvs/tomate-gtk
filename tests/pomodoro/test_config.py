@@ -4,6 +4,7 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import TEST_DATA_DIR
+from tomate.pomodoro.event import Events
 
 
 @pytest.fixture()
@@ -59,12 +60,12 @@ def test_set_option(subject, tmpdir, bus, mocker):
     subject.config_path = lambda: config.strpath
 
     subscriber = mocker.Mock()
-    bus.connect(subscriber, sender="config.section", weak=False)
+    bus.connect(subscriber, Events.CONFIG_CHANGE, weak=False)
 
     subject.set("section", "option", "value")
 
     assert subject.get("section", "option") == "value"
-    subscriber.assert_called_once_with("config.section", payload=Payload("set", "section", "option", "value"))
+    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=Payload("set", "section", "option", "value"))
 
 
 def test_get_icon_path(subject):

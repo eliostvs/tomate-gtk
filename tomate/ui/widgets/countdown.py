@@ -1,10 +1,10 @@
 import logging
 
 from gi.repository import Gtk
-from wiring import SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Bus, Events, Subscriber, on
+from tomate.pomodoro.event import Events, Subscriber, on
 from tomate.pomodoro.session import Payload as SessionPayload
 from tomate.pomodoro.timer import Payload as TimerPayload, format_time_left
 
@@ -13,14 +13,16 @@ logger = logging.getLogger(__name__)
 
 @register.factory("tomate.ui.countdown", scope=SingletonScope)
 class Countdown(Subscriber):
-    def __init__(self):
+    @inject(bus="tomate.bus")
+    def __init__(self, bus):
         self.widget = Gtk.Label(margin_top=30, margin_bottom=10, margin_right=10, margin_left=10)
+        self.connect(bus)
 
-    @on(Bus, [Events.TIMER_UPDATE])
+    @on(Events.TIMER_UPDATE)
     def _on_timer_update(self, _, payload: TimerPayload) -> None:
         self._update(payload.time_left)
 
-    @on(Bus, [Events.SESSION_INTERRUPT, Events.SESSION_CHANGE])
+    @on(Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
     def _on_session_change(self, _, payload: SessionPayload) -> None:
         self._update(payload.duration)
 

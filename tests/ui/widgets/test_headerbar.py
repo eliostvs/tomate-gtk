@@ -3,7 +3,7 @@ from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload, refresh_gui
-from tomate.pomodoro.event import Bus, Events, connect_events
+from tomate.pomodoro.event import Events
 from tomate.ui.widgets import HeaderBar, HeaderBarMenu
 
 
@@ -13,9 +13,8 @@ class TestHeaderBar:
         return mocker.Mock(HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def subject(self, graph, menu, shortcut_manager, session, mocker):
-        Bus.receivers.clear()
-
+    def subject(self, graph, menu, shortcut_manager, session, bus, mocker):
+        graph.register_instance("tomate.bus", bus)
         graph.register_instance("tomate.ui.menu", menu)
         graph.register_instance("tomate.session", session)
         graph.register_instance("tomate.ui.shortcut", shortcut_manager)
@@ -34,10 +33,7 @@ class TestHeaderBar:
 
         scan_to_graph(namespaces, graph)
 
-        instance = graph.get("tomate.ui.headerbar")
-
-        connect_events(instance)
-        return instance
+        return graph.get("tomate.ui.headerbar")
 
     def test_module(self, graph, subject):
         instance = graph.get("tomate.ui.headerbar")
@@ -78,17 +74,17 @@ class TestHeaderBar:
 
         session.reset.assert_called_once_with()
 
-    def test_enable_only_the_stop_button_when_session_starts(self, subject):
-        Bus.send(Events.SESSION_START)
+    def test_enable_only_the_stop_button_when_session_starts(self, bus, subject):
+        bus.send(Events.SESSION_START)
 
         assert subject._stop_button.get_visible() is True
         assert subject._start_button.get_visible() is False
         assert subject._reset_button.get_sensitive() is False
 
-    def test_disables_reset_button_when_session_is_reset(self, subject, session):
+    def test_disables_reset_button_when_session_is_reset(self, subject, bus, session):
         subject._reset_button.set_sensitive(True)
 
-        Bus.send(Events.SESSION_RESET)
+        bus.send(Events.SESSION_RESET)
 
         assert subject._reset_button.get_sensitive() is False
         assert subject.widget.props.title == "No session yet"
@@ -101,9 +97,9 @@ class TestHeaderBar:
         ],
     )
     def test_buttons_visibility_and_title_in_the_first_session(
-        self, event, title, pomodoros, subject, session, payload
+        self, event, title, pomodoros, subject, session, payload, bus
     ):
-        Bus.send(event, payload=payload)
+        bus.send(event, payload=payload)
 
         assert subject._start_button.get_visible() is True
         assert subject._stop_button.get_visible() is False
@@ -122,9 +118,8 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def subject(self, about, preference, view, graph):
-        Bus.receivers.clear()
-
+    def subject(self, about, preference, view, bus, graph):
+        graph.register_instance("tomate.bus", bus)
         graph.register_instance("tomate.ui.view", view)
         graph.register_instance("tomate.ui.about", about)
         graph.register_instance("tomate.ui.preference", preference)
@@ -135,7 +130,7 @@ class TestHeaderBarMenu:
 
         return graph.get("tomate.ui.headerbar.menu")
 
-    def test_module(self, graph, subject):
+    def test_module(self, graph, bus, subject):
         instance = graph.get("tomate.ui.headerbar.menu")
 
         assert isinstance(instance, HeaderBarMenu)

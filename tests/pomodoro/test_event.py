@@ -1,25 +1,23 @@
 import blinker
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro.event import Subscriber, on
-
-EVENT_FOO = "foo"
-EVENT_BAR = "bar"
+from tomate.pomodoro.event import Events, Subscriber, on
 
 
 def test_subscriber(bus):
     class Subject(Subscriber):
-        @on(bus, [EVENT_FOO, EVENT_BAR])
+        @on(Events.TIMER_START, Events.SESSION_START)
         def bar(self, sender):
             return sender
 
     subject = Subject()
+    subject.connect(bus)
 
-    result = bus.send(EVENT_BAR)
-    assert result == [(subject.bar, EVENT_BAR)]
+    result = bus.send(Events.TIMER_START)
+    assert result == [(subject.bar, Events.TIMER_START)]
 
-    result = bus.send(EVENT_FOO)
-    assert result == [(subject.bar, EVENT_FOO)]
+    result = bus.send(Events.SESSION_START)
+    assert result == [(subject.bar, Events.SESSION_START)]
 
     result = bus.send("NO")
     assert result == []

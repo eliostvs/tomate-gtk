@@ -3,50 +3,49 @@ import os
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro.event import on
+from tomate.pomodoro.event import Events, on
+from tomate.pomodoro.graph import graph
 from tomate.pomodoro.plugin import Plugin, PluginManager, suppress_errors
 
-TEST_EVENT = "TEST_EVENT"
 
-
-@pytest.fixture()
-def subject(graph, config):
+def test_module(config):
+    graph.providers.clear()
     graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.pomodoro.plugin"], graph)
-    return graph.get("tomate.plugin")
 
-
-def test_module(graph, subject):
     instance = graph.get("tomate.plugin")
 
     assert isinstance(instance, PluginManager)
-    assert instance is subject
+    assert instance == graph.get("tomate.plugin")
 
 
-@pytest.fixture()
-def plugin(bus):
-    class Subject(Plugin):
-        @on(bus, [TEST_EVENT])
-        def bar(self, sender):
-            return sender
-
-    return Subject()
+class Subject(Plugin):
+    @on(Events.SESSION_CHANGE)
+    def bar(self, sender):
+        return sender
 
 
-def test_disconnects_events_when_plugin_deactivate(plugin, bus):
-    plugin.deactivate()
-
-    result = bus.send(TEST_EVENT)
-
-    assert result == []
-
-
-def test_connects_events_when_plugin_activate(plugin, bus):
+def test_connects_events_when_plugin_activate(bus):
+    graph.providers.clear()
+    graph.register_instance("tomate.bus", bus)
+    plugin = Subject()
     plugin.activate()
 
-    result = bus.send(TEST_EVENT)
+    result = bus.send(Events.SESSION_CHANGE)
 
-    assert result == [(plugin.bar, TEST_EVENT)]
+    assert result == [(plugin.bar, Events.SESSION_CHANGE)]
+
+
+def test_disconnects_events_when_plugin_deactivate(bus):
+    graph.providers.clear()
+    graph.register_instance("tomate.bus", bus)
+    plugin = Subject()
+    plugin.activate()
+    plugin.deactivate()
+
+    result = bus.send(Events.SESSION_CHANGE)
+
+    assert result == []
 
 
 def test_does_not_raise_exception_when_debug_is_disabled():

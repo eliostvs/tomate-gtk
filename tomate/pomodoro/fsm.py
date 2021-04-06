@@ -42,6 +42,10 @@ class fsm:
 
     @wrapt.decorator
     def __call__(self, wrapped, instance, args, kwargs):
+        # when there is a decorator over the @fsm the instance will be None so we need to get it from the first param
+        if instance is None:
+            instance = args[0]
+
         logger.debug(
             "action=before method=%s.%s",
             instance.__class__.__name__,

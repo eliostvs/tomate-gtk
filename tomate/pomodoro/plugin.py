@@ -9,7 +9,8 @@ from yapsy.IPlugin import IPlugin
 from yapsy.PluginManager import PluginManagerSingleton
 from yapsy.VersionedPluginManager import VersionedPluginManager
 
-from .event import connect_events, disconnect_events
+from .event import Subscriber
+from .graph import graph
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +23,16 @@ class StubbySettingsWindow:
         pass
 
 
-class Plugin(IPlugin):
+class Plugin(IPlugin, Subscriber):
     has_settings = False
 
     def activate(self):
         super(Plugin, self).activate()
-        connect_events(self)
+        self.connect(graph.get("tomate.bus"))
 
     def deactivate(self):
         super(Plugin, self).deactivate()
-        disconnect_events(self)
+        self.disconnect(graph.get("tomate.bus"))
 
     def settings_window(self, parent) -> StubbySettingsWindow:
         return StubbySettingsWindow(parent)

@@ -2,12 +2,13 @@ import enum
 import functools
 import logging
 
-from blinker import NamedSignal
+import blinker
 from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
-Bus = NamedSignal("Tomate")
+bus = blinker.NamedSignal("tomate")
+register.instance("tomate.bus")(bus)
 
 
 @enum.unique
@@ -26,64 +27,48 @@ class Events(enum.Enum):
     WINDOW_SHOW = 9
     WINDOW_HIDE = 10
 
+    CONFIG_CHANGE = 11
 
-def on(event, senders):
-    def wrapper(func):
-        if not hasattr(func, "_has_event"):
-            func._has_event = True
-            func._events = []
 
-        for each in senders:
-            func._events.append((event, each))
+def on(*events: Events):
+    def wrapper(method):
+        method._events = events
 
-        @functools.wraps(func)
+        @functools.wraps(method)
         def wrapped(*args, **kwargs):
-            return func(*args, **kwargs)
+            return method(*args, **kwargs)
 
         return wrapped
 
     return wrapper
 
 
-def methods_with_events(obj):
-    return [getattr(obj, attr) for attr in dir(obj) if getattr(getattr(obj, attr), "_has_event", False) is True]
+class Subscriber:
+    def connect(self, bus: blinker.Signal) -> None:
+        for method, events in self.__methods_with_events():
+            for event in events:
+                logger.debug(
+                    "action=connect event=%s method=%s.%s",
+                    event,
+                    self.__class__.__name__,
+                    method.__name__,
+                )
+                bus.connect(method, sender=event)
 
+    def disconnect(self, bus: blinker.Signal):
+        for method, events in self.__methods_with_events():
+            for event in events:
+                logger.debug(
+                    "action=disconnect event=%s method=%s.%s",
+                    event,
+                    self.__class__.__name__,
+                    method.__name__,
+                )
+                bus.disconnect(method, sender=event)
 
-def connect_events(obj):
-    for method in methods_with_events(obj):
-        for (event, sender) in method._events:
-            logger.debug(
-                "action=connect event=%s.%s method=%s.%s",
-                event.name,
-                sender,
-                obj.__class__.__name__,
-                method.__name__,
-            )
-            event.connect(method, sender=sender, weak=False)
-
-
-def disconnect_events(obj):
-    for method in methods_with_events(obj):
-        for (event, sender) in method._events:
-            logger.debug(
-                "action=disconnect event=%s.%s method=%s.%s",
-                event.name,
-                sender,
-                obj.__class__.__name__,
-                method.__name__,
-            )
-            event.disconnect(method, sender=sender)
-
-
-class SubscriberMeta(type):
-    def __call__(cls, *args, **kwargs):
-        obj = type.__call__(cls, *args, **kwargs)
-        connect_events(obj)
-        return obj
-
-
-class Subscriber(metaclass=SubscriberMeta):
-    pass
-
-
-register.instance("tomate.bus")(Bus)
+    def __methods_with_events(self):
+        return [
+            (getattr(self, attr), getattr(getattr(self, attr), "_events"))
+            for attr in dir(self)
+            if getattr(getattr(self, attr), "_events", None)
+        ]

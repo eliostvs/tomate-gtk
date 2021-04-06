@@ -5,7 +5,7 @@ from gi.repository import GdkPixbuf, Gtk
 from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Bus, Events, Subscriber, on
+from tomate.pomodoro.event import Events, Subscriber, on
 from tomate.ui.widgets.systray import TrayIcon
 
 logger = logging.getLogger(__name__)
@@ -14,29 +14,30 @@ logger = logging.getLogger(__name__)
 @register.factory("tomate.ui.view", scope=SingletonScope)
 class Window(Subscriber):
     @inject(
-        session="tomate.session",
         bus="tomate.bus",
         config="tomate.config",
+        countdown="tomate.ui.countdown",
         graph=Graph,
         headerbar="tomate.ui.headerbar",
-        countdown="tomate.ui.countdown",
+        session="tomate.session",
         session_button="tomate.ui.taskbutton",
         shortcuts="tomate.ui.shortcut",
     )
     def __init__(
         self,
-        session,
         bus,
         config,
+        countdown,
         graph,
         headerbar,
-        countdown,
+        session,
         session_button,
         shortcuts,
     ):
         self._session = session
         self._bus = bus
         self._graph = graph
+        self.connect(bus)
 
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         box.pack_start(countdown.widget, False, False, 0)
@@ -79,7 +80,7 @@ class Window(Subscriber):
             logger.debug("action=hide to=minimize")
             return Gtk.true
 
-    @on(Bus, [Events.SESSION_END])
+    @on(Events.SESSION_END)
     def show(self, *_, **__):
         self._bus.send(Events.WINDOW_SHOW)
         self.widget.present_with_time(time.time())

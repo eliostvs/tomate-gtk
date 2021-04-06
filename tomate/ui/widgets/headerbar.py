@@ -8,7 +8,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Bus, Events, Subscriber, on
+from tomate.pomodoro.event import Events, Subscriber, on
 from tomate.pomodoro.session import EndPayload as SessionEndPayload, Payload as SessionPayload, Session
 from tomate.ui.shortcut import ShortcutManager
 
@@ -17,13 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 @register.factory("tomate.ui.headerbar.menu", scope=SingletonScope)
-class Menu:
-    @inject(
-        about="tomate.ui.about",
-        preference="tomate.ui.preference",
-        lazy_proxy="tomate.proxy",
-    )
-    def __init__(self, about, preference, lazy_proxy):
+class Menu(Subscriber):
+    @inject(about="tomate.ui.about", bus="tomate.bus", lazy_proxy="tomate.proxy", preference="tomate.ui.preference")
+    def __init__(self, about, bus, lazy_proxy, preference):
+        self.connect(bus)
         self._window = lazy_proxy("tomate.ui.view")
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
@@ -53,10 +50,16 @@ Shortcut = namedtuple("Shortcut", "name default")
 
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
 class HeaderBar(Subscriber):
-    @inject(session="tomate.session", menu="tomate.ui.headerbar.menu", shortcuts="tomate.ui.shortcut")
-    def __init__(self, session: Session, menu: Menu, shortcuts: ShortcutManager):
+    @inject(
+        bus="tomate.bus",
+        menu="tomate.ui.headerbar.menu",
+        session="tomate.session",
+        shortcuts="tomate.ui.shortcut",
+    )
+    def __init__(self, bus, menu: Menu, session: Session, shortcuts: ShortcutManager):
         self._session = session
         self.shortcuts = shortcuts
+        self.connect(bus)
 
         self.widget = Gtk.HeaderBar(
             show_close_button=True,
@@ -97,7 +100,7 @@ class HeaderBar(Subscriber):
 
         self.widget.pack_end(button)
 
-    @on(Bus, [Events.SESSION_START])
+    @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
         self._start_button.set_visible(False)
         self._stop_button.set_visible(True)
@@ -105,7 +108,7 @@ class HeaderBar(Subscriber):
 
         logger.debug("action=enable_stop")
 
-    @on(Bus, [Events.SESSION_INTERRUPT, Events.SESSION_END])
+    @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def _on_session_stop(self, _, payload: Union[SessionEndPayload, SessionPayload]) -> None:
         self._start_button.set_visible(True)
         self._stop_button.set_visible(False)
@@ -114,7 +117,7 @@ class HeaderBar(Subscriber):
 
         logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
 
-    @on(Bus, [Events.SESSION_RESET])
+    @on(Events.SESSION_RESET)
     def _on_session_reset(self, *_, **__):
         self._reset_button.set_sensitive(False)
         self._update_title(0)
