@@ -7,7 +7,7 @@ from wiring.scanning import register
 from tomate.pomodoro.event import Events, Subscriber, on
 
 
-class TrayIcon(Interface):
+class Systray(Interface):
     def show(*args, **kwargs):
         pass
 
@@ -15,7 +15,7 @@ class TrayIcon(Interface):
         pass
 
 
-@register.factory("tomate.ui.tray.menu", scope=SingletonScope)
+@register.factory("tomate.ui.systray.menu", scope=SingletonScope)
 class Menu(Subscriber):
     @inject(bus="tomate.bus", window="tomate.ui.view")
     def __init__(self, bus, window):

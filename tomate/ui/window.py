@@ -6,7 +6,7 @@ from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
 from tomate.pomodoro.event import Events, Subscriber, on
-from tomate.ui.widgets.systray import TrayIcon
+from .systray import Systray
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class Window(Subscriber):
         bus,
         config,
         countdown,
-        graph,
+        graph: Graph,
         headerbar,
         session,
         session_button,
@@ -72,7 +72,7 @@ class Window(Subscriber):
     def hide(self):
         self._bus.send(Events.WINDOW_HIDE)
 
-        if TrayIcon in self._graph.providers:
+        if Systray in self._graph.providers:
             logger.debug("action=hide to=tray")
             return self.widget.hide_on_delete()
         else:

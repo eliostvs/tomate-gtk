@@ -4,7 +4,7 @@ from wiring.scanning import scan_to_graph
 
 from tests.conftest import refresh_gui
 from tomate.pomodoro.event import Events
-from tomate.ui.widgets import TrayIconMenu
+from tomate.ui.systray import Menu
 
 
 @pytest.fixture()
@@ -16,14 +16,14 @@ def view():
 def subject(graph, bus, view):
     graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.ui.view", view)
-    scan_to_graph(["tomate.ui.widgets.systray"], graph)
-    return graph.get("tomate.ui.tray.menu")
+    scan_to_graph(["tomate.ui.systray"], graph)
+    return graph.get("tomate.ui.systray.menu")
 
 
 def test_module(graph, subject):
-    instance = graph.get("tomate.ui.tray.menu")
+    instance = graph.get("tomate.ui.systray.menu")
 
-    assert isinstance(instance, TrayIconMenu)
+    assert isinstance(instance, Menu)
     assert instance is subject
 
 

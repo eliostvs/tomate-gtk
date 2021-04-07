@@ -4,8 +4,7 @@ from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_shortcut_called, create_session_end_payload, create_session_payload
 from tomate.pomodoro.event import Events
-from tomate.ui import Window
-from tomate.ui.widgets import TrayIcon
+from tomate.ui import Systray, Window
 
 
 @pytest.fixture
@@ -58,7 +57,7 @@ class TestWindowHide:
         subscriber.assert_called_once_with(Events.WINDOW_HIDE)
 
     def test_deletes_when_tray_icon_plugin_is_registered(self, subject, bus, graph, mocker):
-        graph.register_factory(TrayIcon, mocker.Mock)
+        graph.register_factory(Systray, mocker.Mock)
         subscriber = mocker.Mock()
         bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
         subject.widget.set_visible(True)
