@@ -32,7 +32,6 @@ def main():
 
     except Exception as ex:
         logger.error(ex, exc_info=True)
-
         raise ex
 
 
