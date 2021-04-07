@@ -70,5 +70,5 @@ class Subscriber:
         return [
             (getattr(self, attr), getattr(getattr(self, attr), "_events"))
             for attr in dir(self)
-            if getattr(getattr(self, attr), "_events", None)
+            if hasattr(getattr(self, attr), "_events")
         ]
