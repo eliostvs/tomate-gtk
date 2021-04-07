@@ -4,7 +4,7 @@ from wiring.scanning import scan_to_graph
 from tests.conftest import create_session_end_payload, create_session_payload
 from tomate.pomodoro.event import Events
 from tomate.pomodoro.session import Payload, Session, State, Type
-from tomate.ui.test import run_loop_for
+from tomate.ui.testing import run_loop_for
 
 
 @pytest.fixture()

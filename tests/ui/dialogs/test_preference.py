@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.ui.test import Q, T
+from tomate.ui.testing import Q, TV
 
 PLUGIN_CATEGORY = "Default"
 TestPlugin = namedtuple("TestPlugin", "name version description plugin_object")
@@ -72,13 +72,13 @@ def test_refresh_load_available_plugins(subject, plugin_manager, enabled_plugin,
 
     plugin_list = Q.select(subject.widget, Q.name("pluginList"))
     assert plugin_list is not None
-    assert T.query(plugin_list, T.model, len) == 2
+    assert TV.map(plugin_list, TV.model, len) == 2
 
     plugin_manager.removePluginFromCategory(enabled_plugin, PLUGIN_CATEGORY)
     plugin_manager.removePluginFromCategory(disabled_plugin, PLUGIN_CATEGORY)
     subject.run()
 
-    assert T.query(plugin_list, T.model, len) == 0
+    assert TV.map(plugin_list, TV.model, len) == 0
 
 
 @pytest.mark.parametrize(
@@ -100,8 +100,12 @@ def test_refresh_select_first_plugin(plugin, row, subject, enabled_plugin, disab
     plugin_manager.appendPluginToCategory(locals()[plugin], PLUGIN_CATEGORY)
     subject.run()
 
-    columns = T.items_columns(GridPlugin.NAME, GridPlugin.ACTIVE, GridPlugin.DETAIL)
-    assert T.query(Q.select(subject.widget, Q.name("pluginList")), T.model, columns) == [row]
+    rows = TV.map(
+        Q.select(subject.widget, Q.name("pluginList")),
+        TV.model,
+        TV.row(GridPlugin.NAME, GridPlugin.ACTIVE, GridPlugin.DETAIL),
+    )
+    assert rows == [row]
     assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is False
 
 
@@ -109,10 +113,10 @@ def test_select_plugin(subject, disabled_plugin, plugin_manager):
     plugin_manager.appendPluginToCategory(disabled_plugin, PLUGIN_CATEGORY)
     subject.run()
 
-    T.query(
+    TV.map(
         Q.select(subject.widget, Q.name("pluginList")),
-        T.column("Active"),
-        T.cell(0),
+        TV.column("Active"),
+        TV.cell_renderer(0),
         Q.emit("toggled", "0"),
     )
 

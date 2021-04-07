@@ -4,7 +4,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro.event import Events
 from tomate.pomodoro.timer import Payload as TimerPayload, State, Timer, format_time_left
-from tomate.ui.test import run_loop_for
+from tomate.ui.testing import run_loop_for
 
 
 def create_bus():

@@ -1,7 +1,12 @@
+from collections import deque
 from functools import reduce
 from typing import Any, Callable, List, Optional
 
 from gi.repository import GLib, Gtk
+
+
+class GtkWidgetNotFound(Exception):
+    pass
 
 
 class Q:
@@ -25,18 +30,19 @@ class Q:
         return select
 
     @staticmethod
-    def select(root: Gtk.Widget, *fns: WidgetFilter) -> Optional[Gtk.Widget]:
+    def select(root: Gtk.Widget, *fns: WidgetFilter) -> Gtk.Widget:
         fn = Q.combine(*fns)
-
-        queue = [root]
+        queue = deque([root])
         while queue:
-            widget = queue.pop(0)
+            widget = queue.popleft()
             if fn(widget):
                 return widget
 
             if hasattr(widget, "get_children"):
                 for child in widget.get_children():
                     queue.append(child)
+
+        raise GtkWidgetNotFound()
 
     @staticmethod
     def emit(method: str, *args) -> Callable[[Gtk.Widget], None]:
@@ -46,9 +52,9 @@ class Q:
         return action
 
 
-class T:
+class TV:
     @staticmethod
-    def query(tree_view: Gtk.TreeView, *fns):
+    def map(tree_view: Gtk.TreeView, *fns: Callable[[Any], Any]):
         return reduce(lambda prev, fn: fn(prev), fns, tree_view)
 
     @staticmethod
@@ -56,26 +62,24 @@ class T:
         return tree_view.get_model()
 
     @staticmethod
-    def items_columns(*columns: int) -> Callable[[Gtk.TreeView], Optional[List[Any]]]:
-        def transform(tree_store: Gtk.TreeStore) -> Optional[List[Any]]:
+    def row(*columns: int) -> Callable[[Gtk.TreeStore], List[Any]]:
+        def mapper(tree_store: Gtk.TreeStore) -> List[Any]:
             return [[row[column] for column in columns] for row in tree_store]
 
-        return transform
+        return mapper
 
     @staticmethod
     def column(name: str):
-        def transform(tree_view: Gtk.TreeView):
+        def mapper(tree_view: Gtk.TreeView) -> Callable[[Gtk.TreeView], Optional[Gtk.TreeViewColumn]]:
             columns = [col for col in tree_view.get_columns() if col.get_title() == name]
-            if columns:
-                return columns[0]
-            return []
+            return columns[0] if columns else None
 
-        return transform
+        return mapper
 
     @staticmethod
-    def cell(position=0):
+    def cell_renderer(column=0):
         def select(tree_column: Gtk.TreeView) -> Gtk.CellRenderer:
-            return tree_column.get_cells()[position]
+            return tree_column.get_cells()[column]
 
         return select
 
