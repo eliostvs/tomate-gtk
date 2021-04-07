@@ -11,7 +11,6 @@ ifeq ($(origin .RECIPEPREFIX), undefined)
 endif
   
 DATAPATH     = $(CURDIR)/tests/data
-DEBUG        = TOMATE_DEBUG=true
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
@@ -43,7 +42,7 @@ test: clean
 
 .PHONY: run
 run:
-	$(XDGPATH) $(PYTHONPATH) $(DEBUG) $(PYTHON) -m $(PACKAGE) -v
+	$(XDGPATH) $(PYTHONPATH) TOMATE_DEBUG=true $(PYTHON) -m $(PACKAGE) -v
 
 release-%:
 	git flow init -d
