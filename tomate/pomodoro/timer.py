@@ -26,7 +26,7 @@ class Payload(namedtuple("TimerPayload", "time_left duration")):
 
     @property
     def elapsed_ratio(self) -> float:
-        return round(1.0 - self.remaining_ratio, 1)
+        return round(1.0 - self.remaining_ratio, 2)
 
     @property
     def elapsed_percent(self):
