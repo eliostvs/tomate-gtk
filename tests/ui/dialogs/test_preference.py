@@ -95,7 +95,7 @@ def test_refresh_load_available_plugins(subject, plugin_manager, enabled_plugin,
     ],
 )
 def test_refresh_select_first_plugin(plugin, row, subject, enabled_plugin, disabled_plugin, plugin_manager):
-    from tomate.ui.dialogs import GridPlugin
+    from tomate.ui.dialogs import PluginGrid
 
     plugin_manager.appendPluginToCategory(locals()[plugin], PLUGIN_CATEGORY)
     subject.run()
@@ -103,7 +103,7 @@ def test_refresh_select_first_plugin(plugin, row, subject, enabled_plugin, disab
     rows = TV.map(
         Q.select(subject.widget, Q.name("pluginList")),
         TV.model,
-        TV.row(GridPlugin.NAME, GridPlugin.ACTIVE, GridPlugin.DETAIL),
+        TV.rows(PluginGrid.NAME, PluginGrid.ACTIVE, PluginGrid.DETAIL),
     )
     assert rows == [row]
     assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is False

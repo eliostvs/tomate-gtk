@@ -1,4 +1,4 @@
 from .about import AboutDialog
-from .preference import ExtensionTab, GridPlugin, PreferenceDialog, TimerTab
+from .preference import ExtensionTab, PluginGrid, PreferenceDialog, TimerTab
 
-__all__ = ["AboutDialog", "ExtensionTab", "PreferenceDialog", "TimerTab", "GridPlugin"]
+__all__ = ["AboutDialog", "ExtensionTab", "PreferenceDialog", "TimerTab", "PluginGrid"]

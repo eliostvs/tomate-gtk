@@ -116,7 +116,7 @@ class ExtensionTab:
         self._config = config
         self.toplevel = None
 
-        self.plugin_model = Gtk.ListStore(*GridPlugin.MODEL)
+        self.plugin_model = Gtk.ListStore(*PluginGrid.MODEL)
 
         self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model, name="pluginList")
         self.plugin_list.get_selection().connect("changed", self._on_selected_item_changed)
@@ -124,15 +124,15 @@ class ExtensionTab:
 
         renderer = Gtk.CellRendererToggle()
         renderer.connect("toggled", self._on_row_toggled)
-        column = Gtk.TreeViewColumn("Active", renderer, active=GridPlugin.ACTIVE)
+        column = Gtk.TreeViewColumn("Active", renderer, active=PluginGrid.ACTIVE)
         self.plugin_list.append_column(column)
 
         renderer = Gtk.CellRendererPixbuf()
-        column = Gtk.TreeViewColumn("Icon", renderer, pixbuf=GridPlugin.ICON)
+        column = Gtk.TreeViewColumn("Icon", renderer, pixbuf=PluginGrid.ICON)
         self.plugin_list.append_column(column)
 
         renderer = Gtk.CellRendererText(wrap_mode=Pango.WrapMode.WORD, wrap_width=250)
-        column = Gtk.TreeViewColumn("Detail", renderer, markup=GridPlugin.DETAIL)
+        column = Gtk.TreeViewColumn("Detail", renderer, markup=PluginGrid.DETAIL)
         self.plugin_list.append_column(column)
 
         plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
@@ -174,11 +174,11 @@ class ExtensionTab:
         model, selected = selection.get_selected()
 
         if selected is not None:
-            grid_plugin = GridPlugin.from_iter(model, selected)
+            grid_plugin = PluginGrid.from_iter(model, selected)
             self.settings_button.set_sensitive(grid_plugin.is_enable & grid_plugin.has_settings)
 
     def _on_row_toggled(self, _, path):
-        plugin = GridPlugin.from_path(self.plugin_model, path)
+        plugin = PluginGrid.from_path(self.plugin_model, path)
         plugin.toggle()
 
         if plugin.is_enable:
@@ -188,7 +188,7 @@ class ExtensionTab:
 
     def _on_plugin_settings_clicked(self, _):
         model, selected = self.plugin_list.get_selection().get_selected()
-        grid_plugin = GridPlugin.from_iter(model, selected)
+        grid_plugin = PluginGrid.from_iter(model, selected)
         logger.debug("action=openPluginSettings name=%s", grid_plugin.name)
         grid_plugin.open_settings(self.toplevel)
 
@@ -207,12 +207,12 @@ class ExtensionTab:
         self.plugin_list.get_selection().select_iter(self.plugin_model.get_iter_first())
 
     def _add_plugin(self, plugin):
-        self.plugin_model.append(GridPlugin.create_row(plugin, self._config))
+        self.plugin_model.append(PluginGrid.create_row(plugin, self._config))
 
         logger.debug("action=addPlugin name=%s", plugin.name)
 
 
-class GridPlugin(object):
+class PluginGrid(object):
     NAME = 0
     ACTIVE = 1
     ICON = 2
@@ -256,8 +256,8 @@ class GridPlugin(object):
         return [
             plugin.name,
             plugin.plugin_object.is_activated,
-            GridPlugin.pixbuf(plugin, config),
-            GridPlugin.description(plugin),
+            PluginGrid.pixbuf(plugin, config),
+            PluginGrid.description(plugin),
             plugin.plugin_object,
         ]
 
