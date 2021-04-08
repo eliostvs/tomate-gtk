@@ -115,7 +115,7 @@ def test_select_plugin(subject, disabled_plugin, plugin_manager):
 
     TV.map(
         Q.select(subject.widget, Q.name("pluginList")),
-        TV.column("Active"),
+        TV.column(Q.title("Active")),
         TV.cell_renderer(0),
         Q.emit("toggled", "0"),
     )

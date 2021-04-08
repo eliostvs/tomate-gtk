@@ -1,6 +1,6 @@
 from collections import deque
 from functools import reduce
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List
 
 from gi.repository import GLib, Gtk
 
@@ -9,18 +9,26 @@ class GtkWidgetNotFound(Exception):
     pass
 
 
-class Q:
-    WidgetFilter = Callable[[Gtk.Widget], bool]
+Filter = Callable[[Any], bool]
 
+
+class Q:
     @staticmethod
-    def name(name: str) -> WidgetFilter:
+    def name(name: str) -> Filter:
         def select(w: Gtk.Widget) -> bool:
             return w.get_name() == name
 
         return select
 
     @staticmethod
-    def combine(*fns: WidgetFilter) -> WidgetFilter:
+    def title(title: str) -> Filter:
+        def select(widget) -> bool:
+            return widget.get_title() == title
+
+        return select
+
+    @staticmethod
+    def combine(*fns: Filter) -> Filter:
         def select(w: Gtk.Widget) -> bool:
             for fn in fns:
                 if not fn(w):
@@ -30,7 +38,7 @@ class Q:
         return select
 
     @staticmethod
-    def select(root: Gtk.Widget, *fns: WidgetFilter) -> Gtk.Widget:
+    def select(root: Gtk.Widget, *fns: Filter) -> Gtk.Widget:
         fn = Q.combine(*fns)
         queue = deque([root])
         while queue:
@@ -46,10 +54,10 @@ class Q:
 
     @staticmethod
     def emit(method: str, *args) -> Callable[[Gtk.Widget], None]:
-        def action(widget: Gtk.Widget) -> None:
-            widget.emit(method, *args)
+        def effect(w: Gtk.Widget) -> None:
+            w.emit(method, *args)
 
-        return action
+        return effect
 
 
 class TV:
@@ -62,23 +70,22 @@ class TV:
         return tree_view.get_model()
 
     @staticmethod
-    def row(*columns: int) -> Callable[[Gtk.TreeStore], List[Any]]:
+    def rows(*columns: int) -> Callable[[Gtk.TreeStore], List[Any]]:
         def mapper(tree_store: Gtk.TreeStore) -> List[Any]:
             return [[row[column] for column in columns] for row in tree_store]
 
         return mapper
 
     @staticmethod
-    def column(name: str):
-        def mapper(tree_view: Gtk.TreeView) -> Callable[[Gtk.TreeView], Optional[Gtk.TreeViewColumn]]:
-            columns = [col for col in tree_view.get_columns() if col.get_title() == name]
-            return columns[0] if columns else None
+    def column(fn: Filter) -> Callable[[Gtk.TreeView], List[Gtk.TreeViewColumn]]:
+        def select(tree_view: Gtk.TreeView) -> List[Gtk.TreeViewColumn]:
+            return [column for column in tree_view.get_columns() if fn(column)][0]
 
-        return mapper
+        return select
 
     @staticmethod
     def cell_renderer(column=0):
-        def select(tree_column: Gtk.TreeView) -> Gtk.CellRenderer:
+        def select(tree_column: Gtk.TreeViewColumn) -> Gtk.CellRenderer:
             return tree_column.get_cells()[column]
 
         return select
