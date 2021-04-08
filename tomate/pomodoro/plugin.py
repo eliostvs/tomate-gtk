@@ -27,11 +27,11 @@ class Plugin(IPlugin, Subscriber):
     has_settings = False
 
     def activate(self):
-        super(Plugin, self).activate()
+        super().activate()
         self.connect(graph.get("tomate.bus"))
 
     def deactivate(self):
-        super(Plugin, self).deactivate()
+        super().deactivate()
         self.disconnect(graph.get("tomate.bus"))
 
     def settings_window(self, parent) -> StubbySettingsWindow:
