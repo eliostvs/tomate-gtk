@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Ratio rounding in Timer payload
+
 ### Added
 
 - Shortcuts to session buttons
-- EndPayload session
+- End session payload
 
 ### Changed
 
-- Timer, Session and App have their own state values
 - Join python-tomate and tomate-gtk projects
-- Session payload events
-- Event API
+- Timer, Session and App have their own state values instead of shared a Enum
+- Redesign the event API
 
 ### Removed
 
