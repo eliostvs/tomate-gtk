@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 SECONDS_IN_A_MINUTE = 60
 
 
-class Payload(namedtuple("TimerPayload", "time_left duration")):
-    __slots__ = ()
-
+class Payload(namedtuple("TimerPayload", ["time_left", "duration"])):
     @property
     def remaining_ratio(self) -> float:
         try:
