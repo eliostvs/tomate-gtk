@@ -29,10 +29,10 @@ endif
 .PHONY: clean
 clean:
 	find . \( -iname "*.pyc" -o -iname "__pycache__"  -o -iname ".pytest_cache" \) -print0 | xargs -0 rm -rf
-	rm -rf .eggs *.egg-info/ .coverage build/ .cache
+	rm -rf .eggs *.egg-info/ .coverage build/ .cache tests/data/mime/mime.cache
 
-.PHONY: install
-install: clean
+.PHONY: mime
+mime: clean
 	update-mime-database tests/data/mime
 	rm -rf tests/data/mime/{image,aliases,generic-icons,globs,globs2,icons,magic,subclasses,treemagic,types,version,XMLnamespaces}
 
@@ -73,7 +73,7 @@ docker-clean:
 
 .PHONY: docker-test
 docker-test:
-	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) install test
+	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) mime test
 
 .PHONY: docker-pull
 docker-pull:
