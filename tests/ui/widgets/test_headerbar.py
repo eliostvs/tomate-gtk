@@ -18,7 +18,6 @@ class TestHeaderBar:
         graph.register_instance("tomate.session", session)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
-        graph.register_factory("tomate.ui.view", mocker.Mock)
         graph.register_instance("tomate.ui.menu", menu)
         graph.register_instance("tomate.ui.shortcut", shortcut_engine)
 
@@ -27,10 +26,7 @@ class TestHeaderBar:
         shortcut_engine.disconnect(HeaderBar.STOP_SHORTCUT)
         shortcut_engine.disconnect(HeaderBar.RESET_SHORTCUT)
 
-        namespaces = [
-            "tomate.pomodoro.proxy",
-            "tomate.ui.widgets.headerbar",
-        ]
+        namespaces = ["tomate.ui.widgets.headerbar"]
 
         scan_to_graph(namespaces, graph)
 
@@ -113,13 +109,12 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def menu(self, bus, graph, about, preference, window) -> HeaderBarMenu:
+    def menu(self, bus, graph, about, preference) -> HeaderBarMenu:
         graph.register_instance("tomate.bus", bus)
         graph.register_instance("tomate.ui.about", about)
         graph.register_instance("tomate.ui.preference", preference)
-        graph.register_instance("tomate.ui.view", window)
 
-        namespaces = ["tomate.ui.widgets.headerbar", "tomate.pomodoro.proxy"]
+        namespaces = ["tomate.ui.widgets.headerbar"]
         scan_to_graph(namespaces, graph)
 
         return graph.get("tomate.ui.headerbar.menu")
@@ -137,7 +132,7 @@ class TestHeaderBarMenu:
             ("header.menu.about", "About", "about"),
         ],
     )
-    def test_menu_items(self, widget, label, mock_name, menu, window, about, preference):
+    def test_menu_items(self, widget, label, mock_name, menu, about, preference):
         menu_item = Q.select(menu.widget, Q.props("name", widget))
         assert menu_item.props.label == label
 
@@ -146,4 +141,3 @@ class TestHeaderBarMenu:
 
         dialog = locals()[mock_name].widget
         dialog.run.assert_called_once_with()
-        dialog.set_transient_for.assert_called_once_with(window.widget)

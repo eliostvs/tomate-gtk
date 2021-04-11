@@ -21,13 +21,10 @@ class Menu(Subscriber):
         bus="tomate.bus",
         about="tomate.ui.about",
         preference="tomate.ui.preference",
-        lazy_proxy="tomate.proxy",
     )
-    def __init__(self, bus: blinker.signal, about, preference, lazy_proxy):
-        self.toplevel = None
+    def __init__(self, bus: blinker.signal, about, preference):
         self.connect(bus)
-        # TODO: remove lazy proxy
-        self._window = lazy_proxy("tomate.ui.view")
+
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
         self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
         self.widget.add(self._create_menu_item("header.menu.about", _("About"), about.widget))
@@ -36,13 +33,8 @@ class Menu(Subscriber):
     def _create_menu_item(self, name: str, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(label)
         menu_item.props.name = name
-        menu_item.connect("activate", self._open_dialog, dialog)
+        menu_item.connect("activate", lambda *_: dialog.run())
         return menu_item
-
-    def _open_dialog(self, _, dialog: Gtk.Dialog) -> None:
-        logger.debug("action=open_dialog")
-        dialog.set_transient_for(self._window.widget)
-        dialog.run()
 
 
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
