@@ -109,21 +109,24 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def menu(self, bus, graph, about, preference) -> HeaderBarMenu:
+    def menu(self, bus, about, preference, shortcut_engine) -> HeaderBarMenu:
+        shortcut_engine.disconnect(HeaderBarMenu.PREFERENCE_SHORTCUT)
+
+        return HeaderBarMenu(bus, about, preference, shortcut_engine)
+
+    def test_module(self, about, bus, preference, graph, shortcut_engine):
         graph.register_instance("tomate.bus", bus)
         graph.register_instance("tomate.ui.about", about)
         graph.register_instance("tomate.ui.preference", preference)
+        graph.register_instance("tomate.ui.shortcut", shortcut_engine)
 
         namespaces = ["tomate.ui.widgets.headerbar"]
         scan_to_graph(namespaces, graph)
 
-        return graph.get("tomate.ui.headerbar.menu")
-
-    def test_module(self, graph, bus, menu):
         instance = graph.get("tomate.ui.headerbar.menu")
 
         assert isinstance(instance, HeaderBarMenu)
-        assert instance is menu
+        assert instance is graph.get("tomate.ui.headerbar.menu")
 
     @pytest.mark.parametrize(
         "widget,label,mock_name",
@@ -141,3 +144,8 @@ class TestHeaderBarMenu:
 
         dialog = locals()[mock_name].widget
         dialog.run.assert_called_once_with()
+
+    def test_shortcut(self, menu, shortcut_engine, preference):
+        assert active_shortcut(shortcut_engine, HeaderBarMenu.PREFERENCE_SHORTCUT) is True
+
+        preference.widget.run.assert_called_once_with()

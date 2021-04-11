@@ -17,18 +17,23 @@ logger = logging.getLogger(__name__)
 
 @register.factory("tomate.ui.headerbar.menu", scope=SingletonScope)
 class Menu(Subscriber):
+    PREFERENCE_SHORTCUT = Shortcut("session.settings", "<control>comma")
+
     @inject(
         bus="tomate.bus",
         about="tomate.ui.about",
         preference="tomate.ui.preference",
+        shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: blinker.signal, about, preference):
+    def __init__(self, bus: blinker.signal, about, preference, shortcuts: ShortcutEngine):
         self.connect(bus)
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
         self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
         self.widget.add(self._create_menu_item("header.menu.about", _("About"), about.widget))
         self.widget.show_all()
+
+        shortcuts.connect(Menu.PREFERENCE_SHORTCUT, lambda *_: preference.widget.run())
 
     def _create_menu_item(self, name: str, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(label)
