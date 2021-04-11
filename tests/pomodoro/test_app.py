@@ -11,8 +11,8 @@ DBusGMainLoop(set_as_default=True)
 
 
 @pytest.fixture
-def app(graph, view, plugin_engine, mocker) -> Application:
-    graph.register_instance("tomate.ui.view", view)
+def app(graph, window, plugin_engine, mocker) -> Application:
+    graph.register_instance("tomate.ui.view", window)
     graph.register_instance("tomate.plugin", plugin_engine)
     graph.register_instance("dbus.session", mocker.Mock())
 
@@ -33,19 +33,19 @@ def test_collects_plugins_on_start(app, plugin_engine):
 
 
 class TestRun:
-    def test_start_window_when_app_is_not_running(self, app, view):
+    def test_start_window_when_app_is_not_running(self, app, window):
         app.state = State.STOPPED
 
         app.Run()
 
-        view.run.assert_called_once_with()
+        window.run.assert_called_once_with()
 
-    def test_shows_window_when_app_is_running(self, app, view):
+    def test_shows_window_when_app_is_running(self, app, window):
         app.state = State.STARTED
 
         app.Run()
 
-        view.show.assert_called_once_with()
+        window.show.assert_called_once_with()
 
 
 class TestFromGraph:
@@ -55,8 +55,8 @@ class TestFromGraph:
     def teardown_method(self):
         DBusTestCase.tearDownClass()
 
-    def test_create_app_instance_when_it_is_not_registered_in_dbus(self, graph, view, plugin_engine):
-        graph.register_instance("tomate.ui.view", view)
+    def test_create_app_instance_when_it_is_not_registered_in_dbus(self, graph, window, plugin_engine):
+        graph.register_instance("tomate.ui.view", window)
         graph.register_instance("tomate.plugin", plugin_engine)
         scan_to_graph(["tomate.pomodoro.app"], graph)
 

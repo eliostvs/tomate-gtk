@@ -29,8 +29,8 @@ def graph() -> Graph:
 
 
 @pytest.fixture()
-def view(mocker):
-    return mocker.Mock(spec=Window, widget=mocker.Mock(spec=Gtk.Window))
+def window(mocker):
+    return mocker.Mock(spec=Window, widget=Gtk.Window())
 
 
 @pytest.fixture

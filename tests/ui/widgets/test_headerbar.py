@@ -113,11 +113,11 @@ class TestHeaderBarMenu:
         return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
 
     @pytest.fixture
-    def menu(self, bus, graph, about, preference, view) -> HeaderBarMenu:
+    def menu(self, bus, graph, about, preference, window) -> HeaderBarMenu:
         graph.register_instance("tomate.bus", bus)
         graph.register_instance("tomate.ui.about", about)
         graph.register_instance("tomate.ui.preference", preference)
-        graph.register_instance("tomate.ui.view", view)
+        graph.register_instance("tomate.ui.view", window)
 
         namespaces = ["tomate.ui.widgets.headerbar", "tomate.pomodoro.proxy"]
         scan_to_graph(namespaces, graph)
@@ -137,7 +137,7 @@ class TestHeaderBarMenu:
             ("header.menu.about", "About", "about"),
         ],
     )
-    def test_menu_items(self, widget, label, mock_name, menu, view, about, preference):
+    def test_menu_items(self, widget, label, mock_name, menu, window, about, preference):
         menu_item = Q.select(menu.widget, Q.props("name", widget))
         assert menu_item.props.label == label
 
@@ -146,4 +146,4 @@ class TestHeaderBarMenu:
 
         dialog = locals()[mock_name].widget
         dialog.run.assert_called_once_with()
-        dialog.set_transient_for.assert_called_once_with(view.widget)
+        dialog.set_transient_for.assert_called_once_with(window.widget)
