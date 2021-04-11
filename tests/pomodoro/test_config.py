@@ -66,7 +66,7 @@ def test_set_option(config, tmpdir, bus, mocker):
 
 
 def test_get_icon_path(config):
-    expected = os.path.join(TEST_DATA_DIR, "icons", "hicolor", "22x22", "apps", "tomate.png")
+    expected = os.path.join(TEST_DATA_DIR, "icons", "hicolor", "24x24", "apps", "tomate.png")
     assert config.icon_path("tomate", 48, "hicolor") == expected
 
 
