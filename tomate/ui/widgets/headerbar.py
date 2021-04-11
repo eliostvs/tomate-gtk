@@ -1,16 +1,15 @@
 import locale
 import logging
-from collections import namedtuple
 from locale import gettext as _
 from typing import Union
 
+import blinker
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Events, Subscriber, on
-from tomate.pomodoro.session import EndPayload as SessionEndPayload, Payload as SessionPayload, Session
-from tomate.ui.shortcut import ShortcutManager
+from tomate.pomodoro import Events, Session, SessionEndPayload, SessionPayload, Subscriber, on
+from tomate.ui import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -18,25 +17,26 @@ logger = logging.getLogger(__name__)
 
 @register.factory("tomate.ui.headerbar.menu", scope=SingletonScope)
 class Menu(Subscriber):
-    @inject(about="tomate.ui.about", bus="tomate.bus", lazy_proxy="tomate.proxy", preference="tomate.ui.preference")
-    def __init__(self, about, bus, lazy_proxy, preference):
+    @inject(
+        bus="tomate.bus",
+        about="tomate.ui.about",
+        preference="tomate.ui.preference",
+        lazy_proxy="tomate.proxy",
+    )
+    def __init__(self, bus: blinker.signal, about, preference, lazy_proxy):
+        self.toplevel = None
         self.connect(bus)
+        # TODO: remove lazy proxy
         self._window = lazy_proxy("tomate.ui.view")
-
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
-
-        self._preference_item = self._create_menu_item(_("Preferences"), preference.widget)
-        self.widget.add(self._preference_item)
-
-        self._about_item = self._create_menu_item(_("About"), about.widget)
-        self.widget.add(self._about_item)
-
+        self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
+        self.widget.add(self._create_menu_item("header.menu.about", _("About"), about.widget))
         self.widget.show_all()
 
-    def _create_menu_item(self, label: str, dialog) -> Gtk.MenuItem:
+    def _create_menu_item(self, name: str, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(label)
+        menu_item.props.name = name
         menu_item.connect("activate", self._open_dialog, dialog)
-
         return menu_item
 
     def _open_dialog(self, _, dialog: Gtk.Dialog) -> None:
@@ -45,20 +45,19 @@ class Menu(Subscriber):
         dialog.run()
 
 
-Shortcut = namedtuple("Shortcut", "name default")
-
-
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
 class HeaderBar(Subscriber):
+    START_SHORTCUT = Shortcut("session.start", "<control>s")
+    STOP_SHORTCUT = Shortcut("session.stop", "<control>p")
+    RESET_SHORTCUT = Shortcut("session.reset", "<control>r")
+
     @inject(
         bus="tomate.bus",
         menu="tomate.ui.headerbar.menu",
         session="tomate.session",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus, menu: Menu, session: Session, shortcuts: ShortcutManager):
-        self._session = session
-        self.shortcuts = shortcuts
+    def __init__(self, bus: blinker.Signal, menu: Menu, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
 
         self.widget = Gtk.HeaderBar(
@@ -69,30 +68,33 @@ class HeaderBar(Subscriber):
 
         self._start_button = self._create_button(
             Gtk.STOCK_MEDIA_PLAY,
-            "Starts the session",
-            lambda *_: self._session.start(),
-            Shortcut(name="button.start", default="<control>s"),
+            ("Starts the session ({})".format(shortcuts.label(HeaderBar.START_SHORTCUT))),
+            lambda *_: session.start(),
+            name=HeaderBar.START_SHORTCUT.name,
         )
         self.widget.pack_start(self._start_button)
+        shortcuts.connect(HeaderBar.START_SHORTCUT, lambda *_: session.start())
 
         self._stop_button = self._create_button(
             Gtk.STOCK_MEDIA_STOP,
-            "Stops the session",
-            lambda *_: self._session.stop(),
-            Shortcut(name="button.stop", default="<control>p"),
-            visible=False,
+            ("Stops the session ({})".format(shortcuts.label(HeaderBar.STOP_SHORTCUT))),
+            lambda *_: session.stop(),
+            name=HeaderBar.STOP_SHORTCUT.name,
             no_show_all=True,
+            visible=False,
         )
         self.widget.pack_start(self._stop_button)
+        shortcuts.connect(HeaderBar.STOP_SHORTCUT, lambda *_: session.stop())
 
         self._reset_button = self._create_button(
             Gtk.STOCK_CLEAR,
-            "Clear the count of sessions",
-            lambda *_: self._session.reset(),
-            Shortcut(name="button.reset", default="<control>r"),
+            ("Clear session count ({})".format(shortcuts.label(HeaderBar.RESET_SHORTCUT))),
+            lambda *_: session.reset(),
+            name=HeaderBar.RESET_SHORTCUT.name,
             sensitive=False,
         )
         self.widget.pack_start(self._reset_button)
+        shortcuts.connect(HeaderBar.RESET_SHORTCUT, lambda *_: session.reset())
 
         button = Gtk.MenuButton(popup=menu.widget)
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
@@ -100,39 +102,35 @@ class HeaderBar(Subscriber):
 
         self.widget.pack_end(button)
 
+    def _create_button(self, icon: str, tooltip_text: str, on_clicked, **props) -> Gtk.Button:
+        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.BUTTON)
+        image.show()
+
+        button = Gtk.Button(tooltip_text=tooltip_text, **props)
+        button.add(image)
+        button.connect("clicked", on_clicked)
+        return button
+
     @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
         logger.debug("action=enable_stop")
-        self._start_button.set_visible(False)
-        self._stop_button.set_visible(True)
-        self._reset_button.set_sensitive(False)
+        self._start_button.props.visible = False
+        self._stop_button.props.visible = True
+        self._reset_button.props.sensitive = False
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def _on_session_stop(self, _, payload: Union[SessionEndPayload, SessionPayload]) -> None:
         logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
-        self._start_button.set_visible(True)
-        self._stop_button.set_visible(False)
-        self._reset_button.set_sensitive(bool(payload.pomodoros))
+        self._start_button.props.visible = True
+        self._stop_button.props.visible = False
+        self._reset_button.props.sensitive = bool(payload.pomodoros)
         self._update_title(payload.pomodoros)
 
     @on(Events.SESSION_RESET)
     def _on_session_reset(self, *_, **__):
         logger.debug("action=disable_reset")
-        self._reset_button.set_sensitive(False)
+        self._reset_button.props.sensitive = False
         self._update_title(0)
 
     def _update_title(self, pomodoros: int) -> None:
         self.widget.props.title = _("Session {}".format(pomodoros)) if pomodoros else _("No session yet")
-
-    def _create_button(self, icon_name: str, tooltip_text: str, on_clicked, shortcut: Shortcut, **props) -> Gtk.Button:
-        image = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
-        image.show()
-
-        tooltip = "{} ({})".format(_(tooltip_text), self.shortcuts.label(shortcut.name, shortcut.default))
-        button = Gtk.Button(tooltip_text=tooltip, **props)
-        button.add(image)
-        button.connect("clicked", on_clicked)
-
-        self.shortcuts.connect(shortcut.name, on_clicked, shortcut.default)
-
-        return button
