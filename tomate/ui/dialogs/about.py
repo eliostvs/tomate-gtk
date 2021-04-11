@@ -22,7 +22,7 @@ class AboutDialog(Gtk.AboutDialog):
             website_label="Tomate GTK on Github",
         )
 
-        self.set_property("authors", ["Elio Esteves Duarte"])
+        self.props.authors = ["Elio Esteves Duarte"]
         self.connect("response", lambda widget, _: widget.hide())
 
     @property
