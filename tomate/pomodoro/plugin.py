@@ -44,7 +44,7 @@ class PluginEngine:
         return self._plugin_manager.activatePluginByName(name)
 
     def list(self) -> List[object]:
-        return sorted(self._plugin_manager.getAllPlugins(), key=lambda p: p.name)
+        return sorted(self._plugin_manager.getAllPlugins(), key=lambda plugin: plugin.name)
 
     def get(self, name: str, category="Default") -> Optional[object]:
         return self._plugin_manager.getPluginByName(name, category)
