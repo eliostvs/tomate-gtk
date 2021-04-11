@@ -1,13 +1,13 @@
 from _locale import gettext as _
 
 from gi.repository import Gtk
-from wiring import Interface, SingletonScope, inject
+from wiring import SingletonScope, inject
 from wiring.scanning import register
 
 from tomate.pomodoro.event import Events, Subscriber, on
 
 
-class Systray(Interface):
+class Systray:
     def show(*args, **kwargs):
         pass
 
