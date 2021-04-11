@@ -1,40 +1,39 @@
 import os
 
-import blinker
 import pytest
 from gi.repository import Gtk
 from wiring import Graph
 
-from tomate.pomodoro import Config, PluginEngine, Session
+from tomate.pomodoro import Bus, Config, PluginEngine, Session
 from tomate.ui import ShortcutEngine, Window
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
-@pytest.fixture()
+@pytest.fixture
 def session(mocker):
     return mocker.Mock(spec=Session)
 
 
-@pytest.fixture()
-def bus() -> blinker.Signal:
-    return blinker.NamedSignal("test")
+@pytest.fixture
+def bus() -> Bus:
+    return Bus()
 
 
-@pytest.fixture()
+@pytest.fixture
 def graph() -> Graph:
     g = Graph()
     g.register_instance(Graph, g)
     return g
 
 
-@pytest.fixture()
+@pytest.fixture
 def window(mocker):
     return mocker.Mock(spec=Window, widget=Gtk.Window())
 
 
 @pytest.fixture
-def config(bus: blinker.Signal, tmpdir) -> Config:
+def config(bus, tmpdir) -> Config:
     cfg = Config(bus)
     tmp_path = tmpdir.mkdir("tomate").join("tomate.config")
     cfg.config_path = lambda: tmp_path.strpath

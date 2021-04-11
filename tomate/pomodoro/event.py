@@ -1,14 +1,13 @@
 import enum
 import functools
 import logging
+from typing import Any, Callable, List, Tuple
 
 import blinker
+from wiring import SingletonScope
 from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
-
-bus = blinker.NamedSignal("tomate")
-register.instance("tomate.bus")(bus)
 
 
 @enum.unique
@@ -30,6 +29,25 @@ class Events(enum.Enum):
     CONFIG_CHANGE = 11
 
 
+Receiver = Callable[[Events, Any], Any]
+
+
+@register.factory("tomate.bus", scope=SingletonScope)
+class Bus:
+    def __init__(self):
+        self._bus = blinker.NamedSignal("tomate")
+
+    def connect(self, event: Events, receiver: Receiver, weak: bool = True):
+        self._bus.connect(receiver, sender=event, weak=weak)
+
+    def send(self, event: Events, payload: Any = None) -> List[Any]:
+        # drop receiver, index 0, in the result
+        return [result[1] for result in self._bus.send(event, payload=payload)]
+
+    def disconnect(self, event: Events, receiver: Receiver):
+        self._bus.disconnect(receiver, sender=event)
+
+
 def on(*events: Events):
     def wrapper(method):
         method._events = events
@@ -44,7 +62,7 @@ def on(*events: Events):
 
 
 class Subscriber:
-    def connect(self, bus: blinker.Signal) -> None:
+    def connect(self, bus: Bus) -> None:
         for method, events in self.__methods_with_events():
             for event in events:
                 logger.debug(
@@ -53,9 +71,9 @@ class Subscriber:
                     self.__class__.__name__,
                     method.__name__,
                 )
-                bus.connect(method, sender=event)
+                bus.connect(event, method)
 
-    def disconnect(self, bus: blinker.Signal):
+    def disconnect(self, bus: Bus):
         for method, events in self.__methods_with_events():
             for event in events:
                 logger.debug(
@@ -64,9 +82,9 @@ class Subscriber:
                     self.__class__.__name__,
                     method.__name__,
                 )
-                bus.disconnect(method, sender=event)
+                bus.disconnect(event, method)
 
-    def __methods_with_events(self):
+    def __methods_with_events(self) -> List[Tuple[Any, List[Events]]]:
         return [
             (getattr(self, attr), getattr(getattr(self, attr), "_events"))
             for attr in dir(self)

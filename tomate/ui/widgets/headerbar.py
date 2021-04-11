@@ -3,12 +3,11 @@ import logging
 from locale import gettext as _
 from typing import Union
 
-import blinker
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Events, Session, SessionEndPayload, SessionPayload, Subscriber, on
+from tomate.pomodoro import Bus, Events, Session, SessionEndPayload, SessionPayload, Subscriber, on
 from tomate.ui import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")
@@ -25,7 +24,7 @@ class Menu(Subscriber):
         preference="tomate.ui.preference",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: blinker.signal, about, preference, shortcuts: ShortcutEngine):
+    def __init__(self, bus: Bus, about, preference, shortcuts: ShortcutEngine):
         self.connect(bus)
 
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
@@ -54,7 +53,7 @@ class HeaderBar(Subscriber):
         session="tomate.session",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: blinker.Signal, menu: Menu, session: Session, shortcuts: ShortcutEngine):
+    def __init__(self, bus: Bus, menu: Menu, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
 
         self.widget = Gtk.HeaderBar(

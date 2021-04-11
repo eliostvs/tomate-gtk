@@ -3,12 +3,11 @@ import os
 from collections import namedtuple
 from configparser import RawConfigParser
 
-from blinker import Signal
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 from xdg import BaseDirectory, IconTheme
 
-from tomate.pomodoro.event import Events
+from .event import Bus, Events
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class Config:
     }
 
     @inject(bus="tomate.bus")
-    def __init__(self, bus: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
+    def __init__(self, bus: Bus, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
         self.parser = parser
         self._bus = bus
         self.load()

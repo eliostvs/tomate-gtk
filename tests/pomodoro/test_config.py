@@ -56,7 +56,7 @@ def test_set_option(config, tmpdir, bus, mocker):
     config.config_path = lambda: config_path
 
     subscriber = mocker.Mock()
-    bus.connect(subscriber, Events.CONFIG_CHANGE, weak=False)
+    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
 
     config.set("section", "option", "value")
 

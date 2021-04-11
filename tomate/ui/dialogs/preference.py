@@ -2,12 +2,11 @@ import locale
 import logging
 from locale import gettext as _
 
-import blinker
 from gi.repository import GdkPixbuf, Gtk, Pango
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Config, PluginEngine
+from tomate.pomodoro import Bus, Config, PluginEngine
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -113,7 +112,7 @@ class TimerTab:
 @register.factory("tomate.ui.preference.extension", scope=SingletonScope)
 class ExtensionTab:
     @inject(bus="tomate.bus", config="tomate.config", plugin_engine="tomate.plugin")
-    def __init__(self, bus: blinker.Signal, config: Config, plugin_engine: PluginEngine):
+    def __init__(self, bus: Bus, config: Config, plugin_engine: PluginEngine):
         self._plugins = plugin_engine
         self._config = config
         self._bus = bus

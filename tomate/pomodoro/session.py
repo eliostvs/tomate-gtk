@@ -5,11 +5,10 @@ import logging
 import uuid
 from collections import namedtuple
 
-from blinker import Signal
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from .event import Events, Subscriber, on
+from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
 from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer
 
@@ -48,7 +47,7 @@ class Session(Subscriber):
         config="tomate.config",
         timer="tomate.timer",
     )
-    def __init__(self, bus: Signal, config, timer: Timer):
+    def __init__(self, bus: Bus, config, timer: Timer):
         self._config = config
         self._timer = timer
         self._bus = bus

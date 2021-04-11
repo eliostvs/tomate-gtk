@@ -6,5 +6,5 @@ class PluginB(plugin.Plugin):
     has_settings = False
 
     @on(Events.WINDOW_SHOW)
-    def event_listener(self, _) -> str:
+    def listener(self, *_, **__) -> str:
         return "plugin_b"

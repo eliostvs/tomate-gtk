@@ -2,12 +2,11 @@ import enum
 import logging
 from collections import namedtuple
 
-import blinker
 from gi.repository import GLib
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from .event import Events
+from .event import Bus, Events
 from .fsm import fsm
 
 logger = logging.getLogger(__name__)
@@ -51,7 +50,7 @@ class Timer:
     ONE_SECOND = 1
 
     @inject(bus="tomate.bus")
-    def __init__(self, bus: blinker.Signal):
+    def __init__(self, bus: Bus):
         self.duration = self.time_left = 0
         self.state = State.STOPPED
         self._bus = bus

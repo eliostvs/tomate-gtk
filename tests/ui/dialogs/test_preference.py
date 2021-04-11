@@ -89,7 +89,7 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     preference.run()
 
     result = bus.send(Events.WINDOW_SHOW)
-    assert len(result) == 1 and result[0][1] == "plugin_b"
+    assert len(result) == 1 and result[0] == "plugin_b"
 
     def toggle_plugin(row: int):
         TV.map(
@@ -103,7 +103,7 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     toggle_plugin(1)
 
     result = bus.send(Events.WINDOW_SHOW)
-    assert len(result) == 1 and result[0][1] == "plugin_a"
+    assert len(result) == 1 and result[0] == "plugin_a"
 
 
 @pytest.mark.parametrize(

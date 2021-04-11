@@ -3,11 +3,10 @@ import logging
 from locale import gettext as _
 from typing import Callable, Union
 
-import blinker
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Events, Session, SessionEndPayload, SessionPayload, SessionType, Subscriber, on
+from tomate.pomodoro import Bus, Events, Session, SessionEndPayload, SessionPayload, SessionType, Subscriber, on
 from tomate.ui import Shortcut, ShortcutEngine
 from .mode_button import ModeButton
 
@@ -26,7 +25,7 @@ class SessionButton(Subscriber):
         session="tomate.session",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: blinker.Signal, session: Session, shortcuts: ShortcutEngine):
+    def __init__(self, bus: Bus, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
         self._session = session
 

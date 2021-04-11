@@ -1,12 +1,11 @@
 import logging
 import time
 
-import blinker
 from gi.repository import GdkPixbuf, Gtk
 from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Config, Events, Session, Subscriber, on
+from tomate.pomodoro import Bus, Config, Events, Session, Subscriber, on
 from .shortcut import ShortcutEngine
 from .systray import Systray
 from .widgets import Countdown, HeaderBar, SessionButton
@@ -28,7 +27,7 @@ class Window(Subscriber):
     )
     def __init__(
         self,
-        bus: blinker.Signal,
+        bus: Bus,
         config: Config,
         countdown: Countdown,
         graph: Graph,

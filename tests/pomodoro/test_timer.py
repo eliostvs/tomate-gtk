@@ -28,7 +28,7 @@ class TestTimerStart:
         timer.state = state
 
         subscriber = mocker.Mock()
-        bus.connect(subscriber, sender=Events.TIMER_START, weak=False)
+        bus.connect(Events.TIMER_START, subscriber, weak=False)
 
         result = timer.start(60)
 
@@ -47,7 +47,7 @@ class TestTimerStop:
     def test_stops_when_timer_is_running(self, bus, mocker):
         timer = Timer(bus)
         subscriber = mocker.Mock()
-        bus.connect(subscriber, sender=Events.TIMER_STOP, weak=False)
+        bus.connect(Events.TIMER_STOP, subscriber, weak=False)
 
         timer.start(60)
         result = timer.stop()
@@ -68,10 +68,10 @@ class TestTimerEnd:
     def test_ends_when_time_is_up(self, bus, mocker):
         timer = Timer(bus)
         changed = mocker.Mock()
-        timer._bus.connect(changed, sender=Events.TIMER_UPDATE, weak=False)
+        timer._bus.connect(Events.TIMER_UPDATE, changed, weak=False)
 
         finished = mocker.Mock()
-        bus.connect(finished, sender=Events.TIMER_END, weak=False)
+        bus.connect(Events.TIMER_END, finished, weak=False)
 
         timer.start(1)
         run_loop_for(2)

@@ -47,24 +47,24 @@ def test_start(mocker, window):
 class TestWindowHide:
     def test_iconify_when_tray_icon_plugin_is_not_registered(self, window, bus, mocker):
         subscriber = mocker.Mock()
-        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
 
         result = window.hide()
 
         assert result is Gtk.true
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
 
     def test_deletes_when_tray_icon_plugin_is_registered(self, bus, graph, mocker, window):
         graph.register_factory(Systray, mocker.Mock)
         subscriber = mocker.Mock()
-        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
         window.widget.set_visible(True)
 
         result = window.hide()
 
         assert result
         assert window.widget.get_visible() is False
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
 
 
 class TestWindowQuit:
@@ -79,20 +79,20 @@ class TestWindowQuit:
     def test_hides_when_timer_is_running(self, bus, mocker, session, window):
         session.is_running.return_value = True
         subscriber = mocker.Mock()
-        bus.connect(subscriber, sender=Events.WINDOW_HIDE, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
 
         window.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE)
+        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
 
 
 def test_shows_window_when_session_end(bus, mocker, window):
     window.widget.set_visible(False)
     subscriber = mocker.Mock()
-    bus.connect(subscriber, sender=Events.WINDOW_SHOW, weak=False)
+    bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
     payload = create_session_end_payload(previous=create_session_payload())
 
     bus.send(Events.SESSION_END, payload=payload)
 
     assert window.widget.get_visible()
-    subscriber.assert_called_once_with(Events.WINDOW_SHOW)
+    subscriber.assert_called_once_with(Events.WINDOW_SHOW, payload=None)
