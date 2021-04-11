@@ -4,13 +4,14 @@ import logging
 from locale import gettext as _
 
 import gi
+
+gi.require_version("Gdk", "3.0")
+gi.require_version("Gtk", "3.0")
+
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro.app import Application
 from tomate.pomodoro.graph import graph
-
-gi.require_version("Gdk", "3.0")
-gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gdk
 
