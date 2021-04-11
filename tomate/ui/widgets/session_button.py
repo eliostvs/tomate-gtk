@@ -1,40 +1,34 @@
 import locale
 import logging
-from collections import namedtuple
 from locale import gettext as _
-from typing import Union
+from typing import Callable, Union
 
 import blinker
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Events, Subscriber, on
-from tomate.pomodoro.session import (
-    EndPayload as SessionEndPayload,
-    Payload as SessionPayload,
-    Session,
-    Type as SessionType,
-)
+from tomate.pomodoro import Events, Session, SessionEndPayload, SessionPayload, SessionType, Subscriber, on
+from tomate.ui import Shortcut, ShortcutEngine
 from .mode_button import ModeButton
-from ..shortcut import ShortcutManager
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
-Shortcut = namedtuple("Shortcut", "name default session_type")
-
 
 @register.factory("tomate.ui.taskbutton", scope=SingletonScope)
 class SessionButton(Subscriber):
+    POMODORO_SHORTCUT = Shortcut("session.pomodoro", "<control>1")
+    SHORT_BREAK_SHORTCUT = Shortcut("session.short_break", "<control>2")
+    LONG_BREAK_SHORTCUT = Shortcut("session.long_break", "<control>3")
+
     @inject(
         bus="tomate.bus",
         session="tomate.session",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: blinker.Signal, session: Session, shortcuts: ShortcutManager):
+    def __init__(self, bus: blinker.Signal, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
         self._session = session
-        self._shortcuts = shortcuts
 
         self.widget = ModeButton(
             can_focus=False,
@@ -44,48 +38,41 @@ class SessionButton(Subscriber):
             margin_right=12,
         )
 
-        self._create_button(
+        self.widget.append_text(
             _("Pomodoro"),
-            Shortcut(
-                name="button.pomodoro",
-                session_type=SessionType.POMODORO.value,
-                default="<control>1",
-            ),
+            tooltip_text=_("Pomodoro ({})".format(shortcuts.label(SessionButton.POMODORO_SHORTCUT))),
+            name=SessionButton.POMODORO_SHORTCUT.name,
         )
+        shortcuts.connect(SessionButton.POMODORO_SHORTCUT, self._change_session(SessionType.POMODORO))
 
-        self._create_button(
+        self.widget.append_text(
             _("Short Break"),
-            Shortcut(
-                name="button.shortbreak",
-                session_type=SessionType.SHORT_BREAK.value,
-                default="<control>2",
-            ),
+            tooltip_text=_("Short Break ({})".format(shortcuts.label(SessionButton.SHORT_BREAK_SHORTCUT))),
+            name=SessionButton.SHORT_BREAK_SHORTCUT.name,
         )
+        shortcuts.connect(SessionButton.SHORT_BREAK_SHORTCUT, self._change_session(SessionType.SHORT_BREAK))
 
-        self._create_button(
+        self.widget.append_text(
             _("Long Break"),
-            Shortcut(
-                name="button.longbreak",
-                session_type=SessionType.LONG_BREAK.value,
-                default="<control>3",
-            ),
+            tooltip_text=_("Long Break ({})".format(shortcuts.label(SessionButton.LONG_BREAK_SHORTCUT))),
+            name=SessionButton.LONG_BREAK_SHORTCUT.name,
         )
+        shortcuts.connect(SessionButton.LONG_BREAK_SHORTCUT, self._change_session(SessionType.LONG_BREAK))
 
-        self.widget.connect("mode_changed", self._on_mode_changed)
+        self.widget.connect("mode_changed", self._on_button_clicked)
 
-    def _create_button(self, label: str, shortcut: Shortcut):
-        tooltip_text = "{} ({})".format(label, self._shortcuts.label(shortcut.name, shortcut.default))
-        self.widget.append_text(label, tooltip_text=tooltip_text)
+    def _change_session(self, session_type: SessionType) -> Callable[[], bool]:
+        def callback(*_) -> bool:
+            logger.debug("action=change session=%s", session_type)
+            self.widget.set_selected(session_type.value)
+            return True
 
-        self._shortcuts.connect(
-            shortcut.name,
-            lambda *_: self.widget.set_selected(shortcut.session_type),
-            shortcut.default,
-        )
+        return callback
 
-    def _on_mode_changed(self, _, number):
-        logger.debug("action=change session=%s", SessionType.of(number))
-        self._session.change(session=SessionType.of(number))
+    def _on_button_clicked(self, _, number):
+        session_type = SessionType.of(number)
+        logger.debug("action=mode_changed session=%s", session_type)
+        self._session.change(session=session_type)
 
     def init(self):
         self.widget.set_sensitive(True)
