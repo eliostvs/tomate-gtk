@@ -17,4 +17,11 @@ class PluginA(plugin.Plugin):
 
     def settings_window(self, parent: Gtk.Widget) -> Gtk.Dialog:
         self.parent = parent
-        return Gtk.Dialog()
+        dialog = Gtk.MessageDialog(
+            message_type=Gtk.MessageType.INFO,
+            transient_for=parent,
+            buttons=Gtk.ButtonsType.OK,
+            text="Plugin A Settings",
+        )
+        dialog.connect("response", lambda widget, _: widget.destroy())
+        return dialog
