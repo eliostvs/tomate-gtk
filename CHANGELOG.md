@@ -13,14 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Shortcuts to session buttons
-- End session payload
+- Shortcuts to session buttons, pomodoro in Ctrl+1, short break is Ctrl+2 and long break is Ctrl+3 
+- EndSessionPayload have the same fields of a SessionPayload plus the previous field that is the last SessionPayload
 
 ### Changed
 
+- Session actions (start, stop, reset) keys in shortcuts section in the config
 - Join python-tomate and tomate-gtk projects
-- Timer, Session and App have their own state values instead of shared a Enum
+- Timer, Session and App have their own state values instead of a shared Enum
 - Redesign the event API
+- Redesign the plugin API
 
 ### Removed
 
