@@ -94,7 +94,11 @@ class HeaderBar(Subscriber):
         shortcuts.connect(HeaderBar.RESET_SHORTCUT, lambda *_: session.reset())
 
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
-        button = Gtk.MenuButton(popup=menu.widget)
+        button = Gtk.MenuButton(
+            name=Menu.PREFERENCE_SHORTCUT.name,
+            popup=menu.widget,
+            tooltip_text=_("Open preferences ({})".format(shortcuts.label(Menu.PREFERENCE_SHORTCUT))),
+        )
         button.add(icon)
 
         self.widget.pack_end(button)

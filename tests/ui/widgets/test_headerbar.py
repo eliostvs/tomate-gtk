@@ -51,21 +51,33 @@ class TestHeaderBar:
         getattr(session, action).assert_called_once_with()
 
     @pytest.mark.parametrize(
-        "button_name,tooltip,action",
+        "button_name,action",
         [
-            (HeaderBar.START_SHORTCUT.name, "Starts the session (Ctrl+S)", "start"),
-            (HeaderBar.STOP_SHORTCUT.name, "Stops the session (Ctrl+P)", "stop"),
-            (HeaderBar.RESET_SHORTCUT.name, "Clear session count (Ctrl+R)", "reset"),
+            (HeaderBar.START_SHORTCUT.name, "start"),
+            (HeaderBar.STOP_SHORTCUT.name, "stop"),
+            (HeaderBar.RESET_SHORTCUT.name, "reset"),
         ],
     )
-    def test_buttons(self, button_name, tooltip, action: str, session, headerbar):
+    def test_change_session(self, button_name, action, session, headerbar):
         button = Q.select(headerbar.widget, Q.props("name", button_name))
-        assert tooltip == button.props.tooltip_text
 
         button.emit("clicked")
         refresh_gui()
 
         getattr(session, action).assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        "button_name,tooltip",
+        [
+            (HeaderBar.START_SHORTCUT.name, "Starts the session (Ctrl+S)"),
+            (HeaderBar.STOP_SHORTCUT.name, "Stops the session (Ctrl+P)"),
+            (HeaderBar.RESET_SHORTCUT.name, "Clear session count (Ctrl+R)"),
+            (HeaderBarMenu.PREFERENCE_SHORTCUT.name, "Open preferences (Ctrl+,)"),
+        ],
+    )
+    def test_buttons_tooltip(self, button_name, tooltip, headerbar):
+        button = Q.select(headerbar.widget, Q.props("name", button_name))
+        assert tooltip == button.props.tooltip_text
 
     def test_enable_only_the_stop_button_when_session_starts(self, bus, headerbar):
         bus.send(Events.SESSION_START)
