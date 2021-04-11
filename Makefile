@@ -26,17 +26,22 @@ else
 	ARGS ?=
 endif
 
+.PHONY: clean
+clean:
+	find . \( -iname "*.pyc" -o -iname "__pycache__"  -o -iname ".pytest_cache" \) -print0 | xargs -0 rm -rf
+	rm -rf .eggs *.egg-info/ .coverage build/ .cache
+
+.PHONY: install
+install: clean
+	update-mime-database tests/data/mime
+	rm -rf tests/data/mime/{image,aliases,generic-icons,globs,globs2,icons,magic,subclasses,treemagic,types,version,XMLnamespaces}
+
 .PHONY: format
 format:
 	black $(PACKAGE) tests/
 
-.PHONY: clean
-clean:
-	find . \( -iname "*.pyc" -o -iname "__pycache__" \) -print0 | xargs -0 rm -rf
-	rm -rf .eggs *.egg-info/ .coverage build/ .cache
-
 .PHONY: test
-test: clean
+test:
 	echo "$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
 	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
 
