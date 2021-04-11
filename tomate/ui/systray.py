@@ -5,7 +5,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Events, Subscriber, on
+from tomate.pomodoro import Events, Subscriber, on
 
 
 class Systray:
@@ -29,7 +29,7 @@ class Menu(Subscriber):
         self.widget.add(self.show_item)
 
         self.hide_item = Gtk.MenuItem.new_with_label(_("Hide"))
-        self.hide_item.set_properties(visible=True)
+        self.hide_item.props.visible = True
         self.hide_item.connect("activate", lambda _: window.hide())
         self.widget.add(self.hide_item)
 
@@ -37,10 +37,10 @@ class Menu(Subscriber):
 
     @on(Events.WINDOW_SHOW)
     def _on_window_show(self, *_, **__):
-        self.hide_item.set_visible(True)
-        self.show_item.set_visible(False)
+        self.hide_item.props.visible = True
+        self.show_item.props.visible = False
 
     @on(Events.WINDOW_HIDE)
     def _on_window_hide(self, *_, **__):
-        self.hide_item.set_visible(False)
-        self.show_item.set_visible(True)
+        self.hide_item.props.visible = False
+        self.show_item.props.visible = True
