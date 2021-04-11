@@ -2,67 +2,66 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import assert_shortcut_called
+from tomate.ui import Shortcut, ShortcutEngine
+from tomate.ui.testing import active_shortcut
 
 
 @pytest.fixture
-def subject(graph, config, bus):
-    graph.register_instance("tomate.bus", bus)
+def shortcut_engine(bus, config, graph) -> ShortcutEngine:
     graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.ui.shortcut"], graph)
     return graph.get("tomate.ui.shortcut")
 
 
-def test_label(subject):
-    label = subject.label("start", "")
+def test_module(graph, shortcut_engine):
+    instance = graph.get("tomate.ui.shortcut")
+
+    assert isinstance(instance, ShortcutEngine)
+    assert instance is shortcut_engine
+
+
+def test_label(shortcut_engine):
+    label = shortcut_engine.label(Shortcut("test", ""))
 
     assert label == "Ctrl+S"
 
 
-def test_label_with_fallback(subject):
-    label = subject.label("stop", "<control>p")
+def test_label_with_fallback(shortcut_engine):
+    label = shortcut_engine.label(Shortcut("", "<control>p"))
 
     assert label == "Ctrl+P"
 
 
-def test_connect(subject, mocker):
+def test_connect(shortcut_engine, mocker):
     callback = mocker.Mock(return_value=True)
-    subject.connect("start", callback)
+    shortcut = Shortcut("start", "<control>s")
 
-    shortcut = "<control>s"
-    assert_shortcut_called(subject, shortcut)
+    shortcut_engine.connect(shortcut, callback)
+    assert active_shortcut(shortcut_engine, shortcut) is True
 
-    key, mod = Gtk.accelerator_parse(shortcut)
-    callback.assert_called_once_with(subject.accel_group, mocker.ANY, key, mod)
-
-
-def test_disconnect(subject, mocker):
-    shortcut = "<control>s"
-
-    subject.connect("start", mocker.Mock(), fallback=shortcut)
-    subject.disconnect("start", fallback=shortcut)
-
-    assert_shortcut_called(subject, shortcut, want=False)
+    key, mod = Gtk.accelerator_parse(shortcut.value)
+    callback.assert_called_once_with(shortcut_engine.accel_group, mocker.ANY, key, mod)
 
 
-def test_change(subject, mocker):
+def test_disconnect(shortcut_engine, mocker):
+    shortcut = Shortcut("start", "<control>s")
+    shortcut_engine.connect(shortcut, mocker.Mock())
+
+    shortcut_engine.disconnect(shortcut)
+
+    assert active_shortcut(shortcut_engine, shortcut) is False
+
+
+def test_change(shortcut_engine, mocker):
     callback = mocker.Mock(return_value=True)
-    name = "start"
-    shortcut = "<control>b"
+    old_shortcut = Shortcut("start", "<control>a")
+    new_shortcut = Shortcut("start", "<control>b")
 
-    subject.connect(name, callback)
-    subject.change(name, shortcut)
+    shortcut_engine.connect(old_shortcut, callback)
+    shortcut_engine.change(new_shortcut)
 
-    assert_shortcut_called(subject, shortcut)
+    assert active_shortcut(shortcut_engine, old_shortcut) is False
+    assert active_shortcut(shortcut_engine, new_shortcut) is True
 
-    key, mod = Gtk.accelerator_parse(shortcut)
-    callback.assert_called_once_with(subject.accel_group, mocker.ANY, key, mod)
-
-
-def test_module(graph, subject):
-    from tomate.ui.shortcut import ShortcutManager
-
-    instance = graph.get("tomate.ui.shortcut")
-
-    assert isinstance(instance, ShortcutManager)
-    assert instance is subject
+    key, mod = Gtk.accelerator_parse(new_shortcut.value)
+    callback.assert_called_once_with(shortcut_engine.accel_group, mocker.ANY, key, mod)
