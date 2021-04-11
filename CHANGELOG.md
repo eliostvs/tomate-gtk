@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Shortcuts to session buttons, pomodoro in Ctrl+1, short break is Ctrl+2 and long break is Ctrl+3 
+- Shortcuts to change session to pomodoro (Ctrl+1), short break (Ctrl+2) and long break (Ctrl+3)
+- Shortcut to open settings
 - EndSessionPayload have the same fields of a SessionPayload plus the previous field that is the last SessionPayload
 
 ### Changed
