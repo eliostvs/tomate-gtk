@@ -1,5 +1,6 @@
 from _locale import gettext as _
 
+import blinker
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
@@ -18,7 +19,7 @@ class Systray:
 @register.factory("tomate.ui.systray.menu", scope=SingletonScope)
 class Menu(Subscriber):
     @inject(bus="tomate.bus", window="tomate.ui.view")
-    def __init__(self, bus, window):
+    def __init__(self, bus: blinker.signal, window):
         self.connect(bus)
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
 
