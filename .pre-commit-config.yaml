@@ -7,6 +7,7 @@ repos:
     rev: v3.4.0
     hooks:
       - id: trailing-whitespace
+        types: [python]
       - id: check-added-large-files
       - id: check-ast
       - id: check-merge-conflict
