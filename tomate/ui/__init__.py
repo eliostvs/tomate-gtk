@@ -1,5 +1,5 @@
-from .shortcut import ShortcutManager
+from .shortcut import Shortcut, ShortcutEngine
+from .systray import Menu as SystrayMenu, Systray
 from .window import Window
-from .systray import Systray, Menu as SystrayMenu
 
-__all__ = ["ShortcutManager", "Systray", "SystrayMenu", "Window"]
+__all__ = ["Shortcut", "ShortcutEngine", "Systray", "SystrayMenu", "Window"]
