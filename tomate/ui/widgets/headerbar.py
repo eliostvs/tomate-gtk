@@ -88,8 +88,8 @@ class HeaderBar(Subscriber):
         self.widget.pack_start(self._reset_button)
         shortcuts.connect(HeaderBar.RESET_SHORTCUT, lambda *_: session.reset())
 
-        button = Gtk.MenuButton(popup=menu.widget)
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
+        button = Gtk.MenuButton(popup=menu.widget)
         button.add(icon)
 
         self.widget.pack_end(button)
