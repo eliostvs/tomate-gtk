@@ -2,9 +2,9 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import refresh_gui
-from tomate.pomodoro.event import Events
-from tomate.ui.systray import Menu
+from tomate.pomodoro import Events
+from tomate.ui import SystrayMenu
+from tomate.ui.testing import refresh_gui
 
 
 @pytest.fixture()
@@ -23,7 +23,7 @@ def subject(graph, bus, view):
 def test_module(graph, subject):
     instance = graph.get("tomate.ui.systray.menu")
 
-    assert isinstance(instance, Menu)
+    assert isinstance(instance, SystrayMenu)
     assert instance is subject
 
 
