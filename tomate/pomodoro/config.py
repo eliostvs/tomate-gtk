@@ -12,21 +12,23 @@ from tomate.pomodoro.event import Events
 
 logger = logging.getLogger(__name__)
 
-DEFAULTS = {
-    "pomodoro_duration": "25",
-    "shortbreak_duration": "5",
-    "longbreak_duration": "15",
-    "long_break_interval": "4",
-}
-
 Payload = namedtuple("ConfigPayload", "action section option value")
 
 
 @register.factory("tomate.config", scope=SingletonScope)
 class Config:
     APP_NAME = "tomate"
-    SECTION_SHORTCUTS = "shortcuts"
-    SECTION_TIMER = "timer"
+    SHORTCUT_SECTION = "shortcuts"
+    DURATION_SECTION = "timer"
+    DURATION_LONG_BREAK = "longbreak_duration"
+    DURATION_POMODORO = "pomodoro_duration"
+    DURATION_SHORT_BREAK = "shortbreak_duration"
+    DEFAULTS = {
+        DURATION_POMODORO: "25",
+        DURATION_SHORT_BREAK: "5",
+        DURATION_LONG_BREAK: "15",
+        "long_break_interval": "4",
+    }
 
     @inject(bus="tomate.bus")
     def __init__(self, bus: Signal, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
