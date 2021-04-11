@@ -4,100 +4,97 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import TEST_DATA_DIR
-from tomate.pomodoro.event import Events
+from tomate.pomodoro import Config, ConfigPayload, Events
 
 
-@pytest.fixture()
-def subject(graph, bus):
+@pytest.fixture
+def config(graph, bus):
     graph.register_instance("tomate.bus", bus)
     scan_to_graph(["tomate.pomodoro.config"], graph)
     return graph.get("tomate.config")
 
 
-def test_module(graph, subject):
-    from tomate.pomodoro.config import Config
-
+def test_module(graph, config):
     instance = graph.get("tomate.config")
 
     assert isinstance(instance, Config)
-    assert instance is subject
+    assert instance is config
 
 
-def test_get_plugin_paths(subject):
+def test_get_plugin_paths(config):
     expected = os.path.join(TEST_DATA_DIR, "tomate", "plugins")
 
-    assert expected in subject.plugin_paths()
+    assert expected in config.plugin_paths()
 
 
-def test_get_config_path(subject):
-    assert subject.config_path() == os.path.join(TEST_DATA_DIR, "tomate", "tomate.conf")
+def test_get_config_path(config):
+    assert config.config_path() == os.path.join(TEST_DATA_DIR, "tomate", "tomate.conf")
 
 
-def test_get_media_uri_raises_error_when_media_is_not_found(subject):
+def test_get_media_uri_raises_error_when_media_is_not_found(config):
     with pytest.raises(OSError) as excinfo:
-        subject.media_uri("tomate.jpg")
+        config.media_uri("tomate.jpg")
 
     assert str(excinfo.value) == "Resource 'tomate.jpg' not found!"
 
 
-def test_get_media_uri(subject):
+def test_get_media_uri(config):
     expected = "file://" + os.path.join(TEST_DATA_DIR, "tomate", "media", "tomate.png")
 
-    assert subject.media_uri("tomate.png") == expected
+    assert config.media_uri("tomate.png") == expected
 
 
-def test_get_icon_path_raises_when_icon_not_found(subject):
+def test_get_icon_path_raises_when_icon_not_found(config):
     with pytest.raises(OSError) as excinfo:
-        assert subject.icon_path("foo", 48, "foobar")
+        assert config.icon_path("foo", 48, "foobar")
 
     assert str(excinfo.value) == "Icon 'foo' not found!"
 
 
-def test_set_option(subject, tmpdir, bus, mocker):
-    from tomate.pomodoro.config import Payload
-
-    config = tmpdir.mkdir("tmp").join("tomate.config")
-    subject.config_path = lambda: config.strpath
+def test_set_option(config, tmpdir, bus, mocker):
+    config_path = tmpdir.mkdir("tmp").join("tomate.config").strpath
+    config.config_path = lambda: config_path
 
     subscriber = mocker.Mock()
     bus.connect(subscriber, Events.CONFIG_CHANGE, weak=False)
 
-    subject.set("section", "option", "value")
+    config.set("section", "option", "value")
 
-    assert subject.get("section", "option") == "value"
-    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=Payload("set", "section", "option", "value"))
+    assert config.get("section", "option") == "value"
+    payload = ConfigPayload("set", "section", "option", "value")
+    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)
 
 
-def test_get_icon_path(subject):
+def test_get_icon_path(config):
     expected = os.path.join(TEST_DATA_DIR, "icons", "hicolor", "22x22", "apps", "tomate.png")
-    assert subject.icon_path("tomate", 48, "hicolor") == expected
+    assert config.icon_path("tomate", 48, "hicolor") == expected
 
 
-def test_icon_paths(subject):
-    assert os.path.join(TEST_DATA_DIR, "icons") in subject.icon_paths()
+def test_icon_paths(config):
+    assert os.path.join(TEST_DATA_DIR, "icons") in config.icon_paths()
 
 
-def test_get_option_as_int(subject):
-    assert subject.get_int("Timer", "pomodoro_duration") == 25
+def test_get_option_as_int(config):
+    assert config.get_int("Timer", "pomodoro_duration") == 25
 
 
-def test_get_option(subject):
-    assert subject.get("Timer", "pomodoro_duration") == "25"
+def test_get_option(config):
+    assert config.get("Timer", "pomodoro_duration") == "25"
 
 
-def test_get_option_with_fallback(subject):
-    assert subject.get("Timer", "pomodoro_pass", fallback="23") == "23"
+def test_get_option_with_fallback(config):
+    assert config.get("Timer", "pomodoro_pass", fallback="23") == "23"
 
 
-def test_get_defaults_option(subject):
-    assert subject.get("Timer", "shortbreak_duration") == "5"
+def test_get_defaults_option(config):
+    assert config.get("Timer", "shortbreak_duration") == "5"
 
 
-def test_remove_section(subject, tmpdir):
+def test_remove_section(config, tmpdir):
     tmp_path = tmpdir.mkdir("tmp").join("tomate.config")
-    subject.config_path = lambda: tmp_path.strpath
+    config.config_path = lambda: tmp_path.strpath
 
-    subject.set("section", "option", "value")
-    subject.remove("section", "option")
+    config.set("section", "option", "value")
+    config.remove("section", "option")
 
-    assert subject.parser.has_option("section", "option") is False
+    assert config.parser.has_option("section", "option") is False
