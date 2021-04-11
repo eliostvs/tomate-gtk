@@ -1,7 +1,7 @@
 import blinker
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro.event import Events, Subscriber, on
+from tomate.pomodoro import Events, Subscriber, on
 
 
 def test_subscriber(bus):
