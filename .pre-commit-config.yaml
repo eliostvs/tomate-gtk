@@ -17,3 +17,12 @@ repos:
     rev: 3.9.0
     hooks:
       - id: flake8
+  - repo: local
+    hooks:
+      - id: test
+        name: Running tests
+        always_run: true
+        language: system
+        require_serial: true
+        stages: [push]
+        entry: make test
