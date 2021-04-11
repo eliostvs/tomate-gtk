@@ -73,7 +73,7 @@ docker-clean:
 
 .PHONY: docker-test
 docker-test:
-	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE)
+	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) install test
 
 .PHONY: docker-pull
 docker-pull:
