@@ -2,9 +2,12 @@ import locale
 import logging
 from locale import gettext as _
 
+import blinker
 from gi.repository import GdkPixbuf, Gtk, Pango
 from wiring import SingletonScope, inject
 from wiring.scanning import register
+
+from tomate.pomodoro import Config, PluginEngine
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -22,7 +25,7 @@ class PreferenceDialog(Gtk.Dialog):
         stack.add_titled(extension_tab.widget, "extension", _("Extensions"))
 
         switcher = Gtk.StackSwitcher(halign=Gtk.Align.CENTER)
-        switcher.set_stack(stack)
+        switcher.props.stack = stack
 
         content_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_bottom=12)
         content_area.pack_start(switcher, False, False, 0)
@@ -59,7 +62,7 @@ class PreferenceDialog(Gtk.Dialog):
 @register.factory("tomate.ui.preference.timer", scope=SingletonScope)
 class TimerTab:
     @inject(config="tomate.config")
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self._config = config
 
         section = self._create_section(_("Duration"))
@@ -67,19 +70,19 @@ class TimerTab:
         self.widget.attach(section, 0, 0, 1, 1)
 
         # Pomodoro Duration
-        label, button = self._create_option(_("Pomodoro"), "pomodoro_duration")
+        label, button = self._create_option("duration.pomodoro", _("Pomodoro"), Config.DURATION_POMODORO)
         self.widget.attach(label, 0, 1, 1, 1)
         self.widget.attach_next_to(button, label, Gtk.PositionType.RIGHT, 3, 1)
         self.pomodoro = button
 
         # Short Break Duration
-        label, button = self._create_option(_("Short break"), "shortbreak_duration")
+        label, button = self._create_option("duration.shortbreak", _("Short break"), Config.DURATION_SHORT_BREAK)
         self.widget.attach(label, 0, 2, 1, 1)
         self.widget.attach_next_to(button, label, Gtk.PositionType.RIGHT, 3, 1)
         self.shortbreak = button
 
         # Long Break Duration
-        label, button = self._create_option(_("Long Break"), "longbreak_duration")
+        label, button = self._create_option("duration.longbreak", _("Long Break"), Config.DURATION_LONG_BREAK)
         self.widget.attach(label, 0, 3, 1, 1)
         self.widget.attach_next_to(button, label, Gtk.PositionType.RIGHT, 3, 1)
         self.longbreak = button
@@ -87,18 +90,17 @@ class TimerTab:
     def _create_section(self, name):
         section = Gtk.Label.new()
         section.set_markup("<b>{0}</b>".format(name))
-        section.set_halign(Gtk.Align.START)
+        section.props.halign = Gtk.Align.START
         return section
 
-    def _create_option(self, name, option):
-        label = Gtk.Label.new(name + ":")
+    def _create_option(self, name: str, label: str, option: str):
+        label = Gtk.Label.new(label + ":")
         label.set_properties(margin_left=12, hexpand=True, halign=Gtk.Align.END)
 
         button = Gtk.SpinButton.new_with_range(1, 99, 1)
-        button.set_hexpand(True)
-        button.set_halign(Gtk.Align.START)
-        button.set_value(self._config.get_int("Timer", option))
-        button.set_name(option)
+        button.set_properties(
+            hexpand=True, halign=Gtk.Align.START, name=name, value=self._config.get_int("Timer", option)
+        )
         button.connect("value-changed", self._on_change, option)
 
         return label, button
@@ -110,20 +112,21 @@ class TimerTab:
 
 @register.factory("tomate.ui.preference.extension", scope=SingletonScope)
 class ExtensionTab:
-    @inject(plugin_manager="tomate.plugin", config="tomate.config")
-    def __init__(self, plugin_manager, config):
-        self._plugin_manager = plugin_manager
+    @inject(bus="tomate.bus", config="tomate.config", plugin_engine="tomate.plugin")
+    def __init__(self, bus: blinker.Signal, config: Config, plugin_engine: PluginEngine):
+        self._plugins = plugin_engine
         self._config = config
+        self._bus = bus
         self.toplevel = None
 
         self.plugin_model = Gtk.ListStore(*PluginGrid.MODEL)
 
-        self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model, name="pluginList")
-        self.plugin_list.get_selection().connect("changed", self._on_selected_item_changed)
+        self.plugin_list = Gtk.TreeView(headers_visible=False, model=self.plugin_model, name="plugin.list")
+        self.plugin_list.get_selection().connect("changed", self._on_plugin_changed)
         self.plugin_list.get_selection().set_mode(Gtk.SelectionMode.BROWSE)
 
         renderer = Gtk.CellRendererToggle()
-        renderer.connect("toggled", self._on_row_toggled)
+        renderer.connect("toggled", self._on_plugin_toggle)
         column = Gtk.TreeViewColumn("Active", renderer, active=PluginGrid.ACTIVE)
         self.plugin_list.append_column(column)
 
@@ -139,8 +142,7 @@ class ExtensionTab:
         plugin_list_container.add(self.plugin_list)
 
         self.settings_button = Gtk.Button.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU)
-        self.settings_button.set_name("pluginSettingsButton")
-        self.settings_button.set_sensitive(False)
+        self.settings_button.set_properties(name="plugin.settings", sensitive=False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)
 
         settings_button_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
@@ -152,64 +154,66 @@ class ExtensionTab:
 
         self.widget.show_all()
 
-    def set_toplevel(self, widget: Gtk.Widget) -> None:
-        self.toplevel = widget
-
-    def refresh(self):
-        logger.debug("action=refreshPluginList")
-
-        self._clear()
-
-        for plugin in self._plugin_manager.getAllPlugins():
-            self._add_plugin(plugin)
-
-        if self._has_plugins:
-            self._select_first_row()
-
-    @property
-    def _has_plugins(self):
-        return bool(len(self.plugin_model))
-
-    def _on_selected_item_changed(self, selection):
+    def _on_plugin_changed(self, selection):
         model, selected = selection.get_selected()
 
         if selected is not None:
             grid_plugin = PluginGrid.from_iter(model, selected)
-            self.settings_button.set_sensitive(grid_plugin.is_enable & grid_plugin.has_settings)
+            self.settings_button.props.sensitive = grid_plugin.is_enable & grid_plugin.has_settings
 
-    def _on_row_toggled(self, _, path):
+    def _on_plugin_toggle(self, _, path):
         plugin = PluginGrid.from_path(self.plugin_model, path)
         plugin.toggle()
 
+        logger.debug("action=toggle plugin=%s enable=%s", plugin.name, plugin.is_enable)
+
         if plugin.is_enable:
-            self._activate_plugin(plugin)
+            self._activate(plugin)
         else:
-            self._deactivate_plugin(plugin)
+            self._deactivate(plugin)
 
     def _on_plugin_settings_clicked(self, _):
         model, selected = self.plugin_list.get_selection().get_selected()
         grid_plugin = PluginGrid.from_iter(model, selected)
-        logger.debug("action=openPluginSettings name=%s", grid_plugin.name)
+        logger.debug("action=open_plugin_settings plugin=%s", grid_plugin.name)
         grid_plugin.open_settings(self.toplevel)
 
-    def _deactivate_plugin(self, plugin):
-        self._plugin_manager.deactivatePluginByName(plugin.name)
-        self.settings_button.set_sensitive(False)
+    def _activate(self, plugin):
+        plugin.instance.connect(self._bus)
+        self._plugins.activate(plugin.name)
+        self.settings_button.props.sensitive = plugin.has_settings
 
-    def _activate_plugin(self, plugin):
-        self._plugin_manager.activatePluginByName(plugin.name)
-        self.settings_button.set_sensitive(plugin.has_settings)
+    def _deactivate(self, plugin):
+        plugin.instance.disconnect(self._bus)
+        self._plugins.deactivate(plugin.name)
+        self.settings_button.props.sensitive = False
 
-    def _clear(self):
-        self.plugin_model.clear()
+    def set_toplevel(self, widget: Gtk.Widget) -> None:
+        self.toplevel = widget
 
-    def _select_first_row(self):
+    def refresh(self):
+        logger.debug("action=refresh_plugins has_plugins=%s", self._plugins.has_plugins())
+
+        self._clear()
+
+        for plugin in self._plugins.list():
+            self._add(plugin)
+
+        if self._plugins.has_plugins():
+            self._select_first()
+
+    def _add(self, plugin):
+        logger.debug("action=add_plugin plugin=%s", plugin.name)
+        self.plugin_model.append(PluginGrid.create_row(plugin, self._config))
+        if plugin.is_activated:
+            plugin.plugin_object.connect(self._bus)
+
+    def _select_first(self):
         self.plugin_list.get_selection().select_iter(self.plugin_model.get_iter_first())
 
-    def _add_plugin(self, plugin):
-        self.plugin_model.append(PluginGrid.create_row(plugin, self._config))
-
-        logger.debug("action=addPlugin name=%s", plugin.name)
+    def _clear(self):
+        logger.debug("action=clear_plugin_list")
+        self.plugin_model.clear()
 
 
 class PluginGrid(object):
@@ -274,10 +278,10 @@ class PluginGrid(object):
         )
 
     @classmethod
-    def from_iter(cls, treestore, treeiter):
-        return cls(treestore[treeiter])
+    def from_iter(cls, tree_store, tree_iter):
+        return cls(tree_store[tree_iter])
 
     @classmethod
-    def from_path(cls, treestore, treepath):
-        treeiter = treestore.get_iter(treepath)
-        return cls(treestore[treeiter])
+    def from_path(cls, tree_store, tree_path):
+        tree_iter = tree_store.get_iter(tree_path)
+        return cls(tree_store[tree_iter])

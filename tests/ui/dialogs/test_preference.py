@@ -1,160 +1,124 @@
-from collections import namedtuple
-from unittest.mock import Mock
-
 import pytest
+from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
+from tomate.pomodoro import Config, Events
+from tomate.ui.dialogs import ExtensionTab, PluginGrid, PreferenceDialog, TimerTab
 from tomate.ui.testing import Q, TV
-
-PLUGIN_CATEGORY = "Default"
-TestPlugin = namedtuple("TestPlugin", "name version description plugin_object")
-
-
-@pytest.fixture()
-def plugin_manager():
-    from yapsy.PluginManager import PluginManager
-
-    return PluginManager()
-
-
-@pytest.fixture()
-def enabled_plugin():
-    return TestPlugin(
-        name="Enabled",
-        version="1.0.0",
-        description="Description",
-        plugin_object=Mock(has_settings=False, is_activated=True),
-    )
-
-
-@pytest.fixture()
-def disabled_plugin():
-    return TestPlugin(
-        name="Disabled",
-        version="2.0.0",
-        description="Description",
-        plugin_object=Mock(has_settings=True, is_activated=False),
-    )
 
 
 @pytest.fixture
-def subject(graph, plugin_manager, config, mocker):
+def preference(bus, plugin_engine, config, mocker) -> PreferenceDialog:
     mocker.patch("tomate.ui.dialogs.preference.Gtk.Dialog.run")
+    return PreferenceDialog(TimerTab(config), ExtensionTab(bus, config, plugin_engine))
 
-    graph.register_instance("tomate.plugin", plugin_manager)
+
+def test_preference_module(graph, bus, config, plugin_engine):
+    graph.register_instance("tomate.bus", bus)
+    graph.register_instance("tomate.plugin", plugin_engine)
     graph.register_instance("tomate.config", config)
-
     scan_to_graph(["tomate.ui.dialogs.preference"], graph)
-
-    return graph.get("tomate.ui.preference")
-
-
-def test_preference_module(graph, subject):
-    from tomate.ui.dialogs import PreferenceDialog
-
     instance = graph.get("tomate.ui.preference")
 
     assert isinstance(instance, PreferenceDialog)
-    assert instance is subject
+    assert graph.get("tomate.ui.preference") is instance
 
 
-def test_extension_module(graph, subject):
-    from tomate.ui.dialogs import ExtensionTab
+def test_refresh_reload_plugins(preference, plugin_engine):
+    plugin_engine.collect()
+    preference.run()
 
-    instance = graph.get("tomate.ui.preference.extension")
-    assert isinstance(instance, ExtensionTab)
-
-
-def test_refresh_load_available_plugins(subject, plugin_manager, enabled_plugin, disabled_plugin):
-    plugin_manager.appendPluginToCategory(enabled_plugin, PLUGIN_CATEGORY)
-    plugin_manager.appendPluginToCategory(disabled_plugin, PLUGIN_CATEGORY)
-    subject.run()
-
-    plugin_list = Q.select(subject.widget, Q.name("pluginList"))
-    assert plugin_list is not None
+    plugin_list = Q.select(preference.widget, Q.props("name", "plugin.list"))
     assert TV.map(plugin_list, TV.model, len) == 2
 
-    plugin_manager.removePluginFromCategory(enabled_plugin, PLUGIN_CATEGORY)
-    plugin_manager.removePluginFromCategory(disabled_plugin, PLUGIN_CATEGORY)
-    subject.run()
+    for plugin in plugin_engine.list():
+        plugin_engine.remove(plugin)
+
+    preference.run()
 
     assert TV.map(plugin_list, TV.model, len) == 0
 
 
 @pytest.mark.parametrize(
-    "plugin,row",
+    "plugin,row,columns",
     [
         (
-            "enabled_plugin",
-            ["Enabled", True, "<b>Enabled</b> (1.0.0)\n<small>Description</small>"],
+            "PluginA",
+            0,
+            ["PluginA", False, "<b>PluginA</b> (1.0)\n<small>Description A</small>"],
         ),
         (
-            "disabled_plugin",
-            ["Disabled", False, "<b>Disabled</b> (2.0.0)\n<small>Description</small>"],
+            "PluginB",
+            1,
+            ["PluginB", True, "<b>PluginB</b> (2.0)\n<small>Description B</small>"],
         ),
     ],
 )
-def test_refresh_select_first_plugin(plugin, row, subject, enabled_plugin, disabled_plugin, plugin_manager):
-    from tomate.ui.dialogs import PluginGrid
+def test_initial_plugin_list(plugin, row, columns, preference, plugin_engine):
+    plugin_engine.collect()
+    preference.run()
 
-    plugin_manager.appendPluginToCategory(locals()[plugin], PLUGIN_CATEGORY)
-    subject.run()
+    def get_columns(tree_store: Gtk.TreeStore):
+        return [tree_store[row][column] for column in (PluginGrid.NAME, PluginGrid.ACTIVE, PluginGrid.DETAIL)]
 
-    rows = TV.map(
-        Q.select(subject.widget, Q.name("pluginList")),
-        TV.model,
-        TV.rows(PluginGrid.NAME, PluginGrid.ACTIVE, PluginGrid.DETAIL),
-    )
-    assert rows == [row]
-    assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is False
+    assert TV.map(Q.select(preference.widget, Q.props("name", "plugin.list")), TV.model, get_columns) == columns
+    assert Q.select(preference.widget, Q.props("name", "plugin.settings")).props.sensitive is False
 
 
-def test_select_plugin(subject, disabled_plugin, plugin_manager):
-    plugin_manager.appendPluginToCategory(disabled_plugin, PLUGIN_CATEGORY)
-    subject.run()
+def test_open_plugin_settings(preference, plugin_engine):
+    plugin_engine.collect()
+    preference.run()
 
     TV.map(
-        Q.select(subject.widget, Q.name("pluginList")),
-        TV.column(Q.title("Active")),
+        Q.select(preference.widget, Q.props("name", "plugin.list")),
+        TV.column(Q.props("title", "Active")),
         TV.cell_renderer(0),
-        Q.emit("toggled", "0"),
+        Q.emit("toggled", 0),
     )
 
-    assert Q.select(subject.widget, Q.name("pluginSettingsButton")).get_sensitive() is True
+    settings_button = Q.select(preference.widget, Q.props("name", "plugin.settings"))
+    assert settings_button.props.sensitive is True
+
+    settings_button.emit("clicked")
+    plugin_a = plugin_engine.get("PluginA")
+    assert plugin_a.plugin_object.parent == preference.widget
 
 
-def test_open_plugin_settings(subject, plugin_manager, disabled_plugin):
-    plugin_manager.appendPluginToCategory(disabled_plugin, "Default")
+def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
+    plugin_engine.collect()
+    preference.run()
 
-    subject.run()
+    result = bus.send(Events.WINDOW_SHOW)
+    assert len(result) == 1 and result[0][1] == "plugin_b"
 
-    Q.select(subject.widget, Q.name("pluginSettingsButton")).emit("clicked")
+    def toggle_plugin(row: int):
+        TV.map(
+            Q.select(preference.widget, Q.props("name", "plugin.list")),
+            TV.column(Q.props("title", "Active")),
+            TV.cell_renderer(0),
+            Q.emit("toggled", row),
+        )
 
-    disabled_plugin.plugin_object.settings_window.assert_called_once_with(subject.widget)
+    toggle_plugin(0)
+    toggle_plugin(1)
 
-
-def test_timer_module(graph, subject):
-    from tomate.ui.dialogs import TimerTab
-
-    instance = graph.get("tomate.ui.preference.timer")
-    assert isinstance(instance, TimerTab)
-
-    assert instance is graph.get("tomate.ui.preference.timer")
+    result = bus.send(Events.WINDOW_SHOW)
+    assert len(result) == 1 and result[0][1] == "plugin_a"
 
 
 @pytest.mark.parametrize(
-    "option, value",
+    "duration_name,option,value",
     [
-        ("pomodoro_duration", 24),
-        ("shortbreak_duration", 4),
-        ("longbreak_duration", 14),
+        ("duration.pomodoro", Config.DURATION_POMODORO, 24),
+        ("duration.shortbreak", Config.DURATION_SHORT_BREAK, 4),
+        ("duration.longbreak", Config.DURATION_LONG_BREAK, 14),
     ],
 )
-def test_save_config_when_task_duration_change(option, value, config, subject):
-    spin_button = Q.select(subject.widget, Q.name(option))
+def test_save_config_when_task_duration_change(duration_name, option, value, config, preference):
+    spin_button = Q.select(preference.widget, Q.props("name", duration_name))
     assert spin_button is not None
 
-    spin_button.set_value(value)
+    spin_button.props.value = value
     spin_button.emit("value-changed")
 
-    assert config.get_int("Timer", option) == value
+    assert config.get_int(Config.DURATION_SECTION, option) == value
