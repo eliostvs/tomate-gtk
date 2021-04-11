@@ -16,7 +16,6 @@ def window(bus, config, graph, session) -> Window:
     namespaces = [
         "tomate.ui",
         "tomate.pomodoro.plugin",
-        "tomate.pomodoro.proxy",
     ]
     scan_to_graph(namespaces, graph)
     return graph.get("tomate.ui.view")
