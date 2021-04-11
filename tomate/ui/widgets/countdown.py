@@ -4,9 +4,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Events, Subscriber, on
-from tomate.pomodoro.session import Payload as SessionPayload
-from tomate.pomodoro.timer import Payload as TimerPayload, format_time_left
+from tomate.pomodoro import Events, SessionPayload, Subscriber, TimerPayload, format_time_left, on
 
 logger = logging.getLogger(__name__)
 
