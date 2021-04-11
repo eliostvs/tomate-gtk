@@ -1,12 +1,15 @@
 import logging
 import time
 
+import blinker
 from gi.repository import GdkPixbuf, Gtk
 from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro.event import Events, Subscriber, on
+from tomate.pomodoro import Config, Events, Session, Subscriber, on
+from .shortcut import ShortcutEngine
 from .systray import Systray
+from .widgets import Countdown, HeaderBar, SessionButton
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +28,14 @@ class Window(Subscriber):
     )
     def __init__(
         self,
-        bus,
-        config,
-        countdown,
+        bus: blinker.Signal,
+        config: Config,
+        countdown: Countdown,
         graph: Graph,
-        headerbar,
-        session,
-        session_button,
-        shortcuts,
+        headerbar: HeaderBar,
+        session: Session,
+        session_button: SessionButton,
+        shortcuts: ShortcutEngine,
     ):
         self._session = session
         self._bus = bus
