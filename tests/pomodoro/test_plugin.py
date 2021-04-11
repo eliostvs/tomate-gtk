@@ -1,69 +1,80 @@
 import os
+from distutils.version import StrictVersion
 
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro.event import Events, on
-from tomate.pomodoro.graph import graph
-from tomate.pomodoro.plugin import Plugin, PluginManager, suppress_errors
+from tomate.pomodoro import PluginEngine, suppress_errors
 
 
-def test_module(config):
-    graph.providers.clear()
+@pytest.fixture
+def plugin_engine(config) -> PluginEngine:
+    return PluginEngine(config)
+
+
+def test_module(config, graph):
     graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.pomodoro.plugin"], graph)
 
     instance = graph.get("tomate.plugin")
 
-    assert isinstance(instance, PluginManager)
+    assert isinstance(instance, PluginEngine)
     assert instance == graph.get("tomate.plugin")
 
 
-class Subject(Plugin):
-    @on(Events.SESSION_CHANGE)
-    def bar(self, sender):
-        return sender
+class TestPluginEngine:
+    def test_collect(self, plugin_engine):
+        assert plugin_engine.has_plugins() is False
+
+        plugin_engine.collect()
+
+        assert plugin_engine.has_plugins() is True
+
+    def test_activate(self, plugin_engine):
+        plugin_engine.collect()
+        plugin_a = plugin_engine.get("PluginA")
+
+        assert plugin_a.is_activated is False
+
+        plugin_engine.activate("PluginA")
+        assert plugin_a.is_activated is True
+
+    def test_deactivate(self, plugin_engine):
+        plugin_engine.collect()
+        plugin_a = plugin_engine.get("PluginB")
+
+        assert plugin_a.is_activated is True
+
+        plugin_engine.deactivate("PluginB")
+        assert plugin_a.is_activated is False
+
+    def test_list(self, plugin_engine):
+        plugin_engine.collect()
+
+        got = [(p.name, p.version, p.is_activated, p.plugin_object.has_settings) for p in plugin_engine.list()]
+
+        assert got == [
+            ("PluginA", StrictVersion("1.0.0"), False, True),
+            ("PluginB", StrictVersion("2.0.0"), True, False),
+        ]
 
 
-def test_connects_events_when_plugin_activate(bus):
-    graph.providers.clear()
-    graph.register_instance("tomate.bus", bus)
-    plugin = Subject()
-    plugin.activate()
+class TestRaiseException:
+    def test_does_not_raise_exception_when_debug_is_disabled(self):
+        os.environ.unsetenv("TOMATE_DEBUG")
 
-    result = bus.send(Events.SESSION_CHANGE)
+        @suppress_errors
+        def raise_exception():
+            raise Exception()
 
-    assert result == [(plugin.bar, Events.SESSION_CHANGE)]
+        assert not raise_exception()
 
+    def test_raises_exception_when_debug_enable(self):
+        os.environ.setdefault("TOMATE_DEBUG", "1")
 
-def test_disconnects_events_when_plugin_deactivate(bus):
-    graph.providers.clear()
-    graph.register_instance("tomate.bus", bus)
-    plugin = Subject()
-    plugin.activate()
-    plugin.deactivate()
+        @suppress_errors
+        def raise_exception():
+            raise Exception()
 
-    result = bus.send(Events.SESSION_CHANGE)
-
-    assert result == []
-
-
-def test_does_not_raise_exception_when_debug_is_disabled():
-    os.environ.unsetenv("TOMATE_DEBUG")
-
-    @suppress_errors
-    def raise_exception():
-        raise Exception()
-
-    assert not raise_exception()
-
-
-def test_raises_exception_when_debug_enable():
-    os.environ.setdefault("TOMATE_DEBUG", "1")
-
-    @suppress_errors
-    def raise_exception():
-        raise Exception()
-
-    with pytest.raises(Exception):
-        raise_exception()
+        with pytest.raises(Exception):
+            raise_exception()

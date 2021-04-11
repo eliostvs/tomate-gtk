@@ -1,0 +1,9 @@
+[Core]
+Name = PluginA
+Module = plugin_a
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 1.0.0
+Website = https://github.com/eliostvs/tomate-plugin-a
+Description = Description A
