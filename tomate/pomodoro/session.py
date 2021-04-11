@@ -14,8 +14,9 @@ from .fsm import fsm
 from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer
 
 logger = logging.getLogger(__name__)
-Payload = namedtuple("SessionPayload", "id type pomodoros duration")
-EndPayload = namedtuple("SessionEndPayload", "id type pomodoros duration previous")
+
+Payload = namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])
+EndPayload = namedtuple("SessionEndPayload", ["id", "type", "pomodoros", "duration", "previous"])
 
 
 class Type(enum.Enum):
