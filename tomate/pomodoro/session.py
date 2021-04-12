@@ -35,9 +35,9 @@ class Type(enum.Enum):
 
 
 class State(enum.Enum):
-    STOPPED = 1
-    STARTED = 2
-    ENDED = 3
+    STOPPED = 0
+    STARTED = 1
+    ENDED = 2
 
 
 @register.factory("tomate.session", scope=SingletonScope)
