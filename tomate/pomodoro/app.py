@@ -5,6 +5,8 @@ from dbus.mainloop.glib import DBusGMainLoop
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
+from .plugin import PluginEngine
+
 
 class State(enum.Enum):
     STOPPED = 1
@@ -19,7 +21,7 @@ class Application(dbus.service.Object):
     SPEC = "tomate.app"
 
     @inject(bus="dbus.session", window="tomate.ui.view", plugins="tomate.plugin")
-    def __init__(self, bus, window, plugins):
+    def __init__(self, bus, window, plugins: PluginEngine):
         dbus.service.Object.__init__(self, bus, self.BUS_PATH)
         self.state = State.STOPPED
         self._window = window
