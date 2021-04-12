@@ -1,3 +1,7 @@
+ifeq ($(origin .RECIPEPREFIX), undefined)
+	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
+endif
+
 .DELETE_ON_ERROR:
 .ONESHELL:
 .SHELLFLAGS   := -eu -o pipefail -c
@@ -6,10 +10,6 @@ MAKEFLAGS     += --no-builtin-rules
 MAKEFLAGS     += --warn-undefined-variables
 SHELL         = bash
 
-ifeq ($(origin .RECIPEPREFIX), undefined)
-	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
-endif
-  
 DATAPATH     = $(CURDIR)/tests/data
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
