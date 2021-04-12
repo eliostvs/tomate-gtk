@@ -3,9 +3,6 @@ sudo: required
 services:
     - docker
 
-before_install:
-    - make docker-pull
-
 script:
     - make docker-test
 
