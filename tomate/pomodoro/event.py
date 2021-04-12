@@ -41,7 +41,7 @@ class Bus:
         self._bus.connect(receiver, sender=event, weak=weak)
 
     def send(self, event: Events, payload: Any = None) -> List[Any]:
-        # drop receiver, index 0, in the result
+        # drop receiver, index 0, from the result
         return [result[1] for result in self._bus.send(event, payload=payload)]
 
     def disconnect(self, event: Events, receiver: Receiver):
