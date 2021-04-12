@@ -28,8 +28,8 @@ endif
 
 .PHONY: clean
 clean:
-	find . \( -iname "*.pyc" -o -iname "__pycache__"  -o -iname ".pytest_cache" \) -print0 | xargs -0 rm -rf
-	rm -rf .eggs *.egg-info/ .coverage build/ .cache tests/data/mime/mime.cache
+	find . \( -iname "__pycache__" \) -print0 | xargs -0 rm -rf
+	rm -rf .eggs *.egg-info/ .coverage build/ .cache .pytest_cache tests/data/mime/mime.cache
 
 .PHONY: mime
 mime: clean
