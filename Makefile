@@ -67,20 +67,9 @@ docker-run:
 	-v $(HOME)/.Xauthority:/root/.Xauthority \
 	$(DOCKER_IMAGE) run
 
-.PHONY: docker-clean
-docker-clean:
-	docker rmi $(DOCKER_IMAGE) 2> /dev/null || echo $(DOCKER_IMAGE) not found!
-
 .PHONY: docker-test
 docker-test:
 	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) mime test
-
-.PHONY: docker-pull
-docker-pull:
-	docker pull $(DOCKER_IMAGE)
-
-.PHONY: docker-all
-docker-all: docker-pull docker-clean docker-test
 
 .PHONY: docker-enter
 docker-enter:
