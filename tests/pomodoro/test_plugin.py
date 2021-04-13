@@ -32,7 +32,7 @@ class TestPluginEngine:
 
     def test_activate(self, plugin_engine):
         plugin_engine.collect()
-        plugin_a = plugin_engine.get("PluginA")
+        plugin_a = plugin_engine.lookup("PluginA")
 
         assert plugin_a.is_activated is False
 
@@ -41,22 +41,31 @@ class TestPluginEngine:
 
     def test_deactivate(self, plugin_engine):
         plugin_engine.collect()
-        plugin_a = plugin_engine.get("PluginB")
+        plugin_a = plugin_engine.lookup("PluginB")
 
         assert plugin_a.is_activated is True
 
         plugin_engine.deactivate("PluginB")
         assert plugin_a.is_activated is False
 
-    def test_list(self, plugin_engine):
+    def test_all(self, plugin_engine):
         plugin_engine.collect()
 
-        got = [(p.name, p.version, p.is_activated, p.plugin_object.has_settings) for p in plugin_engine.list()]
+        got = [(p.name, p.version, p.is_activated, p.plugin_object.has_settings) for p in plugin_engine.all()]
 
         assert got == [
             ("PluginA", StrictVersion("1.0.0"), False, True),
             ("PluginB", StrictVersion("2.0.0"), True, False),
         ]
+
+    def test_lookup(self, plugin_engine):
+        plugin_engine.collect()
+
+        assert plugin_engine.lookup("Not Exist") is None
+
+        plugin = plugin_engine.lookup("PluginA")
+
+        assert plugin is not None
 
 
 class TestRaiseException:

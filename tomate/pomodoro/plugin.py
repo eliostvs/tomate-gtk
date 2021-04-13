@@ -8,6 +8,7 @@ from wiring import SingletonScope, inject
 from wiring.scanning import register
 from yapsy.ConfigurablePluginManager import ConfigurablePluginManager
 from yapsy.IPlugin import IPlugin
+from yapsy.PluginInfo import PluginInfo
 from yapsy.VersionedPluginManager import VersionedPluginManager
 
 from .config import Config
@@ -41,18 +42,18 @@ class PluginEngine:
         self._plugin_manager.deactivatePluginByName(name)
 
     def activate(self, name: str) -> None:
-        return self._plugin_manager.activatePluginByName(name)
+        self._plugin_manager.activatePluginByName(name)
 
-    def list(self) -> List[object]:
-        return sorted(self._plugin_manager.getAllPlugins(), key=lambda plugin: plugin.name)
+    def all(self) -> List[PluginInfo]:
+        return sorted(self._plugin_manager.getAllPlugins(), key=lambda info: info.name)
 
-    def get(self, name: str, category="Default") -> Optional[object]:
+    def lookup(self, name: str, category="Default") -> Optional[PluginInfo]:
         return self._plugin_manager.getPluginByName(name, category)
 
     def has_plugins(self) -> bool:
-        return len(self.list()) > 0
+        return len(self.all()) > 0
 
-    def remove(self, plugin: object, category="Default"):
+    def remove(self, plugin: object, category="Default") -> None:
         self._plugin_manager.removePluginFromCategory(plugin, category)
 
 

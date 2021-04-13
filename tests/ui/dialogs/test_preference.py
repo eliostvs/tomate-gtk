@@ -31,7 +31,7 @@ def test_refresh_reload_plugins(preference, plugin_engine):
     plugin_list = Q.select(preference.widget, Q.props("name", "plugin.list"))
     assert TV.map(plugin_list, TV.model, len) == 2
 
-    for plugin in plugin_engine.list():
+    for plugin in plugin_engine.all():
         plugin_engine.remove(plugin)
 
     preference.run()
@@ -80,7 +80,7 @@ def test_open_plugin_settings(preference, plugin_engine):
     assert settings_button.props.sensitive is True
 
     settings_button.emit("clicked")
-    plugin_a = plugin_engine.get("PluginA")
+    plugin_a = plugin_engine.lookup("PluginA")
     assert plugin_a.plugin_object.parent == preference.widget
 
 

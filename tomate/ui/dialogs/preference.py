@@ -195,7 +195,7 @@ class ExtensionTab:
 
         self._clear()
 
-        for plugin in self._plugins.list():
+        for plugin in self._plugins.all():
             self._add(plugin)
 
         if self._plugins.has_plugins():
