@@ -40,6 +40,9 @@ class Bus:
     def connect(self, event: Events, receiver: Receiver, weak: bool = True):
         self._bus.connect(receiver, sender=event, weak=weak)
 
+    def is_connect(self, event: Events, receiver: Receiver) -> bool:
+        return receiver in self._bus.receivers_for(event)
+
     def send(self, event: Events, payload: Any = None) -> List[Any]:
         # drop receiver, index 0, from the result
         return [result[1] for result in self._bus.send(event, payload=payload)]
