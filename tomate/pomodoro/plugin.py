@@ -36,6 +36,7 @@ class PluginEngine:
         self._plugin_manager.setConfigParser(config.parser, config.save)
 
     def collect(self) -> None:
+        logger.debug("action=collect")
         self._plugin_manager.collectPlugins()
 
     def deactivate(self, name: str) -> None:
@@ -45,13 +46,17 @@ class PluginEngine:
         self._plugin_manager.activatePluginByName(name)
 
     def all(self) -> List[PluginInfo]:
+        logger.debug("action=all")
         return sorted(self._plugin_manager.getAllPlugins(), key=lambda info: info.name)
 
     def lookup(self, name: str, category="Default") -> Optional[PluginInfo]:
+        logger.debug("action=lookup name=%s category=%s", name, category)
         return self._plugin_manager.getPluginByName(name, category)
 
     def has_plugins(self) -> bool:
-        return len(self.all()) > 0
+        has = len(self.all()) > 0
+        logger.debug("action=has_plugin has=%s", has)
+        return has
 
     def remove(self, plugin: object, category="Default") -> None:
         self._plugin_manager.removePluginFromCategory(plugin, category)
