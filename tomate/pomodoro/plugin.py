@@ -30,7 +30,7 @@ class PluginEngine:
     def __init__(self, config: Config):
         logger.debug("action=init paths=%s", config.plugin_paths())
 
-        self._plugin_manager = ConfigurablePluginManager(VersionedPluginManager())
+        self._plugin_manager = ConfigurablePluginManager(decorated_manager=VersionedPluginManager())
         self._plugin_manager.setPluginPlaces(config.plugin_paths())
         self._plugin_manager.setPluginInfoExtension("plugin")
         self._plugin_manager.setConfigParser(config.parser, config.save)
