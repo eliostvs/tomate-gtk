@@ -4,15 +4,16 @@ from distutils.version import StrictVersion
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import PluginEngine, suppress_errors
+from tomate.pomodoro import Events, PluginEngine, suppress_errors
 
 
 @pytest.fixture
-def plugin_engine(config) -> PluginEngine:
-    return PluginEngine(config)
+def plugin_engine(bus, graph, config) -> PluginEngine:
+    return PluginEngine(bus, config, graph)
 
 
-def test_module(config, graph):
+def test_module(bus, config, graph):
+    graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.config", config)
     scan_to_graph(["tomate.pomodoro.plugin"], graph)
 
@@ -23,30 +24,38 @@ def test_module(config, graph):
 
 
 class TestPluginEngine:
-    def test_collect(self, plugin_engine):
+    def test_collect(self, bus, graph, plugin_engine):
         assert plugin_engine.has_plugins() is False
 
         plugin_engine.collect()
 
         assert plugin_engine.has_plugins() is True
 
-    def test_activate(self, plugin_engine):
+        for plugin in plugin_engine.all():
+            assert plugin.plugin_object.bus is bus
+            assert plugin.plugin_object.graph is graph
+
+    def test_activate(self, bus, plugin_engine):
         plugin_engine.collect()
         plugin_a = plugin_engine.lookup("PluginA")
 
         assert plugin_a.is_activated is False
+        assert bus.is_connect(Events.WINDOW_SHOW, plugin_a.plugin_object.listener) is False
 
         plugin_engine.activate("PluginA")
         assert plugin_a.is_activated is True
+        assert bus.is_connect(Events.WINDOW_SHOW, plugin_a.plugin_object.listener) is True
 
-    def test_deactivate(self, plugin_engine):
+    def test_deactivate(self, bus, plugin_engine):
         plugin_engine.collect()
-        plugin_a = plugin_engine.lookup("PluginB")
+        plugin_b = plugin_engine.lookup("PluginB")
 
-        assert plugin_a.is_activated is True
+        assert plugin_b.is_activated is True
+        assert bus.is_connect(Events.WINDOW_SHOW, plugin_b.plugin_object.listener) is True
 
         plugin_engine.deactivate("PluginB")
-        assert plugin_a.is_activated is False
+        assert plugin_b.is_activated is False
+        assert bus.is_connect(Events.WINDOW_SHOW, plugin_b.plugin_object.listener) is False
 
     def test_all(self, plugin_engine):
         plugin_engine.collect()

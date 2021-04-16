@@ -178,12 +178,10 @@ class ExtensionTab:
         grid_plugin.open_settings(self.toplevel)
 
     def _activate(self, plugin):
-        plugin.instance.connect(self._bus)
         self._plugins.activate(plugin.name)
         self.settings_button.props.sensitive = plugin.has_settings
 
     def _deactivate(self, plugin):
-        plugin.instance.disconnect(self._bus)
         self._plugins.deactivate(plugin.name)
         self.settings_button.props.sensitive = False
 
@@ -204,8 +202,6 @@ class ExtensionTab:
     def _add(self, plugin):
         logger.debug("action=add_plugin plugin=%s", plugin.name)
         self.plugin_model.append(PluginGrid.create_row(plugin, self._config))
-        if plugin.is_activated:
-            plugin.plugin_object.connect(self._bus)
 
     def _select_first(self):
         self.plugin_list.get_selection().select_iter(self.plugin_model.get_iter_first())

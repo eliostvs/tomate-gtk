@@ -46,5 +46,5 @@ def shortcut_engine(config: Config) -> ShortcutEngine:
 
 
 @pytest.fixture
-def plugin_engine(config: Config) -> PluginEngine:
-    return PluginEngine(config)
+def plugin_engine(bus: Bus, graph: Graph, config: Config) -> PluginEngine:
+    return PluginEngine(bus, config, graph)
