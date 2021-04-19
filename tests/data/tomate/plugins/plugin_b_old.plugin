@@ -1,0 +1,9 @@
+[Core]
+Name = PluginB
+Module = plugin_b
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 1.5.0
+Website = https://github.com/eliostvs/tomate-plugin-b
+Description = Should not loaded because has an older version

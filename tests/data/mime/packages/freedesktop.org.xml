@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+The freedesktop.org shared MIME database (this file) was created by merging
+several existing MIME databases (all released under the GPL).
+
+It comes with ABSOLUTELY NO WARRANTY, to the extent permitted by law. You may
+redistribute copies of update-mime-database under the terms of the GNU General
+Public License. For more information about these matters, see the file named
+COPYING.
+
+The latest version is available from:
+
+	http://www.freedesktop.org/wiki/Software/shared-mime-info/
+
+To extend this database, users and applications should create additional
+XML files in the 'packages' directory and run the update-mime-database
+command to generate the output files.
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="image/png">
+    <comment>PNG image</comment>
+    <magic priority="50">
+      <match type="string" value="\x89PNG" offset="0"/>
+    </magic>
+    <glob pattern="*.png"/>
+  </mime-type>
+  <mime-type type="image/svg+xml">
+    <comment>SVG image</comment>
+    <acronym>SVG</acronym>
+    <expanded-acronym>Scalable Vector Graphics</expanded-acronym>
+    <sub-class-of type="application/xml"/>
+    <magic priority="80">
+      <match type="string" value="&lt;!DOCTYPE svg" offset="0:256"/>
+    </magic>
+    <magic priority="80">
+      <match type="string" value="&lt;!-- Created with Inkscape" offset="0"/>
+      <match type="string" value="&lt;svg" offset="0"/>
+    </magic>
+    <magic priority="45">
+      <match type="string" value="&lt;svg" offset="1:256"/>
+    </magic>
+    <glob pattern="*.svg"/>
+    <root-XML namespaceURI="http://www.w3.org/2000/svg" localName="svg"/>
+  </mime-type>
+</mime-info>

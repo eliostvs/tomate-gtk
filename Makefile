@@ -1,63 +1,76 @@
-PACKAGE = tomate-gtk
-AUTHOR = eliostvs
-PACKAGE_ROOT = $(CURDIR)
-PACKAGE_DIR = tomate_gtk
-DOCKER_IMAGE_NAME= $(AUTHOR)/tomate
-DATA_PATH = $(PACKAGE_ROOT)/data
-TOMATE_PATH = $(PACKAGE_ROOT)/tomate
-XDG_DATA_DIRS = XDG_DATA_DIRS=$(DATA_PATH):/home/$(USER)/.local/share:/usr/local/share:/usr/share
-PYTHONPATH=PYTHONPATH=$(TOMATE_PATH):$(PACKAGE_ROOT)
-PROJECT = home:eliostvs:tomate
-OBS_API_URL = https://api.opensuse.org/trigger/runservice
-DEBUG = TOMATE_DEBUG=true
-WORK_DIR=/code
-CURRENT_VERSION = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
-
-ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
-	TEST_PREFIX = xvfb-run -a
-else
-	TEST_PREFIX =
+ifeq ($(origin .RECIPEPREFIX), undefined)
+	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
 
-submodule:
-	git submodule init;
-	git submodule update;
+.DELETE_ON_ERROR:
+.ONESHELL:
+.SHELLFLAGS   := -eu -o pipefail -c
+.SILENT:
+MAKEFLAGS     += --no-builtin-rules
+MAKEFLAGS     += --warn-undefined-variables
+SHELL         = bash
 
+DATAPATH     = $(CURDIR)/tests/data
+DOCKER_IMAGE = eliostvs/$(PACKAGE)
+OBS_API_URL  = https://api.opensuse.org/trigger/runservice
+PACKAGE      = tomate
+PYTHON       ?= python
+PYTHONPATH   = PYTHONPATH=$(CURDIR)
+VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
+WORKDIR      = /code
+XDGPATH      = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=$(DATAPATH)
+
+ifeq ($(shell which xvfb-run 1> /dev/null && echo yes),yes)
+	ARGS = xvfb-run -a
+else
+	ARGS ?=
+endif
+
+.PHONY: clean
 clean:
-	find . \( -iname "*.pyc" -o -iname "__pycache__"\) -print0 | xargs -0 rm -rf
+	find . \( -iname "__pycache__" \) -print0 | xargs -0 rm -rf
+	rm -rf .eggs *.egg-info/ .coverage build/ .cache .pytest_cache tests/data/mime/mime.cache
 
+.PHONY: mime
+mime: clean
+	update-mime-database tests/data/mime
+	rm -rf tests/data/mime/{image,aliases,generic-icons,globs,globs2,icons,magic,subclasses,treemagic,types,version,XMLnamespaces}
+
+.PHONY: format
+format:
+	black $(PACKAGE) tests/
+
+.PHONY: test
+test:
+	echo "$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
+	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
+
+.PHONY: run
 run:
-	$(XDG_DATA_DIRS) $(PYTHONPATH) python -m $(PACKAGE_DIR) -v
-
-test: clean
-	$(XDG_DATA_DIRS) $(PYTHONPATH) $(DEBUG) $(TEST_PREFIX) pytest $(file) -v --cov=$(PACKAGE_DIR)
-
-docker-run:
-	docker run --rm -it -e DISPLAY --net=host \
-	-v $(PACKAGE_ROOT):/code \
-	-v $(HOME)/.Xauthority:/root/.Xauthority \
-	$(DOCKER_IMAGE_NAME) run
-
-docker-clean:
-	docker rmi $(DOCKER_IMAGE_NAME) 2> /dev/null || echo $(DOCKER_IMAGE_NAME) not found!
-
-docker-test:
-	docker run --rm -it -v $(PACKAGE_ROOT):$(WORK_DIR) --workdir $(WORK_DIR) $(DOCKER_IMAGE_NAME)
-
-docker-pull:
-	docker pull $(DOCKER_IMAGE_NAME)
-
-docker-all: docker-pull docker-clean docker-test
-
-docker-enter:
-	docker run --rm -v $(PACKAGE_ROOT):$(WORK_DIR) -it --workdir $(WORK_DIR) --entrypoint="bash" $(DOCKER_IMAGE_NAME)
-
-trigger-build:
-	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
+	$(XDGPATH) $(PYTHONPATH) TOMATE_DEBUG=true $(PYTHON) -m $(PACKAGE) -v
 
 release-%:
 	git flow init -d
-	@grep -q '\[Unreleased\]' README.md || (echo 'Create the [Unreleased] section in the changelog first!' && exit)
+	@grep -q '\[Unreleased\]' CHANGELOG.md || (echo 'Create the [Unreleased] section in the changelog first!' && exit)
 	bumpversion --verbose --commit $*
-	git flow release start $(CURRENT_VERSION)
-	GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$(CURRENT_VERSION)" -T $(CURRENT_VERSION) $(CURRENT_VERSION) -p
+	git flow release start $(VERSION)
+	GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$(VERSION)" -T $(VERSION) $(VERSION) -p
+
+.PHONY: trigger-build
+trigger-build:
+	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
+
+.PHONY: docker-run
+docker-run:
+	docker run --rm -it -e DISPLAY --net=host \
+	-v $(CURDIR):/code \
+	-v $(HOME)/.Xauthority:/root/.Xauthority \
+	$(DOCKER_IMAGE) run
+
+.PHONY: docker-test
+docker-test:
+	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) mime test
+
+.PHONY: docker-enter
+docker-enter:
+	docker run --rm -v $(CURDIR):$(WORKDIR) -it --workdir $(WORKDIR) --entrypoint="bash" $(DOCKER_IMAGE)

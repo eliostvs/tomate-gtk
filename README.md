@@ -1,7 +1,7 @@
-Tomate GTK
-==========
+Tomate
+======
 
-A open source timer for the Pomodoro Technique®.
+A Pomodoro timer written in Gtk3 and Python for Linux desktops.
 
 About the technique
 -------------------
@@ -15,7 +15,7 @@ Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 Installation
 ------------
 
-### Ubuntu 16.04+
+### Ubuntu 20.04+
 
 If you have installed the program using the **old ppa repository** uninstall the old version first.
 If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** variable to the Ubuntu version number, such as 16.04, rather than running the sed script bellow.
@@ -25,7 +25,7 @@ If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** va
     sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
     sudo apt-get update && sudo apt-get install tomate-gtk
 
-### Debian 8+
+### Debian 10+
 
     RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1\.0/p' /etc/os-release`
     sudo wget -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/Release.key | sudo apt-key add -
@@ -37,7 +37,7 @@ If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** va
     sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_Tumbleweed/home:eliostvs:tomate.repo
     sudo zypper install tomate-gtk
 
-### Fedora 24+
+### Fedora 32+
 
     RELEASE=`cat /etc/fedora-release | grep -o '[0-9][0-9]*'`
     sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Fedora_$RELEASE/home:eliostvs:tomate.repo
@@ -64,80 +64,6 @@ Bugs and Suggestions
 -------------------
 
 Bugs and suggestions should be reported [here][bugs].
-
-Changelog
----------
-
-### 0.11.0
-
-#### Added
-
-- Keyboard shortcuts to start (control + s), stop (control + p) and reset (control + r) sessions
-
-### 0.10.0
-
-#### Changed
-
-- The timer, session and settings now emit a payload object instead of a dictionary
-
-### 0.9.2
-
-#### Fixed
-
-- Timer countdown blinking
-
-### 0.9.1
-
-#### Changed
-
-- Arch linux installation instructions
-
-### 0.9.0
-
-#### Changed
-
-- Change UI to use a headerbar widget instead of a toolbar
-- The Task enum was renamed to Sessions
-
-#### Removed
-
-- Show notifications in then main widget (**show\_message view interface**)
-
-### 0.8.0
-
-#### Added
-
-- Show notifications in the main widget (**show\_message** view interface)
-
-#### Fixed
-
-- Reopen from command line
-
-#### Changed
-
-- Arch install instructions
-
-### 0.7.0
-
-- Using wiring.scanning
-- Add plugin settings
-- Python 3 only
-
-### 0.6.0
-
-- Using py.test
-- Add menu widget
-
-### 0.5.0
-
-- Remove linux package metadata
-- Fix Gtk warnings
-
-### 0.4.0
-
-- Using the new event system
-- Python 2/3 compatible (only for Ubuntu/Debian/Arch)
-- Remove appindicator3 dependency
 
 License
 -------

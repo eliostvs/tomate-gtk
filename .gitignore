@@ -48,3 +48,5 @@ whoosh_index/
 .cache
 .envrc
 .pytest_cache
+venv/
+tests/data/mime/mime.cache
