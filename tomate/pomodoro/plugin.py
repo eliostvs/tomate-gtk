@@ -37,7 +37,7 @@ class Plugin(IPlugin, Subscriber):
         self.disconnect(self.bus)
         super().deactivate()
 
-    def settings_window(self, parent: Gtk.Widget) -> Union[Gtk.Dialog, None]:
+    def settings_window(self, parent) -> Union[Gtk.Dialog, None]:
         return None
 
 
