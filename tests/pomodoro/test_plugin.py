@@ -79,7 +79,7 @@ class TestPluginEngine:
 
 class TestRaiseException:
     def test_does_not_raise_exception_when_debug_is_disabled(self):
-        os.environ.unsetenv("TOMATE_DEBUG")
+        os.unsetenv("TOMATE_DEBUG")
 
         @suppress_errors
         def raise_exception():
