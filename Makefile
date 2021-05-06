@@ -14,7 +14,7 @@ DATAPATH     = $(CURDIR)/tests/data
 DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
-PYTHON       ?= python
+PYTHON       ?= python3
 PYTHONPATH   = PYTHONPATH=$(CURDIR)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
