@@ -18,6 +18,17 @@ def active_shortcut(shortcut_engine: ShortcutEngine, shortcut: Shortcut, window:
     return Gtk.accel_groups_activate(window, key, mod)
 
 
+def create_session_payload(**kwargs) -> SessionPayload:
+    defaults = {
+        "id": "1234",
+        "duration": 25 * 60,
+        "pomodoros": 0,
+        "type": SessionType.POMODORO,
+    }
+    defaults.update(kwargs)
+    return SessionPayload(**defaults)
+
+
 def create_session_end_payload(**kwargs) -> SessionEndPayload:
     defaults = {
         "id": "1234",
@@ -38,17 +49,6 @@ def refresh_gui(delay: int = 0) -> None:
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
     time.sleep(delay)
-
-
-def create_session_payload(**kwargs) -> SessionPayload:
-    defaults = {
-        "id": "1234",
-        "duration": 25 * 60,
-        "pomodoros": 0,
-        "type": SessionType.POMODORO,
-    }
-    defaults.update(kwargs)
-    return SessionPayload(**defaults)
 
 
 class GtkWidgetNotFound(Exception):
