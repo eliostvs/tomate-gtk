@@ -1,7 +1,7 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import Events, Timer, TimerPayload, format_time_left
+from tomate.pomodoro import Events, Timer, TimerPayload
 from tomate.pomodoro.timer import State
 from tomate.ui.testing import run_loop_for
 
@@ -147,10 +147,15 @@ class TestTimerPayload:
 
         assert payload.elapsed_percent == percent
 
+    @pytest.mark.parametrize(
+        "seconds,formatted",
+        [
+            (25 * 60, "25:00"),
+            (15 * 60, "15:00"),
+            (5 * 60, "05:00"),
+        ],
+    )
+    def test_payload_markup(self, seconds, formatted):
+        payload = TimerPayload(time_left=seconds, duration=0)
 
-@pytest.mark.parametrize(
-    "seconds,time_formatted",
-    [(25 * 60, "25:00"), (15 * 60, "15:00"), (5 * 60, "05:00")],
-)
-def test_format_time_left(seconds, time_formatted):
-    assert time_formatted == format_time_left(seconds)
+        assert payload.format == formatted

@@ -13,6 +13,11 @@ logger = logging.getLogger(__name__)
 SECONDS_IN_A_MINUTE = 60
 
 
+def format_seconds(seconds: int) -> str:
+    minutes, seconds = divmod(seconds, SECONDS_IN_A_MINUTE)
+    return "{0:0>2}:{1:0>2}".format(minutes, seconds)
+
+
 class Payload(namedtuple("TimerPayload", ["time_left", "duration"])):
     @property
     def remaining_ratio(self) -> float:
@@ -32,6 +37,10 @@ class Payload(namedtuple("TimerPayload", ["time_left", "duration"])):
         """
         percent = self.elapsed_ratio * 100
         return percent - percent % 5
+
+    @property
+    def format(self) -> str:
+        return format_seconds(self.time_left)
 
 
 # Based on Tomatoro create by Pierre Quillery.
@@ -99,8 +108,3 @@ class Timer:
 
     def _trigger(self, event) -> None:
         self._bus.send(event, payload=Payload(time_left=self.time_left, duration=self.duration))
-
-
-def format_time_left(seconds: int) -> str:
-    minutes, seconds = divmod(seconds, SECONDS_IN_A_MINUTE)
-    return "{0:0>2}:{1:0>2}".format(minutes, seconds)
