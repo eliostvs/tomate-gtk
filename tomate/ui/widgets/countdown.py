@@ -4,7 +4,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, SessionPayload, Subscriber, TimerPayload, format_seconds, on
+from tomate.pomodoro import Bus, Events, SessionPayload, Subscriber, TimerPayload, on
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class Countdown(Subscriber):
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
     def _on_session_change(self, _, payload: SessionPayload) -> None:
-        self._update(format_seconds(payload.duration))
+        self._update(payload.format)
 
     def _update(self, duration: str) -> None:
         self.widget.set_markup(self.timer_markup(duration))
