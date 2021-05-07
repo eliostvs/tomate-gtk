@@ -18,11 +18,11 @@ class Countdown(Subscriber):
 
     @on(Events.TIMER_UPDATE)
     def _on_timer_update(self, _, payload: TimerPayload) -> None:
-        self._update(payload.format)
+        self._update(payload.countdown)
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
     def _on_session_change(self, _, payload: SessionPayload) -> None:
-        self._update(payload.format)
+        self._update(payload.countdown)
 
     def _update(self, duration: str) -> None:
         self.widget.set_markup(self.timer_markup(duration))

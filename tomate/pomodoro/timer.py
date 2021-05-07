@@ -39,7 +39,7 @@ class Payload(namedtuple("TimerPayload", ["time_left", "duration"])):
         return percent - percent % 5
 
     @property
-    def format(self) -> str:
+    def countdown(self) -> str:
         return format_seconds(self.time_left)
 
 

@@ -158,4 +158,4 @@ class TestTimerPayload:
     def test_payload_markup(self, seconds, formatted):
         payload = TimerPayload(time_left=seconds, duration=0)
 
-        assert payload.format == formatted
+        assert payload.countdown == formatted

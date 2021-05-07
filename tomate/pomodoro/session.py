@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Payload(namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])):
     @property
-    def format(self) -> str:
+    def countdown(self) -> str:
         return format_seconds(self.duration)
 
 

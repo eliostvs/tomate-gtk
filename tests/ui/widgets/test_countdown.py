@@ -27,11 +27,11 @@ def test_updates_countdown_when_session_state_changes(event, bus, countdown):
     payload = create_session_payload(duration=random.randint(1, 100))
     bus.send(event, payload=payload)
 
-    assert payload.format in countdown.widget.get_text()
+    assert payload.countdown in countdown.widget.get_text()
 
 
 def test_updates_countdown_when_timer_changes(bus, countdown):
     payload = TimerPayload(time_left=random.randint(1, 100), duration=0)
     bus.send(Events.TIMER_UPDATE, payload=payload)
 
-    assert payload.format in countdown.widget.get_text()
+    assert payload.countdown in countdown.widget.get_text()
