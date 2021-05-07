@@ -35,7 +35,8 @@ def test_updates_countdown_when_session_state_changes(event, bus, countdown):
 def test_updates_countdown_when_timer_changes(bus, countdown):
     time_left = random.randint(1, 100)
 
-    bus.send(Events.TIMER_UPDATE, payload=TimerPayload(time_left=time_left, duration=0))
+    payload = TimerPayload(time_left=time_left, duration=0)
+    bus.send(Events.TIMER_UPDATE, payload=payload)
 
     assert countdown.widget.get_text() == format_time(time_left)
 
