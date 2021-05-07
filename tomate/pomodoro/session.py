@@ -10,12 +10,18 @@ from wiring.scanning import register
 
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
-from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer
+from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer, format_seconds
 
 logger = logging.getLogger(__name__)
 
-Payload = namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])
-EndPayload = namedtuple("SessionEndPayload", ["id", "type", "pomodoros", "duration", "previous"])
+
+class Payload(namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])):
+    @property
+    def countdown(self) -> str:
+        return format_seconds(self.duration)
+
+
+EndPayload = namedtuple("SessionEndPayload", Payload._fields + ("previous",))
 
 
 class Type(enum.Enum):

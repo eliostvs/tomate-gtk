@@ -1,10 +1,9 @@
 import random
-import xml.etree.ElementTree as ET
 
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import Events, TimerPayload, format_time_left
+from tomate.pomodoro import Events, TimerPayload
 from tomate.ui.testing import create_session_payload
 from tomate.ui.widgets import Countdown
 
@@ -25,21 +24,14 @@ def test_module(countdown, graph):
 
 @pytest.mark.parametrize("event", [Events.SESSION_INTERRUPT, Events.SESSION_CHANGE])
 def test_updates_countdown_when_session_state_changes(event, bus, countdown):
-    duration = random.randint(1, 100)
+    payload = create_session_payload(duration=random.randint(1, 100))
+    bus.send(event, payload=payload)
 
-    bus.send(event, payload=create_session_payload(duration=duration))
-
-    assert countdown.widget.get_text() == format_time(duration)
+    assert payload.countdown in countdown.widget.get_text()
 
 
 def test_updates_countdown_when_timer_changes(bus, countdown):
-    time_left = random.randint(1, 100)
+    payload = TimerPayload(time_left=random.randint(1, 100), duration=0)
+    bus.send(Events.TIMER_UPDATE, payload=payload)
 
-    bus.send(Events.TIMER_UPDATE, payload=TimerPayload(time_left=time_left, duration=0))
-
-    assert countdown.widget.get_text() == format_time(time_left)
-
-
-def format_time(time_left: int) -> str:
-    markup = Countdown.timer_markup(format_time_left(time_left))
-    return ET.fromstring(markup).text
+    assert payload.countdown in countdown.widget.get_text()
