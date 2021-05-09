@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Read boolean values from config with the Config.get_bool method
 
+### Fixed
+
+- Save and send event after remove option
+
 ## 0.13.0
 
 ### Added

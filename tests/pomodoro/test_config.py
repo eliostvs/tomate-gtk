@@ -51,20 +51,6 @@ def test_get_icon_path_raises_when_icon_not_found(config):
     assert str(excinfo.value) == "Icon 'foo' not found!"
 
 
-def test_set_option(config, tmpdir, bus, mocker):
-    config_path = tmpdir.mkdir("tmp").join("tomate.config").strpath
-    config.config_path = lambda: config_path
-
-    subscriber = mocker.Mock()
-    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
-
-    config.set("section", "option", "value")
-
-    assert config.get("section", "option") == "value"
-    payload = ConfigPayload("set", "section", "option", "value")
-    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)
-
-
 def test_get_icon_path(config):
     expected = os.path.join(TEST_DATA_DIR, "icons", "hicolor", "24x24", "apps", "tomate.png")
     assert config.icon_path("tomate", 48, "hicolor") == expected
@@ -90,11 +76,33 @@ def test_get_defaults_option(config):
     assert config.get("Timer", "shortbreak_duration") == "5"
 
 
-def test_remove_section(config, tmpdir):
+def test_set_option(bus, config, mocker, tmpdir):
+    config_path = tmpdir.mkdir("tmp").join("tomate.config").strpath
+    config.config_path = lambda: config_path
+
+    subscriber = mocker.Mock()
+    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
+
+    config.set("section", "option", "value")
+
+    config.load()
+    assert config.get("section", "option") == "value"
+
+    payload = ConfigPayload("set", "section", "option", "value")
+    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)
+
+
+def test_remove_option(bus, config, mocker, tmpdir):
     tmp_path = tmpdir.mkdir("tmp").join("tomate.config")
     config.config_path = lambda: tmp_path.strpath
 
     config.set("section", "option", "value")
+    subscriber = mocker.Mock()
+    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
     config.remove("section", "option")
 
+    config.load()
     assert config.parser.has_option("section", "option") is False
+
+    payload = ConfigPayload("remove", "section", "option", "")
+    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)

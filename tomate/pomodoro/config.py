@@ -98,29 +98,28 @@ class Config:
         return getattr(self.parser, method)(section, option, fallback=fallback)
 
     def set(self, section: str, option: str, value) -> None:
+        logger.debug("action=set section=%s option=%s value=%s", section, option, value)
+
         section = self.normalize(section)
         option = self.normalize(option)
         if not self.parser.has_section(section):
             self.parser.add_section(section)
-
         self.parser.set(section, option, value)
         self.save()
 
-        logger.debug("action=set section=%s option=%s value=%s", section, option, value)
-        self._bus.send(
-            Events.CONFIG_CHANGE,
-            payload=Payload(action="set", section=section, option=option, value=value),
-        )
+        payload = Payload(action="set", section=section, option=option, value=value)
+        self._bus.send(Events.CONFIG_CHANGE, payload=payload)
 
     def remove(self, section, option) -> None:
+        logger.debug("action=remove section=%s option=%s", section, option)
+
         section = self.normalize(section)
         option = self.normalize(option)
         self.parser.remove_option(section, option)
+        self.save()
 
         payload = Payload(action="remove", section=section, option=option, value="")
-        self._bus.send(section, payload=payload)
-
-        logger.debug("action=remove section=%s option=%s", section, option)
+        self._bus.send(Events.CONFIG_CHANGE, payload=payload)
 
     @staticmethod
     def normalize(name: str) -> str:
