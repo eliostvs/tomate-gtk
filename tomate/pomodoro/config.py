@@ -81,13 +81,13 @@ class Config:
 
         raise EnvironmentError("Icon '%s' not found!" % iconname)
 
-    def get_int(self, section, option) -> int:
-        return self.get(section, option, "getint")
+    def get_int(self, section: str, option: str, fallback=None) -> int:
+        return self.get(section, option, fallback, method="getint")
 
-    def get_bool(self, section, option) -> bool:
-        return self.get(section, option, "getboolean")
+    def get_bool(self, section: str, option: str, fallback=None) -> bool:
+        return self.get(section, option, fallback, method="getboolean")
 
-    def get(self, section: str, option: str, method="get", fallback=None) -> Union[str, int, bool]:
+    def get(self, section: str, option: str, fallback=None, method="get") -> Union[str, int, bool]:
         section = self.normalize(section)
         option = self.normalize(option)
         if not self.parser.has_section(section):
