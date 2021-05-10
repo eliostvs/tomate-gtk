@@ -1,4 +1,5 @@
-from _locale import gettext as _
+from locale import gettext as _
+from typing import Tuple, Callable
 
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
@@ -20,19 +21,20 @@ class Menu(Subscriber):
     @inject(bus="tomate.bus", window="tomate.ui.view")
     def __init__(self, bus: Bus, window):
         self.connect(bus)
-        self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
+        self.widget, self.show_item, self.hide_item = self._create_menu(window)
 
-        self.show_item = Gtk.MenuItem.new_with_label(_("Show"))
-        self.show_item.set_properties(visible=False, no_show_all=True)
-        self.show_item.connect("activate", lambda _: window.show())
-        self.widget.add(self.show_item)
+    def _create_menu(self, window) -> Tuple[Gtk.Menu, Gtk.MenuItem, Gtk.MenuItem]:
+        menu = Gtk.Menu(halign=Gtk.Align.CENTER)
+        menu.add(self._create_menu_item("Show", lambda _: window.show(), visible=False, no_show_all=True))
+        menu.add(self._create_menu_item("Hide", lambda _: window.hide(), visible=True))
+        menu.show_all()
+        return menu, *menu.get_children()
 
-        self.hide_item = Gtk.MenuItem.new_with_label(_("Hide"))
-        self.hide_item.props.visible = True
-        self.hide_item.connect("activate", lambda _: window.hide())
-        self.widget.add(self.hide_item)
-
-        self.widget.show_all()
+    def _create_menu_item(self, label: str, activate: Callable[[], None], **props) -> Gtk.MenuItem:
+        menu_item = Gtk.MenuItem.new_with_label(_(label))
+        menu_item.set_properties(**props)
+        menu_item.connect("activate", activate)
+        return menu_item
 
     @on(Events.WINDOW_SHOW)
     def _on_window_show(self, *_, **__):
