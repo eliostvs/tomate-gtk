@@ -62,7 +62,9 @@ class Q:
     @staticmethod
     def props(name: str, value: Any) -> Filter:
         def select(w: Gtk.Widget) -> bool:
-            return getattr(w.props, name) == value
+            if hasattr(w.props, name):
+                return getattr(w.props, name) == value
+            return False
 
         return select
 
