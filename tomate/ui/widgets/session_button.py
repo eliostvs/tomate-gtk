@@ -28,37 +28,31 @@ class SessionButton(Subscriber):
     def __init__(self, bus: Bus, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
         self._session = session
+        self._shortcuts = shortcuts
 
-        self.widget = ModeButton(
+        self.widget = self._create_mode_button()
+        self._add_button(SessionButton.POMODORO_SHORTCUT, "Pomodoro", SessionType.POMODORO)
+        self._add_button(SessionButton.SHORT_BREAK_SHORTCUT, "Short Break", SessionType.SHORT_BREAK)
+        self._add_button(SessionButton.LONG_BREAK_SHORTCUT, "Long Break", SessionType.LONG_BREAK)
+        self.widget.connect("mode_changed", self._on_button_clicked)
+
+    def _create_mode_button(self) -> ModeButton:
+        return ModeButton(
             can_focus=False,
             homogeneous=True,
             margin_bottom=12,
             margin_left=12,
             margin_right=12,
+            sensitive=True,
         )
 
+    def _add_button(self, shortcut: Shortcut, label: str, session_type: SessionType) -> None:
         self.widget.append_text(
-            _("Pomodoro"),
-            tooltip_text=_("Pomodoro ({})".format(shortcuts.label(SessionButton.POMODORO_SHORTCUT))),
-            name=SessionButton.POMODORO_SHORTCUT.name,
+            _(label),
+            tooltip_text=_("{} ({})".format(label, self._shortcuts.label(shortcut))),
+            name=shortcut.name,
         )
-        shortcuts.connect(SessionButton.POMODORO_SHORTCUT, self._change_session(SessionType.POMODORO))
-
-        self.widget.append_text(
-            _("Short Break"),
-            tooltip_text=_("Short Break ({})".format(shortcuts.label(SessionButton.SHORT_BREAK_SHORTCUT))),
-            name=SessionButton.SHORT_BREAK_SHORTCUT.name,
-        )
-        shortcuts.connect(SessionButton.SHORT_BREAK_SHORTCUT, self._change_session(SessionType.SHORT_BREAK))
-
-        self.widget.append_text(
-            _("Long Break"),
-            tooltip_text=_("Long Break ({})".format(shortcuts.label(SessionButton.LONG_BREAK_SHORTCUT))),
-            name=SessionButton.LONG_BREAK_SHORTCUT.name,
-        )
-        shortcuts.connect(SessionButton.LONG_BREAK_SHORTCUT, self._change_session(SessionType.LONG_BREAK))
-
-        self.widget.connect("mode_changed", self._on_button_clicked)
+        self._shortcuts.connect(shortcut, self._change_session(session_type))
 
     def _change_session(self, session_type: SessionType) -> Callable[[], bool]:
         def callback(*_) -> bool:
@@ -74,7 +68,6 @@ class SessionButton(Subscriber):
         self._session.change(session=session_type)
 
     def init(self):
-        self.widget.set_sensitive(True)
         self.widget.set_selected(SessionType.POMODORO.value)
 
     @on(Events.SESSION_START)
