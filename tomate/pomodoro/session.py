@@ -96,10 +96,13 @@ class Session(Subscriber):
         return True
 
     @on(Events.CONFIG_CHANGE)
+    def _on_settings_change(self, _, **kwargs) -> bool:
+        return self.change(kwargs.get("session", self.current))
+
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_CHANGE))
-    def change(self, *_, **kwargs) -> bool:
-        self.current = kwargs.get("session", self.current)
-        logger.debug("action=change session=%s", self.current)
+    def change(self, session: Type) -> bool:
+        logger.debug("action=change current=%s next=%s", self.current, session)
+        self.current = session
         return True
 
     @property

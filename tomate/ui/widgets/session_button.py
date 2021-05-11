@@ -65,7 +65,7 @@ class SessionButton(Subscriber):
     def _on_button_clicked(self, _, number):
         session_type = SessionType.of(number)
         logger.debug("action=mode_changed session=%s", session_type)
-        self._session.change(session=session_type)
+        self._session.change(session_type)
 
     @on(Events.SESSION_CHANGE)
     def _on_session_change(self, _, payload=SessionPayload) -> None:

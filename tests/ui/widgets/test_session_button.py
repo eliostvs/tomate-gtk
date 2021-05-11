@@ -75,7 +75,7 @@ def test_changes_session_when_button_is_clicked(session_type, session_button, se
 
     refresh_gui()
 
-    session.change.assert_called_once_with(session=session_type)
+    session.change.assert_called_once_with(session_type)
 
 
 @pytest.mark.parametrize(
@@ -89,7 +89,7 @@ def test_changes_session_when_button_is_clicked(session_type, session_button, se
 def test_shortcuts(shortcut, session_type, session_button, shortcut_engine, session):
     assert active_shortcut(shortcut_engine, shortcut) is True
 
-    session.change.assert_called_once_with(session=session_type)
+    session.change.assert_called_once_with(session_type)
 
 
 def test_selects_button_when_session_changes(bus, session_button, session):
