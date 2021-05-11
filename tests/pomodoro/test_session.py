@@ -204,7 +204,7 @@ class TestSessionChange:
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
 
-        config.set("timer", SessionType.POMODORO.option, 20)
+        config.set(config.DURATION_SECTION, SessionType.POMODORO.option, 20)
 
         payload = create_session_payload(duration=20 * 60)
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
@@ -214,7 +214,7 @@ class TestSessionChange:
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
 
-        config.set("timer", SessionType.POMODORO.option, 24)
+        config.set(config.DURATION_SECTION, SessionType.POMODORO.option, 24)
 
         subscriber.assert_not_called()
 
