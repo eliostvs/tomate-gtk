@@ -22,6 +22,16 @@ def test_module(graph, session):
     assert instance is session
 
 
+def test_sends_ready_event(bus, mocker, session):
+    subscriber = mocker.Mock()
+    bus.connect(Events.SESSION_READY, subscriber, weak=False)
+
+    session.ready()
+
+    payload = create_session_payload()
+    subscriber.assert_called_once_with(Events.SESSION_READY, payload=payload)
+
+
 class TestSessionStart:
     def test_does_not_start_when_session_is_already_running(self, session):
         session.state = State.STARTED
@@ -58,6 +68,7 @@ class TestSessionStop:
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_INTERRUPT, subscriber, False)
 
+        session.ready()
         session.start()
         result = session.stop()
 
@@ -147,6 +158,7 @@ class TestSessionEnd:
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_END, subscriber, False)
 
+        session.ready()
         session.start()
         run_loop_for(2)
 
@@ -204,13 +216,25 @@ class TestSessionChange:
         subscriber.assert_not_called()
 
 
-def test_type_of():
-    assert SessionType.POMODORO == SessionType.of(0)
-    assert SessionType.SHORT_BREAK == SessionType.of(1)
-    assert SessionType.LONG_BREAK == SessionType.of(2)
+@pytest.mark.parametrize(
+    "number,session_type",
+    [
+        (0, SessionType.POMODORO),
+        (1, SessionType.SHORT_BREAK),
+        (2, SessionType.LONG_BREAK),
+    ],
+)
+def test_type_of(number, session_type):
+    assert SessionType.of(number) == session_type
 
 
-def test_type_option():
-    assert SessionType.POMODORO.option == "pomodoro_duration"
-    assert SessionType.SHORT_BREAK.option == "shortbreak_duration"
-    assert SessionType.LONG_BREAK.option == "longbreak_duration"
+@pytest.mark.parametrize(
+    "session_type, option",
+    [
+        (SessionType.POMODORO, "pomodoro_duration"),
+        (SessionType.SHORT_BREAK, "shortbreak_duration"),
+        (SessionType.LONG_BREAK, "longbreak_duration"),
+    ],
+)
+def test_type_option(session_type, option):
+    assert session_type.option == option
