@@ -41,9 +41,10 @@ class Type(enum.Enum):
 
 
 class State(enum.Enum):
-    STOPPED = 0
-    STARTED = 1
-    ENDED = 2
+    INITIAL = 0
+    STOPPED = 1
+    STARTED = 2
+    ENDED = 3
 
 
 @register.factory("tomate.session", scope=SingletonScope)
@@ -57,10 +58,14 @@ class Session(Subscriber):
         self._config = config
         self._timer = timer
         self._bus = bus
-        self.state = State.STOPPED
+        self.state = State.INITIAL
         self.current = Type.POMODORO
         self.pomodoros = 0
         self.connect(bus)
+
+    @fsm(source=[State.INITIAL], target=State.STOPPED, exit=lambda self: self._trigger(Events.SESSION_READY))
+    def ready(self) -> None:
+        pass
 
     @fsm(
         source=[State.STOPPED, State.ENDED], target=State.STARTED, exit=lambda self: self._trigger(Events.SESSION_START)
@@ -91,10 +96,13 @@ class Session(Subscriber):
         return True
 
     @on(Events.CONFIG_CHANGE)
+    def _on_settings_change(self, _, **kwargs) -> bool:
+        return self.change(kwargs.get("session", self.current))
+
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_CHANGE))
-    def change(self, *_, **kwargs) -> bool:
-        self.current = kwargs.get("session", self.current)
-        logger.debug("action=change session=%s", self.current)
+    def change(self, session: Type) -> bool:
+        logger.debug("action=change current=%s next=%s", self.current, session)
+        self.current = session
         return True
 
     @property

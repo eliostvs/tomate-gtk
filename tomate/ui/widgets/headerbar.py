@@ -55,43 +55,58 @@ class HeaderBar(Subscriber):
     )
     def __init__(self, bus: Bus, menu: Menu, session: Session, shortcuts: ShortcutEngine):
         self.connect(bus)
+        self._shortcuts = shortcuts
+        self.widget = self._create_headerbar()
 
-        self.widget = Gtk.HeaderBar(
+        self._start_button = self._add_button(
+            Gtk.STOCK_MEDIA_PLAY,
+            "Starts the session",
+            HeaderBar.START_SHORTCUT,
+            lambda *_: session.start(),
+        )
+
+        self._stop_button = self._add_button(
+            Gtk.STOCK_MEDIA_STOP,
+            "Stops the session",
+            HeaderBar.STOP_SHORTCUT,
+            lambda *_: session.stop(),
+            no_show_all=True,
+            visible=False,
+        )
+
+        self._reset_button = self._add_button(
+            Gtk.STOCK_CLEAR,
+            "Clear session count",
+            HeaderBar.RESET_SHORTCUT,
+            lambda *_: session.reset(),
+            sensitive=False,
+        )
+
+        self._add_preference_button(menu, shortcuts)
+
+    def _create_headerbar(self):
+        return Gtk.HeaderBar(
             show_close_button=True,
             title=_("No session yet"),
             decoration_layout=":close",
         )
 
-        self._start_button = self._create_button(
-            Gtk.STOCK_MEDIA_PLAY,
-            ("Starts the session ({})".format(shortcuts.label(HeaderBar.START_SHORTCUT))),
-            lambda *_: session.start(),
-            name=HeaderBar.START_SHORTCUT.name,
-        )
-        self.widget.pack_start(self._start_button)
-        shortcuts.connect(HeaderBar.START_SHORTCUT, lambda *_: session.start())
+    def _add_button(self, icon: str, tooltip_text: str, shortcut: Shortcut, on_clicked, **props) -> Gtk.Button:
+        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.BUTTON)
+        image.show()
 
-        self._stop_button = self._create_button(
-            Gtk.STOCK_MEDIA_STOP,
-            ("Stops the session ({})".format(shortcuts.label(HeaderBar.STOP_SHORTCUT))),
-            lambda *_: session.stop(),
-            name=HeaderBar.STOP_SHORTCUT.name,
-            no_show_all=True,
-            visible=False,
+        button = Gtk.Button(
+            tooltip_text=_("{} ({})".format(tooltip_text, self._shortcuts.label(shortcut))), name=shortcut.name, **props
         )
-        self.widget.pack_start(self._stop_button)
-        shortcuts.connect(HeaderBar.STOP_SHORTCUT, lambda *_: session.stop())
+        button.add(image)
+        button.connect("clicked", on_clicked)
 
-        self._reset_button = self._create_button(
-            Gtk.STOCK_CLEAR,
-            ("Clear session count ({})".format(shortcuts.label(HeaderBar.RESET_SHORTCUT))),
-            lambda *_: session.reset(),
-            name=HeaderBar.RESET_SHORTCUT.name,
-            sensitive=False,
-        )
-        self.widget.pack_start(self._reset_button)
-        shortcuts.connect(HeaderBar.RESET_SHORTCUT, lambda *_: session.reset())
+        self.widget.pack_start(button)
+        self._shortcuts.connect(shortcut, on_clicked)
 
+        return button
+
+    def _add_preference_button(self, menu, shortcuts) -> None:
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
         button = Gtk.MenuButton(
             name=Menu.PREFERENCE_SHORTCUT.name,
@@ -99,17 +114,7 @@ class HeaderBar(Subscriber):
             tooltip_text=_("Open preferences ({})".format(shortcuts.label(Menu.PREFERENCE_SHORTCUT))),
         )
         button.add(icon)
-
         self.widget.pack_end(button)
-
-    def _create_button(self, icon: str, tooltip_text: str, on_clicked, **props) -> Gtk.Button:
-        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.BUTTON)
-        image.show()
-
-        button = Gtk.Button(tooltip_text=tooltip_text, **props)
-        button.add(image)
-        button.connect("clicked", on_clicked)
-        return button
 
     @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):

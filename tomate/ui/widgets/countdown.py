@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
@@ -13,20 +14,13 @@ logger = logging.getLogger(__name__)
 class Countdown(Subscriber):
     @inject(bus="tomate.bus")
     def __init__(self, bus: Bus):
-        self.widget = Gtk.Label(margin_top=30, margin_bottom=10, margin_right=10, margin_left=10)
+        self.widget = Gtk.Label(margin_top=30, margin_bottom=10, margin_right=10, margin_left=10, label="00:00")
         self.connect(bus)
 
-    @on(Events.TIMER_UPDATE)
-    def _on_timer_update(self, _, payload: TimerPayload) -> None:
-        self._update(payload.countdown)
-
-    @on(Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
-    def _on_session_change(self, _, payload: SessionPayload) -> None:
-        self._update(payload.countdown)
-
-    def _update(self, duration: str) -> None:
-        self.widget.set_markup(self.timer_markup(duration))
-        logger.debug("action=update duration=%s", duration)
+    @on(Events.TIMER_UPDATE, Events.SESSION_READY, Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
+    def _update_countdown(self, _, payload: Union[SessionPayload, TimerPayload]) -> None:
+        logger.debug("action=update countdown=%s", payload.countdown)
+        self.widget.set_markup(self.timer_markup(payload.countdown))
 
     @staticmethod
     def timer_markup(time_left: str) -> str:

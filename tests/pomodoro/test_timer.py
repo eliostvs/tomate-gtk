@@ -16,7 +16,7 @@ def test_module(bus, graph):
 
 
 class TestTimerStart:
-    def test_does_not_start_when_timer_is_already_running(self, bus):
+    def test_not_start_when_timer_is_already_running(self, bus):
         timer = Timer(bus)
         timer.state = State.STARTED
 
@@ -38,7 +38,7 @@ class TestTimerStart:
 
 class TestTimerStop:
     @pytest.mark.parametrize("state", [State.ENDED, State.STOPPED])
-    def test_does_not_stop_when_timer_is_not_running(self, bus, state):
+    def test_not_stop_when_timer_is_not_running(self, bus, state):
         timer = Timer(bus)
         timer.state = state
 
@@ -59,7 +59,7 @@ class TestTimerStop:
 
 class TestTimerEnd:
     @pytest.mark.parametrize("state", [State.ENDED, State.STOPPED])
-    def test_does_not_end_when_timer_is_not_running(self, bus, state):
+    def test_not_end_when_timer_is_not_running(self, bus, state):
         timer = Timer(bus)
         timer.state = state
 

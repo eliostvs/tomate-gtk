@@ -22,16 +22,16 @@ def test_module(countdown, graph):
     assert instance is countdown
 
 
-@pytest.mark.parametrize("event", [Events.SESSION_INTERRUPT, Events.SESSION_CHANGE])
-def test_updates_countdown_when_session_state_changes(event, bus, countdown):
-    payload = create_session_payload(duration=random.randint(1, 100))
+@pytest.mark.parametrize(
+    "event, payload",
+    [
+        (Events.SESSION_READY, create_session_payload(duration=random.randint(1, 100))),
+        (Events.SESSION_INTERRUPT, create_session_payload(duration=random.randint(1, 100))),
+        (Events.SESSION_CHANGE, create_session_payload(duration=random.randint(1, 100))),
+        (Events.TIMER_UPDATE, TimerPayload(time_left=random.randint(1, 100), duration=0)),
+    ],
+)
+def test_updates_countdown_when_session_state_changes(event, payload, bus, countdown):
     bus.send(event, payload=payload)
-
-    assert payload.countdown in countdown.widget.get_text()
-
-
-def test_updates_countdown_when_timer_changes(bus, countdown):
-    payload = TimerPayload(time_left=random.randint(1, 100), duration=0)
-    bus.send(Events.TIMER_UPDATE, payload=payload)
 
     assert payload.countdown in countdown.widget.get_text()

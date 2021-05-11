@@ -17,16 +17,17 @@ class Events(enum.Enum):
     TIMER_STOP = 2
     TIMER_END = 3
 
-    SESSION_START = 4
-    SESSION_INTERRUPT = 5
-    SESSION_CHANGE = 6
-    SESSION_END = 7
-    SESSION_RESET = 8
+    SESSION_READY = 4
+    SESSION_START = 5
+    SESSION_INTERRUPT = 6
+    SESSION_CHANGE = 7
+    SESSION_END = 8
+    SESSION_RESET = 9
 
-    WINDOW_SHOW = 9
-    WINDOW_HIDE = 10
+    WINDOW_SHOW = 10
+    WINDOW_HIDE = 11
 
-    CONFIG_CHANGE = 11
+    CONFIG_CHANGE = 12
 
 
 Receiver = Callable[[Events, Any], Any]

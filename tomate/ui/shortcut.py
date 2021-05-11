@@ -31,18 +31,15 @@ class ShortcutEngine:
 
     def change(self, shortcut: Shortcut) -> None:
         logger.debug("action=change %s", shortcut)
-
         Gtk.AccelMap.change_entry(shortcut.accel_path, *Gtk.accelerator_parse(shortcut.value), True)
 
     def connect(self, shortcut: Shortcut, callback: Callable[[], Any]) -> None:
         logger.debug("action=connect %s", shortcut)
-
         Gtk.AccelMap.add_entry(shortcut.accel_path, *self._parse(shortcut))
         self.accel_group.connect_by_path(shortcut.accel_path, callback)
 
     def disconnect(self, shortcut: Shortcut) -> None:
         logger.debug("action=disconnect %s")
-
         self.accel_group.disconnect_key(*self._parse(shortcut))
 
     def label(self, shortcut: Shortcut) -> str:
