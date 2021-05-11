@@ -4,7 +4,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
 from tomate.ui import Systray, Window
-from tomate.ui.testing import active_shortcut, create_session_end_payload, create_session_payload
+from tomate.ui.testing import Q, active_shortcut, create_session_end_payload, create_session_payload
 
 
 @pytest.fixture
@@ -28,13 +28,30 @@ def test_module(graph, window):
     assert instance is window
 
 
+def test_init(session, window):
+    session.ready.assert_called_once_with()
+
+    # session button
+    assert Q.select(window.widget, Q.props("name", "session.pomodoro"))
+    assert Q.select(window.widget, Q.props("name", "session.short_break"))
+    assert Q.select(window.widget, Q.props("name", "session.long_break"))
+
+    # headerbar
+    assert Q.select(window.widget, Q.props("name", "session.start"))
+    assert Q.select(window.widget, Q.props("name", "session.reset"))
+    assert Q.select(window.widget, Q.props("name", "session.stop"))
+
+    # countdown
+    assert Q.select(window.widget, Q.props("label", "00:00"))
+
+
 def test_shortcuts(shortcut_engine, window):
     from tomate.ui.widgets import HeaderBar
 
     assert active_shortcut(shortcut_engine, HeaderBar.START_SHORTCUT, window=window.widget) is True
 
 
-def test_start(mocker, window):
+def test_run(mocker, window):
     gtk_main = mocker.patch("tomate.ui.window.Gtk.main")
     show_all = mocker.patch("tomate.ui.window.Gtk.Window.show_all")
 
@@ -87,12 +104,12 @@ class TestWindowQuit:
 
 
 def test_shows_window_when_session_end(bus, mocker, window):
-    window.widget.set_visible(False)
+    window.widget.props.visible = False
     subscriber = mocker.Mock()
     bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
-    payload = create_session_end_payload(previous=create_session_payload())
 
+    payload = create_session_end_payload(previous=create_session_payload())
     bus.send(Events.SESSION_END, payload=payload)
 
-    assert window.widget.get_visible()
+    assert window.widget.props.visible is True
     subscriber.assert_called_once_with(Events.WINDOW_SHOW, payload=None)

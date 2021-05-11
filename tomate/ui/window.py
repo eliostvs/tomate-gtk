@@ -45,7 +45,7 @@ class Window(Subscriber):
         self.widget = self._create_window(config, headerbar, content)
 
         shortcuts.init(self.widget)
-        session_button.init()
+        session.ready()
 
     def _create_window(self, config: Config, headerbar: HeaderBar, box: Gtk.Box) -> Gtk.Window:
         window = Gtk.Window(
@@ -82,11 +82,11 @@ class Window(Subscriber):
         self._bus.send(Events.WINDOW_HIDE)
 
         if Systray in self._graph.providers:
-            logger.debug("action=hide to=tray")
+            logger.debug("action=hide strategy=tray")
             return self.widget.hide_on_delete()
         else:
             self.widget.iconify()
-            logger.debug("action=hide to=minimize")
+            logger.debug("action=hide strategy=minimize")
             return Gtk.true
 
     @on(Events.SESSION_END)
