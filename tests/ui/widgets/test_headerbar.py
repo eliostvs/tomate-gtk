@@ -47,7 +47,8 @@ class TestHeaderBar:
         ],
     )
     def test_shortcuts(self, shortcut, action, headerbar, menu, session, shortcut_engine):
-        active_shortcut(shortcut_engine, shortcut)
+        assert active_shortcut(shortcut_engine, shortcut)
+
         getattr(session, action).assert_called_once_with()
 
     @pytest.mark.parametrize(
