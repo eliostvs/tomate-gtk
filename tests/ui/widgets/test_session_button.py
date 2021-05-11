@@ -13,7 +13,7 @@ def session_button(bus, graph, session, shortcut_engine) -> SessionButton:
     graph.register_instance("tomate.ui.shortcut", shortcut_engine)
     scan_to_graph(["tomate.ui.widgets.session_button"], graph)
 
-    # gtk shortcuts binds leave beyond the scope
+    # clean key binds between tests
     shortcut_engine.disconnect(SessionButton.POMODORO_SHORTCUT)
     shortcut_engine.disconnect(SessionButton.SHORT_BREAK_SHORTCUT)
     shortcut_engine.disconnect(SessionButton.LONG_BREAK_SHORTCUT)
@@ -63,7 +63,7 @@ def test_disables_buttons_when_session_starts(bus, session_button):
 def test_changes_selected_button_when_session_finishes(event, payload, bus, session_button, session):
     bus.send(event, payload=payload)
 
-    assert session_button.widget.get_sensitive() is True
+    assert session_button.widget.props.sensitive is True
     assert session_button.widget.get_selected() is SessionType.SHORT_BREAK.value
     session.change.assert_called_once_with(session=SessionType.SHORT_BREAK)
 
@@ -88,3 +88,9 @@ def test_changes_session_when_task_button_is_clicked(session_type, session_butto
 def test_shortcuts(shortcut, session_type, session_button, shortcut_engine, session):
     assert active_shortcut(shortcut_engine, shortcut) is True
     session.change.assert_called_once_with(session=session_type)
+
+
+def test_selects_button_when_session_changes(bus, session_button, session):
+    bus.send(Events.SESSION_CHANGE, payload=create_session_payload(type=SessionType.SHORT_BREAK))
+
+    assert session_button.widget.get_selected() is SessionType.SHORT_BREAK.value

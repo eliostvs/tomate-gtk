@@ -70,10 +70,15 @@ class SessionButton(Subscriber):
     def init(self):
         self.widget.set_selected(SessionType.POMODORO.value)
 
+    @on(Events.SESSION_CHANGE)
+    def _on_session_change(self, _, payload=SessionPayload) -> None:
+        if self.widget.get_selected() != payload.type.value:
+            self.widget.set_selected(payload.type.value)
+
     @on(Events.SESSION_START)
     def _on_session_start(self, *_, **__):
         logger.debug("action=disable")
-        self.widget.set_sensitive(False)
+        self.widget.props.sensitive = False
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def _on_session_stop(self, _, payload: Union[SessionPayload, SessionEndPayload]):
