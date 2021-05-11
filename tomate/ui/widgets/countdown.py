@@ -18,7 +18,7 @@ class Countdown(Subscriber):
         self.connect(bus)
 
     @on(Events.TIMER_UPDATE, Events.SESSION_READY, Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)
-    def _update_countdown(self, _, payload: Union[SessionPayload, TimerPayload]) -> None:
+    def _update_countdown(self, payload: Union[SessionPayload, TimerPayload]) -> None:
         logger.debug("action=update countdown=%s", payload.countdown)
         self.widget.set_markup(self.timer_markup(payload.countdown))
 

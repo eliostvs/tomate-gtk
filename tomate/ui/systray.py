@@ -37,11 +37,11 @@ class Menu(Subscriber):
         return menu_item
 
     @on(Events.WINDOW_SHOW)
-    def _on_window_show(self, *_, **__):
+    def _on_window_show(self, **__):
         self.hide_item.props.visible = True
         self.show_item.props.visible = False
 
     @on(Events.WINDOW_HIDE)
-    def _on_window_hide(self, *_, **__):
+    def _on_window_hide(self, **__):
         self.hide_item.props.visible = False
         self.show_item.props.visible = True

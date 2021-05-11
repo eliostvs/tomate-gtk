@@ -90,7 +90,7 @@ class Window(Subscriber):
             return Gtk.true
 
     @on(Events.SESSION_END)
-    def show(self, *_, **__) -> None:
+    def show(self, **__) -> None:
         logger.debug("action=show")
         self._bus.send(Events.WINDOW_SHOW)
         self.widget.present_with_time(time.time())

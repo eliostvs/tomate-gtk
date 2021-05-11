@@ -24,17 +24,17 @@ class TestBus:
 def test_subscriber(bus):
     class Subject(Subscriber):
         @on(Events.TIMER_START, Events.SESSION_START)
-        def bar(self, sender, **_):
-            return sender
+        def bar(self, **__) -> bool:
+            return True
 
     subject = Subject()
     subject.connect(bus)
 
-    result = bus.send(Events.TIMER_START)
-    assert len(result) == 1 and result[0] == Events.TIMER_START
+    result = bus.send(Events.TIMER_START, "timer_start")
+    assert len(result) == 1 and result[0] is True
 
     result = bus.send(Events.SESSION_START)
-    assert len(result) == 1 and result[0] == Events.SESSION_START
+    assert len(result) == 1 and result[0] is True
 
     assert bus.send(Events.WINDOW_SHOW) == []
 
