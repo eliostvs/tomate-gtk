@@ -47,23 +47,19 @@ If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** va
 
 The packages are available in [aur repository](https://aur.archlinux.org/packages/tomate-gtk/)
 
-Plugins
--------
+Official Plugins
+----------------
 
 All plugins are in the repositories and need to be installed separately.
 For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu.
 
-- [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends.
-- [Notify plugin (tomate-notify-plugin)][notify-plugin] Shows a OSD notification.
-- [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the indicator area **when the timer is running** (requires libappindicator).
-- [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the status area **when the timer is running**.
-- [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only).
-- [Exec plugin (tomate-exec-plugin)][exec-plugin] Run commands when the timer starts, stops or finishes.
-
-Bugs and Suggestions
--------------------
-
-Bugs and suggestions should be reported [here][bugs].
+- [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends
+- [Notify plugin (tomate-notify-plugin)][notify-plugin] Shows notification end the timer starts, stops or ends
+- [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the systray **when the timer is running** (requires libappindicator)
+- [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the systray **when the timer is running**
+- [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only)
+- [Exec plugin (tomate-exec-plugin)][exec-plugin] Run scripts when the timer starts, stops or ends.
+- [Exec plugin (tomate-breakscreen-plugin)][breakscreen-plugin] Block screen during break
 
 License
 -------
@@ -86,4 +82,4 @@ with this program.  If not, see <http://www.gnu.org/licenses/>.
 [statusicon-plugin]: https://github.com/eliostvs/tomate-statusicon-plugin
 [launcher-plugin]: https://github.com/eliostvs/tomate-launcher-plugin
 [exec-plugin]: https://github.com/eliostvs/tomate-exec-plugin
-[bugs]: https://github.com/eliostvs/tomate-gtk/issues
+[breakscreen-plugin]: https://github.com/eliostvs/tomate-breakscreen-plugin
