@@ -12,6 +12,15 @@ Read more about it at the [official website](http://pomodorotechnique.com/).
 Pomodoro Technique® and Pomodoro™ are registered and filed trademarks owned by Francesco Cirillo.
 Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 
+Screenshots
+-----------
+
+![main screen](docs/img/main-screen.png)
+
+![preference duration](docs/img/preference-duration.png)
+
+![preference extension](docs/img/preference-extension.png)
+
 Installation
 ------------
 
