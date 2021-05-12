@@ -58,7 +58,7 @@ def on(*events: Events):
 
         @functools.wraps(method)
         def wrapped(*args, **kwargs):
-            return method(*args, **kwargs)
+            return method(*(arg for arg in args if not isinstance(arg, Events)), **kwargs)
 
         return wrapped
 

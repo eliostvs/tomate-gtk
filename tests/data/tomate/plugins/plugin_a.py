@@ -12,7 +12,7 @@ class PluginA(plugin.Plugin):
         self.parent = None
 
     @on(Events.WINDOW_SHOW)
-    def listener(self, *_, **__) -> str:
+    def listener(self, **__) -> str:
         return "plugin_a"
 
     def settings_window(self, parent: Gtk.Widget) -> Gtk.Dialog:

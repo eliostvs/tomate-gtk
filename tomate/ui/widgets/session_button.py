@@ -68,18 +68,18 @@ class SessionButton(Subscriber):
         self._session.change(session_type)
 
     @on(Events.SESSION_CHANGE)
-    def _on_session_change(self, _, payload=SessionPayload) -> None:
+    def _on_session_change(self, payload=SessionPayload) -> None:
         logger.debug("action=change current=%d next=%d", self.widget.get_selected(), payload.type.value)
         if self.widget.get_selected() != payload.type.value:
             self.widget.set_selected(payload.type.value)
 
     @on(Events.SESSION_START)
-    def _on_session_start(self, *_, **__):
+    def _on_session_start(self, **__):
         logger.debug("action=disable")
         self.widget.props.sensitive = False
 
     @on(Events.SESSION_READY, Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def _on_session_stop(self, _, payload: Union[SessionPayload, SessionEndPayload]):
+    def _on_session_stop(self, payload: Union[SessionPayload, SessionEndPayload]):
         logger.debug("action=enable session=%s", payload.type)
         self.widget.props.sensitive = True
         self.widget.set_selected(payload.type.value)

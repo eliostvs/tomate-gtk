@@ -117,14 +117,14 @@ class HeaderBar(Subscriber):
         self.widget.pack_end(button)
 
     @on(Events.SESSION_START)
-    def _on_session_start(self, *_, **__):
+    def _on_session_start(self, **__):
         logger.debug("action=enable_stop")
         self._start_button.props.visible = False
         self._stop_button.props.visible = True
         self._reset_button.props.sensitive = False
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def _on_session_stop(self, _, payload: Union[SessionEndPayload, SessionPayload]) -> None:
+    def _on_session_stop(self, payload: Union[SessionEndPayload, SessionPayload]) -> None:
         logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
         self._start_button.props.visible = True
         self._stop_button.props.visible = False
@@ -132,7 +132,7 @@ class HeaderBar(Subscriber):
         self._update_title(payload.pomodoros)
 
     @on(Events.SESSION_RESET)
-    def _on_session_reset(self, *_, **__):
+    def _on_session_reset(self, **__):
         logger.debug("action=disable_reset")
         self._reset_button.props.sensitive = False
         self._update_title(0)

@@ -29,14 +29,14 @@ def test_refresh_reload_plugins(preference, plugin_engine):
     preference.run()
 
     plugin_list = Q.select(preference.widget, Q.props("name", "plugin.list"))
-    assert TV.map(plugin_list, TV.model, len) == 2
+    assert Q.map(plugin_list, TV.model, len) == 2
 
     for plugin in plugin_engine.all():
         plugin_engine.remove(plugin)
 
     preference.run()
 
-    assert TV.map(plugin_list, TV.model, len) == 0
+    assert Q.map(plugin_list, TV.model, len) == 0
 
 
 @pytest.mark.parametrize(
@@ -61,7 +61,7 @@ def test_initial_plugin_list(plugin, row, columns, preference, plugin_engine):
     def get_columns(tree_store: Gtk.TreeStore):
         return [tree_store[row][column] for column in (PluginGrid.NAME, PluginGrid.ACTIVE, PluginGrid.DETAIL)]
 
-    assert TV.map(Q.select(preference.widget, Q.props("name", "plugin.list")), TV.model, get_columns) == columns
+    assert Q.map(Q.select(preference.widget, Q.props("name", "plugin.list")), TV.model, get_columns) == columns
     assert Q.select(preference.widget, Q.props("name", "plugin.settings")).props.sensitive is False
 
 
@@ -69,7 +69,7 @@ def test_open_plugin_settings(preference, plugin_engine):
     plugin_engine.collect()
     preference.run()
 
-    TV.map(
+    Q.map(
         Q.select(preference.widget, Q.props("name", "plugin.list")),
         TV.column(Q.props("title", "Active")),
         TV.cell_renderer(0),
@@ -92,7 +92,7 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     assert len(result) == 1 and result[0] == "plugin_b"
 
     def toggle_plugin(row: int):
-        TV.map(
+        Q.map(
             Q.select(preference.widget, Q.props("name", "plugin.list")),
             TV.column(Q.props("title", "Active")),
             TV.cell_renderer(0),

@@ -100,12 +100,12 @@ class Q:
 
         return effect
 
+    @staticmethod
+    def map(widget: Gtk.Widget, *fns: Callable[[Any], Any]):
+        return reduce(lambda prev, fn: fn(prev), fns, widget)
+
 
 class TV:
-    @staticmethod
-    def map(tree_view: Gtk.TreeView, *fns: Callable[[Any], Any]):
-        return reduce(lambda prev, fn: fn(prev), fns, tree_view)
-
     @staticmethod
     def model(tree_view: Gtk.TreeView) -> Gtk.TreeStore:
         return tree_view.get_model()

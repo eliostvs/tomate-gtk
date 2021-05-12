@@ -96,7 +96,7 @@ class Session(Subscriber):
         return True
 
     @on(Events.CONFIG_CHANGE)
-    def _on_settings_change(self, _, **kwargs) -> bool:
+    def _on_config_change(self, **kwargs) -> bool:
         return self.change(kwargs.get("session", self.current))
 
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_CHANGE))
@@ -115,7 +115,7 @@ class Session(Subscriber):
 
     @on(Events.TIMER_END)
     @fsm(source=[State.STARTED], target=State.ENDED, condition=timer_is_up)
-    def _end(self, _, payload: TimerPayload) -> bool:
+    def _end(self, payload: TimerPayload) -> bool:
         previous = self._create_payload(duration=payload.duration)
 
         if self.current == Type.POMODORO:
