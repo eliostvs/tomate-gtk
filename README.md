@@ -62,13 +62,13 @@ Official Plugins
 All plugins are in the repositories and need to be installed separately.
 For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu.
 
-- [Alarm plugin (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends
-- [Notify plugin (tomate-notify-plugin)][notify-plugin] Shows notification end the timer starts, stops or ends
-- [Indicator plugin (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the systray **when the timer is running** (requires libappindicator)
-- [Status Icon plugin (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the systray **when the timer is running**
-- [Launcher plugin (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only)
-- [Exec plugin (tomate-exec-plugin)][exec-plugin] Run scripts when the timer starts, stops or ends.
-- [Exec plugin (tomate-breakscreen-plugin)][breakscreen-plugin] Block screen during break
+- [Alarm (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends
+- [Notify (tomate-notify-plugin)][notify-plugin] Shows notification end the timer starts, stops or ends
+- [Indicator (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the systray **when the timer is running** (requires libappindicator)
+- [StatusIcon (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the systray **when the timer is running**
+- [Launcher (tomate-launcher-plugin)][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only)
+- [Scripts (tomate-exec-plugin)][exec-plugin] Run scripts when the timer starts, stops or ends.
+- [Break Screen (tomate-breakscreen-plugin)][breakscreen-plugin] Block screen during break
 
 License
 -------
