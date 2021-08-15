@@ -13,10 +13,6 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
       - id: detect-private-key
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.0
-    hooks:
-      - id: flake8
   - repo: local
     hooks:
       - id: test
