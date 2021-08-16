@@ -3,7 +3,7 @@ from .config import Config, Payload as ConfigPayload
 from .event import Bus, Events, Subscriber, on
 from .graph import graph
 from .plugin import Plugin, PluginEngine, suppress_errors
-from .session import EndPayload as SessionEndPayload, Payload as SessionPayload, Session, Type as SessionType
+from .session import Payload as SessionPayload, Session, Type as SessionType
 from .timer import Payload as TimerPayload, Timer, format_seconds
 
 __all__ = [
@@ -15,7 +15,6 @@ __all__ = [
     "Plugin",
     "PluginEngine",
     "Session",
-    "SessionEndPayload",
     "SessionPayload",
     "SessionType",
     "Subscriber",

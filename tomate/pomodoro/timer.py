@@ -68,7 +68,7 @@ class Timer:
     def start(self, seconds: int) -> bool:
         logger.debug("action=start")
         self.duration = self.time_left = seconds
-        GLib.timeout_add_seconds(Timer.ONE_SECOND, self._update)
+        GLib.timeout_add_seconds(Timer.ONE_SECOND, self._update, priority=GLib.PRIORITY_HIGH)
         return True
 
     @fsm(target=State.STOPPED, source=[State.STARTED], exit=lambda self: self._trigger(Events.TIMER_STOP))

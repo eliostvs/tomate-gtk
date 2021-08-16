@@ -1,13 +1,12 @@
 import locale
 import logging
 from locale import gettext as _
-from typing import Union
 
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, Session, SessionEndPayload, SessionPayload, Subscriber, on
+from tomate.pomodoro import Bus, Events, Session, SessionPayload, Subscriber, on
 from tomate.ui import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")
@@ -124,7 +123,7 @@ class HeaderBar(Subscriber):
         self._reset_button.props.sensitive = False
 
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def _on_session_stop(self, payload: Union[SessionEndPayload, SessionPayload]) -> None:
+    def _on_session_stop(self, payload: SessionPayload) -> None:
         logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
         self._start_button.props.visible = True
         self._stop_button.props.visible = False

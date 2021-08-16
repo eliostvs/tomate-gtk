@@ -1,12 +1,12 @@
 import locale
 import logging
 from locale import gettext as _
-from typing import Callable, Union
+from typing import Callable
 
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, Session, SessionEndPayload, SessionPayload, SessionType, Subscriber, on
+from tomate.pomodoro import Bus, Events, Session, SessionPayload, SessionType, Subscriber, on
 from tomate.ui import Shortcut, ShortcutEngine
 from .mode_button import ModeButton
 
@@ -34,7 +34,7 @@ class SessionButton(Subscriber):
         self._add_button(SessionButton.POMODORO_SHORTCUT, "Pomodoro", SessionType.POMODORO)
         self._add_button(SessionButton.SHORT_BREAK_SHORTCUT, "Short Break", SessionType.SHORT_BREAK)
         self._add_button(SessionButton.LONG_BREAK_SHORTCUT, "Long Break", SessionType.LONG_BREAK)
-        self.widget.connect("mode_changed", self._on_button_clicked)
+        self.widget.connect("mode_changed", self._clicked)
 
     def _create_mode_button(self) -> ModeButton:
         return ModeButton(
@@ -52,9 +52,9 @@ class SessionButton(Subscriber):
             tooltip_text=_("{} ({})".format(label, self._shortcuts.label(shortcut))),
             name=shortcut.name,
         )
-        self._shortcuts.connect(shortcut, self._change_session(session_type))
+        self._shortcuts.connect(shortcut, self._select(session_type))
 
-    def _change_session(self, session_type: SessionType) -> Callable[[], bool]:
+    def _select(self, session_type: SessionType) -> Callable[[], bool]:
         def callback(*_) -> bool:
             logger.debug("action=change session=%s", session_type)
             self.widget.set_selected(session_type.value)
@@ -62,24 +62,24 @@ class SessionButton(Subscriber):
 
         return callback
 
-    def _on_button_clicked(self, _, number):
+    def _clicked(self, _, number):
         session_type = SessionType.of(number)
         logger.debug("action=mode_changed session=%s", session_type)
         self._session.change(session_type)
 
     @on(Events.SESSION_CHANGE)
-    def _on_session_change(self, payload=SessionPayload) -> None:
+    def _change(self, payload=SessionPayload) -> None:
         logger.debug("action=change current=%d next=%d", self.widget.get_selected(), payload.type.value)
         if self.widget.get_selected() != payload.type.value:
-            self.widget.set_selected(payload.type.value)
+            self._enable(payload)
 
     @on(Events.SESSION_START)
-    def _on_session_start(self, **__):
+    def _disable(self, **__):
         logger.debug("action=disable")
         self.widget.props.sensitive = False
 
-    @on(Events.SESSION_READY, Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def _on_session_stop(self, payload: Union[SessionPayload, SessionEndPayload]):
+    @on(Events.SESSION_READY, Events.SESSION_INTERRUPT)
+    def _enable(self, payload: SessionPayload):
         logger.debug("action=enable session=%s", payload.type)
         self.widget.props.sensitive = True
         self.widget.set_selected(payload.type.value)
