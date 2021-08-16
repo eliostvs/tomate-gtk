@@ -3,7 +3,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events, Session, SessionPayload, SessionType
 from tomate.pomodoro.session import State
-from tomate.ui.testing import create_session_end_payload, create_session_payload, run_loop_for
+from tomate.ui.testing import create_session_payload, run_loop_for
 
 
 @pytest.fixture()
@@ -163,13 +163,31 @@ class TestSessionEnd:
         session.start()
         run_loop_for(2)
 
-        payload = create_session_end_payload(
-            type=new_session,
+        payload = create_session_payload(
+            type=old_session,
             pomodoros=new_pomodoros,
             duration=1,
-            previous=create_session_payload(type=old_session, pomodoros=old_pomodoros, duration=1),
         )
         subscriber.assert_called_once_with(Events.SESSION_END, payload=payload)
+
+    def test_changes_session_type(self, bus, config, session, mocker):
+        config.set("Timer", "pomodoro_duration", 0.02)
+        config.parser.getint = config.parser.getfloat
+
+        subscriber = mocker.Mock()
+        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+
+        session.ready()
+        session.start()
+        run_loop_for(2)
+
+        payload = SessionPayload(
+            id="1234",
+            type=SessionType.SHORT_BREAK,
+            duration=5 * 60,
+            pomodoros=1,
+        )
+        subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
 
 class TestSessionChange:

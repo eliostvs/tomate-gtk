@@ -3,7 +3,7 @@ from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
-from tomate.ui.testing import Q, active_shortcut, create_session_end_payload, create_session_payload, refresh_gui
+from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
 from tomate.ui.widgets import HeaderBar, HeaderBarMenu
 
 
@@ -100,7 +100,7 @@ class TestHeaderBar:
         "event,reset,title,payload",
         [
             (Events.SESSION_INTERRUPT, False, "No session yet", create_session_payload()),
-            (Events.SESSION_END, True, "Session 1", create_session_end_payload(previous=create_session_payload())),
+            (Events.SESSION_END, True, "Session 1", create_session_payload(pomodoros=1)),
         ],
     )
     def test_buttons_visibility_and_title_in_the_first_session(self, event, title, reset, headerbar, payload, bus):

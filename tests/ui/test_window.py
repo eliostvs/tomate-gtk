@@ -4,7 +4,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
 from tomate.ui import Systray, Window
-from tomate.ui.testing import Q, active_shortcut, create_session_end_payload, create_session_payload
+from tomate.ui.testing import Q, active_shortcut, create_session_payload
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ def test_shows_window_when_session_end(bus, mocker, window):
     subscriber = mocker.Mock()
     bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
 
-    payload = create_session_end_payload(previous=create_session_payload())
+    payload = create_session_payload()
     bus.send(Events.SESSION_END, payload=payload)
 
     assert window.widget.props.visible is True

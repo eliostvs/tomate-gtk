@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Remove the SessionEndPayload and start sending SessionPayload with the finished session data
+- Send SessionPayload instead of the SessionEndPayload in the Events.SESSION\_END event
+
+### Added
+
+- Session triggers an Events.SESSION\_CHANGE after the Events.SESSION\_END
+
 ## 0.16.0
 
 ### Changed
@@ -15,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Send Events.SESSION_READY when the main window is created to initialize widget components
+- Send Events.SESSION\_READY when the main window is created to initialize widget components
 
 ### Changed
 
@@ -25,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Read boolean values from config with the Config.get_bool method
+- Read boolean values from config with the Config.get\_bool method
 
 ### Fixed
 

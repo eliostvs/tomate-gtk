@@ -21,9 +21,6 @@ class Payload(namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration
         return format_seconds(self.duration)
 
 
-EndPayload = namedtuple("SessionEndPayload", Payload._fields + ("previous",))
-
-
 class Type(enum.Enum):
     POMODORO = 0
     SHORT_BREAK = 1
@@ -114,9 +111,14 @@ class Session(Subscriber):
         return not self._timer.is_running()
 
     @on(Events.TIMER_END)
-    @fsm(source=[State.STARTED], target=State.ENDED, condition=timer_is_up)
+    @fsm(
+        source=[State.STARTED],
+        target=State.ENDED,
+        condition=timer_is_up,
+        exit=lambda self: self._trigger(Events.SESSION_CHANGE),
+    )
     def _end(self, payload: TimerPayload) -> bool:
-        previous = self._create_payload(duration=payload.duration)
+        payload = self._create_payload(duration=payload.duration)
 
         if self.current == Type.POMODORO:
             self.pomodoros += 1
@@ -124,10 +126,10 @@ class Session(Subscriber):
         else:
             self.current = Type.POMODORO
 
-        logger.debug("action=end previous=%s current=%s", previous.type, self.current)
+        logger.debug("action=end previous=%s current=%s", payload.type, self.current)
 
         self.state = State.ENDED
-        self._bus.send(Events.SESSION_END, payload=self._create_payload(EndPayload, previous=previous))
+        self._bus.send(Events.SESSION_END, payload=payload._replace(pomodoros=self.pomodoros))
 
         return True
 
@@ -141,7 +143,7 @@ class Session(Subscriber):
     def _trigger(self, event: Events) -> None:
         self._bus.send(event, payload=self._create_payload())
 
-    def _create_payload(self, factory=Payload, **kwargs):
+    def _create_payload(self, **kwargs):
         defaults = {
             "duration": self.duration,
             "id": uuid.uuid4(),
@@ -149,4 +151,4 @@ class Session(Subscriber):
             "type": self.current,
         }
         defaults.update(kwargs)
-        return factory(**defaults)
+        return Payload(**defaults)

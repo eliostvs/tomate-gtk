@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional
 
 from gi.repository import GLib, Gtk
 
-from tomate.pomodoro import SessionEndPayload, SessionPayload, SessionType
+from tomate.pomodoro import SessionPayload, SessionType
 from tomate.ui import Shortcut, ShortcutEngine
 
 
@@ -27,17 +27,6 @@ def create_session_payload(**kwargs) -> SessionPayload:
     }
     defaults.update(kwargs)
     return SessionPayload(**defaults)
-
-
-def create_session_end_payload(**kwargs) -> SessionEndPayload:
-    defaults = {
-        "id": "1234",
-        "duration": 5 * 60,
-        "pomodoros": 1,
-        "type": SessionType.SHORT_BREAK,
-    }
-    defaults.update(kwargs)
-    return SessionEndPayload(**defaults)
 
 
 def run_loop_for(seconds: int = 1) -> None:
