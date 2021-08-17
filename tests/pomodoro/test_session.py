@@ -143,10 +143,10 @@ class TestSessionEnd:
         old_pomodoros,
         new_session,
         new_pomodoros,
-        session,
         config,
         bus,
         mocker,
+        session,
     ):
         session.current = old_session
         session.pomodoros = old_pomodoros
@@ -169,8 +169,9 @@ class TestSessionEnd:
             duration=1,
         )
         subscriber.assert_called_once_with(Events.SESSION_END, payload=payload)
+        assert session.current is new_session
 
-    def test_changes_session_type(self, bus, config, session, mocker):
+    def test_changes_session_type(self, bus, config, mocker, session):
         config.set(config.DURATION_SECTION, "pomodoro_duration", 0.02)
         config.parser.getint = config.parser.getfloat
 
