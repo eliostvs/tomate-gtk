@@ -151,9 +151,9 @@ class TestSessionEnd:
         session.current = old_session
         session.pomodoros = old_pomodoros
 
-        config.set("Timer", "pomodoro_duration", 0.02)
-        config.set("Timer", "longbreak_duration", 0.02)
-        config.set("Timer", "shortbreak_duration", 0.02)
+        config.set(config.DURATION_SECTION, "pomodoro_duration", 0.02)
+        config.set(config.DURATION_SECTION, "longbreak_duration", 0.02)
+        config.set(config.DURATION_SECTION, "shortbreak_duration", 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -171,7 +171,7 @@ class TestSessionEnd:
         subscriber.assert_called_once_with(Events.SESSION_END, payload=payload)
 
     def test_changes_session_type(self, bus, config, session, mocker):
-        config.set("Timer", "pomodoro_duration", 0.02)
+        config.set(config.DURATION_SECTION, "pomodoro_duration", 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -213,7 +213,9 @@ class TestSessionChange:
         assert session.change(session=current) is True
         assert session.current is current
 
-        payload = create_session_payload(type=current, duration=config.get_int("Timer", current.option) * 60)
+        payload = create_session_payload(
+            type=current, duration=config.get_int(config.DURATION_SECTION, current.option) * 60
+        )
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
     @pytest.mark.parametrize("state", [State.STOPPED, State.ENDED])
