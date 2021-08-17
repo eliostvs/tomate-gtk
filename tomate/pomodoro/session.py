@@ -109,7 +109,7 @@ class Session(Subscriber):
 
     @property
     def duration(self) -> int:
-        minutes = self._config.get_int("Timer", self.current.option)
+        minutes = self._config.get_int(self._config.DURATION_SECTION, self.current.option)
         return int(minutes * SECONDS_IN_A_MINUTE)
 
     def timer_is_up(self) -> bool:
@@ -142,7 +142,7 @@ class Session(Subscriber):
         return Type.LONG_BREAK if self._is_long_break() else Type.SHORT_BREAK
 
     def _is_long_break(self) -> bool:
-        long_break_interval = self._config.get_int("Timer", "long_break_interval")
+        long_break_interval = self._config.get_int(self._config.DURATION_SECTION, "long_break_interval")
         return not self.pomodoros % long_break_interval
 
     def _trigger(self, event: Events) -> None:
