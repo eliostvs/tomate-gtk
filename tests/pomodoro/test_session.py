@@ -192,34 +192,34 @@ class TestSessionEnd:
 
 class TestSessionChange:
     @pytest.mark.parametrize("state", [State.INITIAL, State.STARTED])
-    def test_not_change_session(self, state, session):
+    def test_not_change_when_session_is_running(self, state, session):
         session.state = state
 
         assert session.change(session=SessionType.LONG_BREAK) is False
         assert session.current is SessionType.POMODORO
 
     @pytest.mark.parametrize(
-        "initial,current",
+        "state, session_type",
         [
             (State.STOPPED, SessionType.SHORT_BREAK),
             (State.ENDED, SessionType.LONG_BREAK),
         ],
     )
-    def test_changes_when_session_is_not_running(self, initial, current, bus, session, config, mocker):
-        session.state = initial
+    def test_changes_when_session_is_not_running(self, state, session_type, bus, config, mocker, session):
+        session.state = state
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
 
-        assert session.change(session=current) is True
-        assert session.current is current
+        assert session.change(session=session_type) is True
+        assert session.current is session_type
 
         payload = create_session_payload(
-            type=current, duration=config.get_int(config.DURATION_SECTION, current.option) * 60
+            type=session_type, duration=config.get_int(config.DURATION_SECTION, session_type.option) * 60
         )
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
     @pytest.mark.parametrize("state", [State.STOPPED, State.ENDED])
-    def test_changes_when_config_change_and_session_is_not_running(self, session, bus, mocker, state, config):
+    def test_changes_when_config_change_and_session_is_not_running(self, state, bus, config, mocker, session):
         session.state = state
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
