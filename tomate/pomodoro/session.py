@@ -11,7 +11,7 @@ from wiring.scanning import register
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
 from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer, format_seconds
-from .config import Payload as ConfigPayload
+from .config import Config, Payload as ConfigPayload
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class Session(Subscriber):
         config="tomate.config",
         timer="tomate.timer",
     )
-    def __init__(self, bus: Bus, config, timer: Timer):
+    def __init__(self, bus: Bus, config: Config, timer: Timer):
         self._config = config
         self._timer = timer
         self._bus = bus
