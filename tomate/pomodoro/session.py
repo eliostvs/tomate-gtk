@@ -37,6 +37,7 @@ class Type(enum.Enum):
         return "{}_duration".format(self.name.replace("_", "").lower())
 
 
+@enum.unique
 class State(enum.Enum):
     INITIAL = 0
     STOPPED = 1
