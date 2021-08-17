@@ -3,6 +3,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events, Session, SessionPayload, SessionType
 from tomate.pomodoro.session import State
+from tomate.pomodoro.config import Config
 from tomate.ui.testing import create_session_payload, run_loop_for
 
 
@@ -151,9 +152,9 @@ class TestSessionEnd:
         session.current = old_session
         session.pomodoros = old_pomodoros
 
-        config.set(config.DURATION_SECTION, "pomodoro_duration", 0.02)
-        config.set(config.DURATION_SECTION, "longbreak_duration", 0.02)
-        config.set(config.DURATION_SECTION, "shortbreak_duration", 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_POMODORO, 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_LONG_BREAK, 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_SHORT_BREAK, 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -172,7 +173,7 @@ class TestSessionEnd:
         assert session.current is new_session
 
     def test_changes_session_type(self, bus, config, mocker, session):
-        config.set(config.DURATION_SECTION, "pomodoro_duration", 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_POMODORO, 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -263,9 +264,9 @@ def test_type_of(number, session_type):
 @pytest.mark.parametrize(
     "session_type, option",
     [
-        (SessionType.POMODORO, "pomodoro_duration"),
-        (SessionType.SHORT_BREAK, "shortbreak_duration"),
-        (SessionType.LONG_BREAK, "longbreak_duration"),
+        (SessionType.POMODORO, Config.DURATION_POMODORO),
+        (SessionType.SHORT_BREAK, Config.DURATION_SHORT_BREAK),
+        (SessionType.LONG_BREAK, Config.DURATION_LONG_BREAK),
     ],
 )
 def test_type_option(session_type, option):
