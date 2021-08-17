@@ -45,7 +45,7 @@ class Bus:
         return receiver in self._bus.receivers_for(event)
 
     def send(self, event: Events, payload: Any = None) -> List[Any]:
-        # drop receiver, index 0, from the result
+        # ignore the receiver in the result
         return [result[1] for result in self._bus.send(event, payload=payload)]
 
     def disconnect(self, event: Events, receiver: Receiver):
@@ -58,6 +58,7 @@ def on(*events: Events):
 
         @functools.wraps(method)
         def wrapped(*args, **kwargs):
+            # ignore the event type, Events, in the receiver callback
             return method(*(arg for arg in args if not isinstance(arg, Events)), **kwargs)
 
         return wrapped
