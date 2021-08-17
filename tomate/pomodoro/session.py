@@ -144,7 +144,7 @@ class Session(Subscriber):
     def _trigger(self, event: Events) -> None:
         self._bus.send(event, payload=self._create_payload())
 
-    def _create_payload(self, **kwargs):
+    def _create_payload(self, **kwargs) -> Payload:
         defaults = {
             "duration": self.duration,
             "id": uuid.uuid4(),
