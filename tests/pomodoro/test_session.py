@@ -229,7 +229,15 @@ class TestSessionChange:
         payload = create_session_payload(duration=20 * 60)
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
-    def test_not_change_when_config_changes_and_session_is_running(self, session, bus, config, mocker):
+    def test_not_change_when_config_section_is_not_timer(self, bus, config, mocker, session):
+        subscriber = mocker.Mock()
+        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+
+        config.set("section", "option", "value")
+
+        subscriber.assert_not_called()
+
+    def test_not_change_when_config_timer_changes_and_session_is_running(self, bus, config, mocker, session):
         session.state = State.STARTED
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)

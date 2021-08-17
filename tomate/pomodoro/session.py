@@ -11,6 +11,7 @@ from wiring.scanning import register
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
 from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer, format_seconds
+from .config import Payload as ConfigPayload
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +95,11 @@ class Session(Subscriber):
         return True
 
     @on(Events.CONFIG_CHANGE)
-    def _on_config_change(self, **kwargs) -> bool:
-        return self.change(kwargs.get("session", self.current))
+    def _on_config_change(self, payload: ConfigPayload) -> bool:
+        if payload.section != "timer":
+            return False
+
+        return self.change(self.current)
 
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_CHANGE))
     def change(self, session: Type) -> bool:
