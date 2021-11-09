@@ -140,7 +140,7 @@ class ExtensionTab:
         plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         plugin_list_container.add(self.plugin_list)
 
-        self.settings_button = Gtk.Button.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.MENU)
+        self.settings_button = Gtk.Button.new_from_icon_name("preferences-system", Gtk.IconSize.MENU)
         self.settings_button.set_properties(name="plugin.settings", sensitive=False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)
 
