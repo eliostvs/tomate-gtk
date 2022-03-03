@@ -58,14 +58,14 @@ class HeaderBar(Subscriber):
         self.widget = self._create_headerbar()
 
         self._start_button = self._add_button(
-            "media-playback-start",
+            Gtk.STOCK_MEDIA_PLAY,
             "Starts the session",
             HeaderBar.START_SHORTCUT,
             lambda *_: session.start(),
         )
 
         self._stop_button = self._add_button(
-            "media-playback-stop",
+            Gtk.STOCK_MEDIA_STOP,
             "Stops the session",
             HeaderBar.STOP_SHORTCUT,
             lambda *_: session.stop(),
@@ -74,7 +74,7 @@ class HeaderBar(Subscriber):
         )
 
         self._reset_button = self._add_button(
-            "edit-clear",
+            Gtk.STOCK_CLEAR,
             "Clear session count",
             HeaderBar.RESET_SHORTCUT,
             lambda *_: session.reset(),
@@ -106,7 +106,7 @@ class HeaderBar(Subscriber):
         return button
 
     def _add_preference_button(self, menu, shortcuts) -> None:
-        icon = Gtk.Image.new_from_icon_name("preferences-system", Gtk.IconSize.BUTTON)
+        icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_PREFERENCES, Gtk.IconSize.BUTTON)
         button = Gtk.MenuButton(
             name=Menu.PREFERENCE_SHORTCUT.name,
             popup=menu.widget,
