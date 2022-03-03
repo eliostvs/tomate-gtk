@@ -11,6 +11,7 @@ from wiring.scanning import register
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
 from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer, format_seconds
+from .config import Config, Payload as ConfigPayload
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class Type(enum.Enum):
         return "{}_duration".format(self.name.replace("_", "").lower())
 
 
+@enum.unique
 class State(enum.Enum):
     INITIAL = 0
     STOPPED = 1
@@ -51,7 +53,7 @@ class Session(Subscriber):
         config="tomate.config",
         timer="tomate.timer",
     )
-    def __init__(self, bus: Bus, config, timer: Timer):
+    def __init__(self, bus: Bus, config: Config, timer: Timer):
         self._config = config
         self._timer = timer
         self._bus = bus
@@ -93,8 +95,11 @@ class Session(Subscriber):
         return True
 
     @on(Events.CONFIG_CHANGE)
-    def _on_config_change(self, **kwargs) -> bool:
-        return self.change(kwargs.get("session", self.current))
+    def _on_config_change(self, payload: ConfigPayload) -> bool:
+        if payload.section != "timer":
+            return False
+
+        return self.change(self.current)
 
     @fsm(source=[State.STOPPED, State.ENDED], target="self", exit=lambda self: self._trigger(Events.SESSION_CHANGE))
     def change(self, session: Type) -> bool:
@@ -104,7 +109,7 @@ class Session(Subscriber):
 
     @property
     def duration(self) -> int:
-        minutes = self._config.get_int("Timer", self.current.option)
+        minutes = self._config.get_int(self._config.DURATION_SECTION, self.current.option)
         return int(minutes * SECONDS_IN_A_MINUTE)
 
     def timer_is_up(self) -> bool:
@@ -137,13 +142,13 @@ class Session(Subscriber):
         return Type.LONG_BREAK if self._is_long_break() else Type.SHORT_BREAK
 
     def _is_long_break(self) -> bool:
-        long_break_interval = self._config.get_int("Timer", "long_break_interval")
+        long_break_interval = self._config.get_int(self._config.DURATION_SECTION, "long_break_interval")
         return not self.pomodoros % long_break_interval
 
     def _trigger(self, event: Events) -> None:
         self._bus.send(event, payload=self._create_payload())
 
-    def _create_payload(self, **kwargs):
+    def _create_payload(self, **kwargs) -> Payload:
         defaults = {
             "duration": self.duration,
             "id": uuid.uuid4(),

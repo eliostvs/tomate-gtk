@@ -3,6 +3,7 @@ from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events, Session, SessionPayload, SessionType
 from tomate.pomodoro.session import State
+from tomate.pomodoro.config import Config
 from tomate.ui.testing import create_session_payload, run_loop_for
 
 
@@ -143,17 +144,17 @@ class TestSessionEnd:
         old_pomodoros,
         new_session,
         new_pomodoros,
-        session,
         config,
         bus,
         mocker,
+        session,
     ):
         session.current = old_session
         session.pomodoros = old_pomodoros
 
-        config.set("Timer", "pomodoro_duration", 0.02)
-        config.set("Timer", "longbreak_duration", 0.02)
-        config.set("Timer", "shortbreak_duration", 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_POMODORO, 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_LONG_BREAK, 0.02)
+        config.set(config.DURATION_SECTION, config.DURATION_SHORT_BREAK, 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -169,9 +170,10 @@ class TestSessionEnd:
             duration=1,
         )
         subscriber.assert_called_once_with(Events.SESSION_END, payload=payload)
+        assert session.current is new_session
 
-    def test_changes_session_type(self, bus, config, session, mocker):
-        config.set("Timer", "pomodoro_duration", 0.02)
+    def test_changes_session_type(self, bus, config, mocker, session):
+        config.set(config.DURATION_SECTION, config.DURATION_POMODORO, 0.02)
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
@@ -192,32 +194,34 @@ class TestSessionEnd:
 
 class TestSessionChange:
     @pytest.mark.parametrize("state", [State.INITIAL, State.STARTED])
-    def test_not_change_session(self, state, session):
+    def test_not_change_when_session_is_running(self, state, session):
         session.state = state
 
         assert session.change(session=SessionType.LONG_BREAK) is False
         assert session.current is SessionType.POMODORO
 
     @pytest.mark.parametrize(
-        "initial,current",
+        "state, session_type",
         [
             (State.STOPPED, SessionType.SHORT_BREAK),
             (State.ENDED, SessionType.LONG_BREAK),
         ],
     )
-    def test_changes_when_session_is_not_running(self, initial, current, bus, session, config, mocker):
-        session.state = initial
+    def test_changes_when_session_is_not_running(self, state, session_type, bus, config, mocker, session):
+        session.state = state
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
 
-        assert session.change(session=current) is True
-        assert session.current is current
+        assert session.change(session=session_type) is True
+        assert session.current is session_type
 
-        payload = create_session_payload(type=current, duration=config.get_int("Timer", current.option) * 60)
+        payload = create_session_payload(
+            type=session_type, duration=config.get_int(config.DURATION_SECTION, session_type.option) * 60
+        )
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
     @pytest.mark.parametrize("state", [State.STOPPED, State.ENDED])
-    def test_changes_when_config_change_and_session_is_not_running(self, session, bus, mocker, state, config):
+    def test_changes_when_config_change_and_session_is_not_running(self, state, bus, config, mocker, session):
         session.state = state
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
@@ -227,7 +231,15 @@ class TestSessionChange:
         payload = create_session_payload(duration=20 * 60)
         subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
 
-    def test_not_change_when_config_changes_and_session_is_running(self, session, bus, config, mocker):
+    def test_not_change_when_config_section_is_not_timer(self, bus, config, mocker, session):
+        subscriber = mocker.Mock()
+        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+
+        config.set("section", "option", "value")
+
+        subscriber.assert_not_called()
+
+    def test_not_change_when_config_timer_changes_and_session_is_running(self, bus, config, mocker, session):
         session.state = State.STARTED
         subscriber = mocker.Mock()
         bus.connect(Events.SESSION_CHANGE, subscriber, False)
@@ -252,9 +264,9 @@ def test_type_of(number, session_type):
 @pytest.mark.parametrize(
     "session_type, option",
     [
-        (SessionType.POMODORO, "pomodoro_duration"),
-        (SessionType.SHORT_BREAK, "shortbreak_duration"),
-        (SessionType.LONG_BREAK, "longbreak_duration"),
+        (SessionType.POMODORO, Config.DURATION_POMODORO),
+        (SessionType.SHORT_BREAK, Config.DURATION_SHORT_BREAK),
+        (SessionType.LONG_BREAK, Config.DURATION_LONG_BREAK),
     ],
 )
 def test_type_option(session_type, option):
