@@ -41,9 +41,10 @@ setup(
     long_description=open("README.md", "r", encoding="utf-8").read(),
     name="tomate-gtk",
     packages=find_packages(exclude=["tests"]),
+    py_modules=[],
     data_files=find_data_files(DATA_FILES, "tomate"),
     url="https://github.com/eliostvs/tomate-gtk",
-    version="0.18.0",
+    version="0.18.1",
     zip_safe=False,
     entry_points={"console_scripts": ["tomate-gtk=tomate.__main__:main"]},
 )
