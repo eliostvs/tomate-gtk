@@ -29,8 +29,8 @@ def find_data_files(data_map, package_name):
 DATA_FILES = [
     ("data/icons", "share/icons"),
     ("data/applications", "share/applications"),
-    ("share/{pkgname}/plugins", "data/plugins"),
-    ("share/{pkgname}/media", "data/media"),
+    ("data/plugins", "share/{pkgname}/plugins"),
+    ("data/media", "share/{pkgname}/media"),
 ]
 
 setup(
