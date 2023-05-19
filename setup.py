@@ -29,8 +29,8 @@ def find_data_files(data_map, package_name):
 DATA_FILES = [
     ("data/icons", "share/icons"),
     ("data/applications", "share/applications"),
-    ("share/{pkgname}/plugins", "data/plugins"),
-    ("share/{pkgname}/media", "data/media"),
+    ("data/plugins", "share/{pkgname}/plugins"),
+    ("data/media", "share/{pkgname}/media"),
 ]
 
 setup(
@@ -46,7 +46,7 @@ setup(
     py_modules=[],
     data_files=find_data_files(DATA_FILES, "tomate"),
     url="https://github.com/eliostvs/tomate-gtk",
-    version="0.19.0",
+    version="0.19.1",
     zip_safe=False,
     entry_points={"console_scripts": ["tomate-gtk=tomate.__main__:main"]},
 )
