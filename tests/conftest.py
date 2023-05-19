@@ -1,8 +1,12 @@
 import os
 
+import gi
 import pytest
-from gi.repository import Gtk
 from wiring import Graph
+
+gi.require_version("Gtk", "3.0")
+
+from gi.repository import Gtk
 
 from tomate.pomodoro import Bus, Config, PluginEngine, Session
 from tomate.ui import ShortcutEngine, Window

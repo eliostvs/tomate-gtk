@@ -6,6 +6,7 @@ from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
 from tomate.pomodoro import Bus, Config, Events, Session, Subscriber, on
+
 from .shortcut import ShortcutEngine
 from .systray import Systray
 from .widgets import Countdown, HeaderBar, SessionButton

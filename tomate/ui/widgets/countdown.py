@@ -5,7 +5,8 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, SessionPayload, Subscriber, TimerPayload, on
+from tomate.pomodoro import (Bus, Events, SessionPayload, Subscriber,
+                             TimerPayload, on)
 
 logger = logging.getLogger(__name__)
 

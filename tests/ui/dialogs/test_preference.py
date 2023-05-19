@@ -3,8 +3,9 @@ from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Config, Events
-from tomate.ui.dialogs import ExtensionTab, PluginGrid, PreferenceDialog, TimerTab
-from tomate.ui.testing import Q, TV
+from tomate.ui.dialogs import (ExtensionTab, PluginGrid, PreferenceDialog,
+                               TimerTab)
+from tomate.ui.testing import TV, Q
 
 
 @pytest.fixture
