@@ -1,0 +1,9 @@
+[Core]
+Name = Ticking
+Module = ticking
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 0.0.1
+Website = https://github.com/eliostvs/tomate-gtk
+Description = Ticking sound during a pomodoro session

@@ -15,7 +15,8 @@ DOCKER_IMAGE = eliostvs/$(PACKAGE)
 OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
 PYTHON       ?= python3
-PYTHONPATH   = PYTHONPATH=$(CURDIR)
+PLUGINPATH   = $(CURDIR)/data/plugins
+PYTHONPATH   = PYTHONPATH=$(CURDIR):$(PLUGINPATH)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
 XDGPATH      = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=$(DATAPATH)
@@ -38,7 +39,12 @@ mime: clean
 
 .PHONY: format
 format:
-	black $(PACKAGE) tests/
+	black $(PACKAGE) tests/ $(PLUGINPATH)
+	isort $(PACKAGE) tests/ $(PLUGINPATH)
+
+.PHONY: lint
+lint:
+	ruff $(ARGS) $(PACKAGE) tests/
 
 .PHONY: test
 test:
