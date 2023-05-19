@@ -64,6 +64,10 @@ def test_get_option_as_int(config):
     assert config.get_int("Timer", "pomodoro_duration") == 25
 
 
+def test_get_option_as_float(config):
+    assert config.get_float("ticking_plugin", "volume") == 0.50
+
+
 def test_get_option(config):
     assert config.get("Timer", "pomodoro_duration") == "25"
 
