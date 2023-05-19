@@ -2,6 +2,7 @@ ifeq ($(origin .RECIPEPREFIX), undefined)
 	$(error This Make does not support .RECIPEPREFIX. Please use GNU Make 4.0 or later)
 endif
 
+.DEFAULT_GOAL = help
 .DELETE_ON_ERROR:
 .ONESHELL:
 .SHELLFLAGS   := -eu -o pipefail -c
@@ -27,34 +28,48 @@ else
 	ARGS ?=
 endif
 
-.PHONY: clean
+
+## help: print this help message
+help:
+	echo 'Usage:'
+	sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /' | sort
+.PHONY: help
+
+## clean: clean development files
 clean:
 	find . \( -iname "__pycache__" \) -print0 | xargs -0 rm -rf
 	rm -rf .eggs *.egg-info/ .coverage build/ .cache .pytest_cache tests/data/mime/mime.cache
+.PHONY: clean
 
-.PHONY: mime
+## mime: generate test mine index
 mime: clean
 	update-mime-database tests/data/mime
 	rm -rf tests/data/mime/{image,aliases,generic-icons,globs,globs2,icons,magic,subclasses,treemagic,types,version,XMLnamespaces}
+.PHONY: mime
 
-.PHONY: format
+## format: run code formatter
 format:
 	black $(PACKAGE) tests/ $(PLUGINPATH)
 	isort $(PACKAGE) tests/ $(PLUGINPATH)
+.PHONY: format
 
-.PHONY: lint
+## lint: run lint
 lint:
 	ruff $(ARGS) $(PACKAGE) tests/
+.PHONY: lint
 
-.PHONY: test
+## test: run tests
 test:
 	echo "$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
 	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
+.PHONY: test
 
-.PHONY: run
+## run: run app locally
 run:
 	$(XDGPATH) $(PYTHONPATH) TOMATE_DEBUG=true $(PYTHON) -m $(PACKAGE) -v
+.PHONY: run
 
+## release-[major|minor|patch]: create release
 release-%:
 	git flow init -d
 	@grep -q '\[Unreleased\]' CHANGELOG.md || (echo 'Create the [Unreleased] section in the changelog first!' && exit)
@@ -62,21 +77,25 @@ release-%:
 	git flow release start $(VERSION)
 	GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$(VERSION)" -T $(VERSION) $(VERSION) -p
 
-.PHONY: trigger-build
+## trigger-build: trigger obs build
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
+.PHONY: trigger-build
 
-.PHONY: docker-run
+## docker-run: run app inside
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
 	-v $(CURDIR):/code \
 	-v $(HOME)/.Xauthority:/root/.Xauthority \
 	$(DOCKER_IMAGE) run
+.PHONY: docker-run
 
-.PHONY: docker-test
+## docker-test: run tests inside docker
 docker-test:
 	docker run --rm -it -v $(CURDIR):$(WORKDIR) --workdir $(WORKDIR) $(DOCKER_IMAGE) mime test
+.PHONY: docker-test
 
-.PHONY: docker-enter
+## docker-enter: open terminal inside docker environment
 docker-enter:
 	docker run --rm -v $(CURDIR):$(WORKDIR) -it --workdir $(WORKDIR) --entrypoint="bash" $(DOCKER_IMAGE)
+.PHONY: docker-enter
