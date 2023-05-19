@@ -1,5 +1,5 @@
 from locale import gettext as _
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
 from gi.repository import Gtk
 from wiring import SingletonScope, inject

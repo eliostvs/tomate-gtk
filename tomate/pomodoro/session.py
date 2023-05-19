@@ -8,10 +8,13 @@ from collections import namedtuple
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
+from .config import Config
+from .config import Payload as ConfigPayload
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
-from .timer import Payload as TimerPayload, SECONDS_IN_A_MINUTE, Timer, format_seconds
-from .config import Config, Payload as ConfigPayload
+from .timer import SECONDS_IN_A_MINUTE
+from .timer import Payload as TimerPayload
+from .timer import Timer, format_seconds
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +32,7 @@ class Type(enum.Enum):
 
     @classmethod
     def of(cls, index) -> Type:
-        for (number, attr) in enumerate(cls):
+        for number, attr in enumerate(cls):
             if number == index:
                 return attr
 

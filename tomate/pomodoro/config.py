@@ -87,6 +87,9 @@ class Config:
     def get_bool(self, section: str, option: str, fallback=None) -> bool:
         return self.get(section, option, fallback, method="getboolean")
 
+    def get_float(self, section: str, option: str, fallback=None) -> int:
+        return self.get(section, option, fallback, method="getfloat")
+
     def get(self, section: str, option: str, fallback=None, method="get") -> Union[str, int, bool]:
         section = self.normalize(section)
         option = self.normalize(option)

@@ -2,8 +2,8 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events, Session, SessionPayload, SessionType
-from tomate.pomodoro.session import State
 from tomate.pomodoro.config import Config
+from tomate.pomodoro.session import State
 from tomate.ui.testing import create_session_payload, run_loop_for
 
 

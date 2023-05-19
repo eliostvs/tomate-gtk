@@ -14,3 +14,7 @@ exclude = '''
   | dist
 )/
 '''
+
+[tool.ruff]
+line-length = 120
+ignore = ["E402"]

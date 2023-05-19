@@ -8,12 +8,11 @@ import gi
 gi.require_version("Gdk", "3.0")
 gi.require_version("Gtk", "3.0")
 
+from gi.repository import Gdk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro.app import Application
 from tomate.pomodoro.graph import graph
-
-from gi.repository import Gdk
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)

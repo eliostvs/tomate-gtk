@@ -6,8 +6,10 @@ from typing import Callable
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, Session, SessionPayload, SessionType, Subscriber, on
+from tomate.pomodoro import (Bus, Events, Session, SessionPayload, SessionType,
+                             Subscriber, on)
 from tomate.ui import Shortcut, ShortcutEngine
+
 from .mode_button import ModeButton
 
 locale.textdomain("tomate")
