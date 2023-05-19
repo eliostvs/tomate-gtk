@@ -53,7 +53,7 @@ class TickingPlugin(plugin.Plugin):
     @suppress_errors
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
     def stop(self, **_) -> None:
-        logger.debug(f"action=stop")
+        logger.debug("action=stop")
         if self.player:
             self.player.stop()
 
