@@ -29,7 +29,7 @@ class Type(enum.Enum):
 
     @classmethod
     def of(cls, index) -> Type:
-        for (number, attr) in enumerate(cls):
+        for number, attr in enumerate(cls):
             if number == index:
                 return attr
 
