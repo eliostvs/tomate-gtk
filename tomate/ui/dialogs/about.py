@@ -17,7 +17,7 @@ class AboutDialog(Gtk.AboutDialog):
             modal=True,
             program_name="Tomate Gtk",
             title="Tomate Gtk",
-            version="0.19.1",
+            version="0.20.0",
             website="https://github.com/eliostvs/tomate-gtk",
             website_label="Tomate GTK on Github",
         )
