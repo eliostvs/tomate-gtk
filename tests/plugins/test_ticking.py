@@ -29,10 +29,11 @@ def wait_until(fn: Callable[[], bool], timeout: int = 1, period: int = 0.25):
 
 
 @pytest.fixture
-def plugin(bus, config, graph):
+def plugin(bus, config, graph, session):
     graph.providers.clear()
     graph.register_instance("tomate.config", config)
     graph.register_instance("tomate.bus", bus)
+    graph.register_instance("tomate.session", session)
 
     from ticking import TickingPlugin
 
@@ -42,12 +43,29 @@ def plugin(bus, config, graph):
 
 
 class TestPlugin:
-    def test_loads_plugin_configuration(self, bus, config, plugin):
+    def test_loads_configuration_when_is_activated(self, bus, config, plugin):
         plugin.activate()
 
         assert plugin.player.volume == 0.5
         assert plugin.player.file == DEFAULT_ALARM
         assert plugin.player.repeat
+
+    @patch("ticking.GStreamerPlayer")
+    @pytest.mark.parametrize(
+        "is_running,session_type,want",
+        [
+            (True, SessionType.POMODORO, True),
+            (True, SessionType.SHORT_BREAK, False),
+            (False, SessionType.POMODORO, False),
+        ],
+    )
+    def test_starts_player_when_is_activated(self, player, is_running, session_type, want, bus, config, session, plugin):
+        session.is_running.return_value = is_running
+        session.current = session_type
+
+        plugin.activate()
+
+        assert player.return_value.play.called == want
 
     @patch("ticking.GStreamerPlayer")
     def test_starts_player_when_session_start(self, player, bus, config, plugin):
@@ -68,7 +86,7 @@ class TestPlugin:
         player.return_value.stop.assert_called_once()
 
     @patch("ticking.GStreamerPlayer")
-    def test_stops_player_when_plugin_deactivate(self, player, bus, config, plugin):
+    def test_stops_player_when_is_deactivate(self, player, bus, config, plugin):
         plugin.activate()
 
         plugin.deactivate()
