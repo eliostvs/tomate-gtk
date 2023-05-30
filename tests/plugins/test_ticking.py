@@ -59,7 +59,9 @@ class TestPlugin:
             (False, SessionType.POMODORO, False),
         ],
     )
-    def test_starts_player_when_is_activated(self, player, is_running, session_type, want, bus, config, session, plugin):
+    def test_starts_player_when_is_activated(
+        self, player, is_running, session_type, want, bus, config, session, plugin
+    ):
         session.is_running.return_value = is_running
         session.current = session_type
 
