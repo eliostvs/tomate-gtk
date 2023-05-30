@@ -17,6 +17,7 @@ OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
 PYTHON       ?= python3
 PLUGINPATH   = $(CURDIR)/data/plugins
+PYTEST       ?=
 PYTHONPATH   = PYTHONPATH=$(CURDIR):$(PLUGINPATH)
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
@@ -43,7 +44,7 @@ clean:
 
 ## mime: generate test mine index
 mime: clean
-	update-mime-database tests/data/mime
+	$(XDGPATH) update-mime-database tests/data/mime
 	rm -rf tests/data/mime/{image,aliases,generic-icons,globs,globs2,icons,magic,subclasses,treemagic,types,version,XMLnamespaces}
 .PHONY: mime
 
@@ -60,8 +61,7 @@ lint:
 
 ## test: run tests
 test:
-	echo "$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)"
-	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest $(PYTEST) -v --cov=$(PACKAGE)
+	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest-3 $(PYTEST) -v --cov=$(PACKAGE)
 .PHONY: test
 
 ## run: run app locally
@@ -85,7 +85,7 @@ trigger-build:
 ## docker-run: run app inside
 docker-run:
 	docker run --rm -it -e DISPLAY --net=host \
-	-v $(CURDIR):/code \
+	-v $(CURDIR):/$(WORKDIR) \
 	-v $(HOME)/.Xauthority:/root/.Xauthority \
 	$(DOCKER_IMAGE) run
 .PHONY: docker-run
