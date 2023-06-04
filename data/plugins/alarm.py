@@ -6,10 +6,9 @@ from urllib.parse import urlparse
 import gi
 from wiring import Graph
 
-gi.require_version("Gst", "1.0")
 gi.require_version("Gtk", "3.0")
 
-from gi.repository import Gst, Gtk
+from gi.repository import Gtk
 
 import tomate.pomodoro.plugin as plugin
 from tomate.audio import GStreamerPlayer
