@@ -1,38 +1,22 @@
-import time
-from datetime import datetime as dt
-from datetime import timedelta
 from os.path import dirname, join
-from typing import Callable
 from unittest.mock import patch
 
 import gi
 import pytest
 
-from tomate.pomodoro import SessionPayload, SessionType
-
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gst", "1.0")
 
-from tomate.pomodoro import Events
+from tomate.pomodoro import Events, SessionPayload, SessionType
 
 DEFAULT_ALARM = f'file://{join(dirname(dirname(__file__)), "data", "tomate", "media", "clock.ogg")}'
-
-
-def wait_until(fn: Callable[[], bool], timeout: int = 1, period: int = 0.25):
-    limit = dt.utcnow() + timedelta(seconds=timeout)
-
-    while dt.utcnow() < limit:
-        if fn():
-            return True
-        time.sleep(period)
-    return False
 
 
 @pytest.fixture
 def plugin(bus, config, graph, session):
     graph.providers.clear()
-    graph.register_instance("tomate.config", config)
     graph.register_instance("tomate.bus", bus)
+    graph.register_instance("tomate.config", config)
     graph.register_instance("tomate.session", session)
 
     from ticking import TickingPlugin

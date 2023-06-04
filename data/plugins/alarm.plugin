@@ -1,0 +1,9 @@
+[Core]
+Name = Alarm
+Module = alarm
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 0.12.0
+Website = https://github.com/eliostvs/tomate-gtk
+Description = Plays alarm at session end

@@ -62,7 +62,7 @@ Official Plugins
 All plugins are in the repositories and need to be installed separately.
 For example `sudo apt-get install tomate-indicator-plugin` will install the indicator plugin under Debian and Ubuntu.
 
-- [Alarm (tomate-alarm-plugin)][alarm-plugin] Plays a sound when the timer ends
+- [tomate-alarm-plugin][alarm-plugin] Plays a sound when the timer ends
 - [Notify (tomate-notify-plugin)][notify-plugin] Shows notification end the timer starts, stops or ends
 - [Indicator (tomate-indicator-plugin)][indicator-plugin] Shows the timer countdown in the systray **when the timer is running** (requires libappindicator)
 - [StatusIcon (tomate-statusicon-plugin)][statusicon-plugin] Shows the timer countdown in the systray **when the timer is running**
@@ -85,7 +85,7 @@ PURPOSE.  See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-[alarm-plugin]: https://github.com/eliostvs/tomate-alarm-plugin
+[alarm-plugin]: ./data/plugins/alarm.plugin
 [notify-plugin]: https://github.com/eliostvs/tomate-notify-plugin
 [indicator-plugin]: https://github.com/eliostvs/tomate-indicator-plugin
 [statusicon-plugin]: https://github.com/eliostvs/tomate-statusicon-plugin

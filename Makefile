@@ -18,8 +18,8 @@ PACKAGE      = tomate
 PYTHON       ?= python3
 PLUGINPATH   = $(CURDIR)/data/plugins
 PYTEST       ?= pytest-3
-TESTARGS     ?=
 PYTHONPATH   = PYTHONPATH=$(CURDIR):$(PLUGINPATH)
+TESTARGS     ?=
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
 XDGPATH      = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=$(DATAPATH)
@@ -57,7 +57,7 @@ format:
 
 ## lint: run lint
 lint:
-	ruff $(ARGS) $(PACKAGE) tests/
+	ruff $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
 .PHONY: lint
 
 ## test: run tests
