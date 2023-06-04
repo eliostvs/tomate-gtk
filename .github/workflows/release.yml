@@ -1,0 +1,21 @@
+name: release
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Trigger build
+        env:
+          TOKEN: ${{ secrets.OBS_TOKEN }}
+        run: make trigger-build
