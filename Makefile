@@ -6,7 +6,6 @@ endif
 .DELETE_ON_ERROR:
 .ONESHELL:
 .SHELLFLAGS   := -eu -o pipefail -c
-.SILENT:
 MAKEFLAGS     += --no-builtin-rules
 MAKEFLAGS     += --warn-undefined-variables
 SHELL         = bash
@@ -57,7 +56,7 @@ format:
 
 ## lint: run lint
 lint:
-	ruff $(ARGS) $(PACKAGE) tests/
+	ruff $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
 .PHONY: lint
 
 ## test: run tests
