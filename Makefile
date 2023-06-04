@@ -17,8 +17,9 @@ OBS_API_URL  = https://api.opensuse.org/trigger/runservice
 PACKAGE      = tomate
 PYTHON       ?= python3
 PLUGINPATH   = $(CURDIR)/data/plugins
-PYTEST       ?=
+PYTEST       ?= pytest-3
 PYTHONPATH   = PYTHONPATH=$(CURDIR):$(PLUGINPATH)
+TESTARGS     ?=
 VERSION      = `cat .bumpversion.cfg | grep current_version | awk '{print $$3}'`
 WORKDIR      = /code
 XDGPATH      = XDG_CONFIG_HOME=$(DATAPATH) XDG_DATA_HOME=$(DATAPATH) XDG_DATA_DIRS=$(DATAPATH)
@@ -61,7 +62,7 @@ lint:
 
 ## test: run tests
 test:
-	$(XDGPATH) $(PYTHONPATH) $(ARGS) pytest-3 $(PYTEST) -v --cov=$(PACKAGE)
+	$(XDGPATH) $(PYTHONPATH) $(ARGS) $(PYTEST) $(TESTARGS) -v --cov=$(PACKAGE)
 .PHONY: test
 
 ## run: run app locally
