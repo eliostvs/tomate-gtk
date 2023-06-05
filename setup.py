@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 
 def find_xdg_data_files(from_dir, to_dir, package_name, data_files):
-    for (root, _, files) in os.walk(from_dir):
+    for root, _, files in os.walk(from_dir):
         if files:
             to_dir = to_dir.format(pkgname=package_name)
 
@@ -20,7 +20,7 @@ def find_xdg_data_files(from_dir, to_dir, package_name, data_files):
 def find_data_files(data_map, package_name):
     data_files = []
 
-    for (from_dir, to_dir) in data_map:
+    for from_dir, to_dir in data_map:
         find_xdg_data_files(from_dir, to_dir, package_name, data_files)
 
     return data_files

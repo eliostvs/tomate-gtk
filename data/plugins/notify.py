@@ -4,6 +4,7 @@ from typing import Tuple
 
 import gi
 from wiring import Graph
+
 import tomate.pomodoro.plugin as plugin
 from tomate.pomodoro import Bus, Events, SessionPayload, SessionType, on, suppress_errors
 
