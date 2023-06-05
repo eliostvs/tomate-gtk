@@ -86,7 +86,7 @@ You should have received a copy of the GNU General Public License along
 with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 [alarm-plugin]: ./data/plugins/alarm.plugin
-[notify-plugin]: https://github.com/eliostvs/tomate-notify-plugin
+[notify-plugin]: data/plugins/notify.plugin
 [indicator-plugin]: https://github.com/eliostvs/tomate-indicator-plugin
 [statusicon-plugin]: https://github.com/eliostvs/tomate-statusicon-plugin
 [launcher-plugin]: https://github.com/eliostvs/tomate-launcher-plugin
