@@ -1,0 +1,9 @@
+[Core]
+Name = Notify
+Module = notify
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 0.15.0
+Website = https://github.com/eliostvs/tomate-gtk
+Description = Shows screen notifications
