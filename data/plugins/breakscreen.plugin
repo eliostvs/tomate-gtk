@@ -1,0 +1,9 @@
+[Core]
+Name = Break Screen
+Module = breakscreen
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 0.7.0
+Website = https://github.com/eliostva/tomate-gtk
+Description = Shows a full screen window which prevents users from using the computer during a break

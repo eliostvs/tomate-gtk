@@ -6,8 +6,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import (Bus, Events, Session, SessionPayload, Subscriber,
-                             on)
+from tomate.pomodoro import Bus, Events, Session, SessionPayload, Subscriber, on
 from tomate.ui import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")

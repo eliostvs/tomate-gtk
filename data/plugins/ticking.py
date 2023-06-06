@@ -7,8 +7,14 @@ gi.require_version("Gst", "1.0")
 
 import tomate.pomodoro.plugin as plugin
 from tomate.audio import GStreamerPlayer
-from tomate.pomodoro import (Bus, Events, SessionPayload, SessionType, on,
-                             suppress_errors)
+from tomate.pomodoro import (
+    Bus,
+    Events,
+    SessionPayload,
+    SessionType,
+    on,
+    suppress_errors,
+)
 
 logger = logging.getLogger(__name__)
 

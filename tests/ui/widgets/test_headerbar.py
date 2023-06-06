@@ -3,8 +3,7 @@ from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
-from tomate.ui.testing import (Q, active_shortcut, create_session_payload,
-                               refresh_gui)
+from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
 from tomate.ui.widgets import HeaderBar, HeaderBarMenu
 
 
