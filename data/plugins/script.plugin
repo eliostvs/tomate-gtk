@@ -1,5 +1,5 @@
 [Core]
-Name = Scripts
+Name = Script
 Module = script
 
 [Documentation]
