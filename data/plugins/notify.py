@@ -6,7 +6,8 @@ import gi
 from wiring import Graph
 
 import tomate.pomodoro.plugin as plugin
-from tomate.pomodoro import Bus, Events, SessionPayload, SessionType, on, suppress_errors
+from tomate.pomodoro import (Bus, Events, SessionPayload, SessionType, on,
+                             suppress_errors)
 
 gi.require_version("Notify", "0.7")
 
