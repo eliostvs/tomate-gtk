@@ -57,7 +57,7 @@ format:
 
 ## lint: run lint
 lint:
-	ruff $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
+	ruff check $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
 .PHONY: lint
 
 ## test: run tests
