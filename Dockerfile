@@ -11,6 +11,7 @@ RUN apt-get update -qq && apt-get install -y \
     gir1.2-gtk-3.0 \
     gir1.2-gtk-3.0 \
     gir1.2-notify-0.7 \
+    gir1.2-playerctl-2.0 \
     gir1.2-unity-5.0 \
     git \
     gstreamer1.0-plugins-base \
