@@ -57,7 +57,7 @@ format:
 
 ## lint: run lint
 lint:
-	ruff $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
+	ruff check $(ARGS) $(PACKAGE) tests/ $(PLUGINPATH)
 .PHONY: lint
 
 ## test: run tests
@@ -82,6 +82,14 @@ release-%:
 trigger-build:
 	curl -X POST -H "Authorization: Token $(TOKEN)" $(OBS_API_URL)
 .PHONY: trigger-build
+
+## docker: create docker image
+docker:
+	docker built -t $(DOCKER_IMAGE) .
+
+## docker: push image to docker hub
+docker-push:
+	docker image push $(DOCKER_IMAGE):latest
 
 ## docker-run: run app inside
 docker-run:

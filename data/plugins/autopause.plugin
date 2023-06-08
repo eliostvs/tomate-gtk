@@ -1,0 +1,9 @@
+[Core]
+Name = Auto Pause
+Module = autopause
+
+[Documentation]
+Author = Elio Esteves Duarte
+Version = 0.2.0
+Website =  https://github.com/eliostvs/tomate-gtk
+Description = Pauses all running media players when the session ends

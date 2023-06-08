@@ -5,7 +5,8 @@ on:
     branches:
       - main
       - develop
-  pull_request: 
+  pull_request:
+  workflow_dispatch: 
 
 jobs:
   lint:
