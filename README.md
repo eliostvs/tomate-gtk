@@ -81,6 +81,7 @@ The packages are available in [aur repository](https://aur.archlinux.org/package
 ---
 
 [alarm-plugin]: ./data/plugins/alarm.plugin
+[ticking-plugin]: ./data/plugins/ticking.plugin
 [notify-plugin]: ./data/plugins/notify.plugin
 [script-plugin]: ./data/plugins/script.plugin
 [breakscreen-plugin]: ./data/plugins/breakscreen.plugin
