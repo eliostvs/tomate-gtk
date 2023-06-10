@@ -4,6 +4,6 @@ Module = script
 
 [Documentation]
 Author = Elio Esteves Duarte
-Version = 0.1.0
+Version = 0.2.0
 Website = https://github.com/eliostvs/tomate-gtk
 Description = Run scripts when a session starts, stops or finishes
