@@ -45,7 +45,7 @@ def plugin(bus, config, graph):
 
 
 @pytest.mark.parametrize(
-    "event, option",
+    "event,option",
     [
         (Events.SESSION_START, "start_command"),
         (Events.SESSION_INTERRUPT, "stop_command"),
@@ -62,15 +62,15 @@ def test_execute_command_when_event_is_trigger(event, option, bus, subprocess_ru
 
 
 @pytest.mark.parametrize(
-    "event, section, session_type",
+    "event,section,session_type",
     [
         (Events.SESSION_START, "start_command", SessionType.POMODORO),
         (Events.SESSION_INTERRUPT, "stop_command", SessionType.LONG_BREAK),
         (Events.SESSION_END, "finish_command", SessionType.SHORT_BREAK),
     ],
 )
-def test_interpolate_command(event, section, session_type, bus, subprocess_run, config, plugin):
-    config.set(SECTION_NAME, section, "$event $type")
+def test_command_variables(event, section, session_type, bus, subprocess_run, config, plugin):
+    config.set(SECTION_NAME, section, "$event $session")
     plugin.activate()
 
     bus.send(event, random_payload(session_type))
@@ -171,3 +171,14 @@ class TestSettingsWindow:
 
         config.load()
         assert config.get(SECTION_NAME, option) == "echo changed"
+
+    def test_text(self, config, plugin):
+        dialog = plugin.settings_window(Gtk.Window())
+
+        expected = (
+            "You can use the session and event names in your script using the"
+            " <i>$session</i> and <i>$event</i> template variables."
+        )
+        assert Q.select(dialog.widget, Q.props("label", expected))
+
+        assert Q.select(dialog.widget, Q.props("label", "<b>Scripts</b>"))

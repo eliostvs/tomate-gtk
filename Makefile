@@ -30,7 +30,6 @@ else
 	ARGS ?=
 endif
 
-
 ## help: print this help message
 help:
 	echo 'Usage:'
@@ -40,8 +39,22 @@ help:
 ## clean: clean development files
 clean:
 	find . \( -iname "__pycache__" \) -print0 | xargs -0 rm -rf
-	rm -rf .eggs *.egg-info/ .coverage build/ .cache .pytest_cache tests/data/mime/mime.cache
+	rm -rf .eggs *.egg-info/ .coverage build/ .cache .pytest_cache tests/data/mime/mime.cache venv
 .PHONY: clean
+
+## venv: create develop environment
+venv:
+	python3 -m venv --system-site-package --upgrade-deps --prompt "." venv
+	source venv/bin/activate
+	pip install \
+		black \
+		isort \
+		pytest \
+		pytest-cov \
+		pytest-flake8 \
+		pytest-mock \
+		python-dbusmock \
+		ruff 
 
 ## mime: generate test mine index
 mime: clean

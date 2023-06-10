@@ -4,6 +4,7 @@
 *.py[cod]
 *.pyc
 .coverage
+venv/
 
 .idea/
 *.deb

@@ -1,3 +1,4 @@
+import locale
 import logging
 import subprocess
 from locale import gettext as _
@@ -14,6 +15,7 @@ from gi.repository import Gtk
 import tomate.pomodoro.plugin as plugin
 from tomate.pomodoro import Bus, Config, Events, SessionPayload, on, suppress_errors
 
+locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
 SECTION_NAME = "script_plugin"
@@ -55,7 +57,7 @@ class ScriptPlugin(plugin.Plugin):
         return self.call_command(FINISH_OPTION, Events.SESSION_END, payload)
 
     def call_command(self, section, event: Events, payload: SessionPayload):
-        command = self.read_command(section, {"event": event.name, "type": payload.type.name})
+        command = self.read_command(section, {"event": event.name, "session": payload.type.name})
         if command:
             try:
                 logger.debug("action=call-command cmd=%s", command)
@@ -106,20 +108,34 @@ class SettingsDialog:
     def create_options(self):
         grid = Gtk.Grid(column_spacing=12, row_spacing=12, margin_bottom=12)
         self.create_section(grid)
-        self.create_option(grid, 1, _("On start:"), START_OPTION)
-        self.create_option(grid, 3, _("On stop:"), STOP_OPTION)
-        self.create_option(grid, 5, _("On finish:"), FINISH_OPTION)
+        self.create_option(grid, 3, _("On start:"), START_OPTION)
+        self.create_option(grid, 5, _("On stop:"), STOP_OPTION)
+        self.create_option(grid, 7, _("On finish:"), FINISH_OPTION)
         return grid
 
     @staticmethod
     def create_section(grid: Gtk.Grid) -> None:
-        label = Gtk.Label(
-            label="<b>{0}</b>".format(_("Commands")),
+        title = Gtk.Label(
+            label="<b>{0}</b>".format(_("Scripts")),
             halign=Gtk.Align.START,
             hexpand=True,
             use_markup=True,
         )
-        grid.attach(label, 0, 0, 1, 1)
+        grid.attach(title, 0, 0, 1, 1)
+
+        help_text = Gtk.Label(
+            label=_(
+                "You can use the session and event names in your script using the"
+                " <i>$session</i> and <i>$event</i> template variables."
+            ),
+            halign=Gtk.Align.CENTER,
+            margin_bottom=24,
+            hexpand=False,
+            wrap=True,
+            max_width_chars=40,
+            use_markup=True,
+        )
+        grid.attach(help_text, 0, 1, 4, 1)
 
     def run(self) -> None:
         self.widget.show_all()
