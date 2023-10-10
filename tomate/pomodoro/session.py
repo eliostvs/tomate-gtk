@@ -12,8 +12,8 @@ from .config import Config
 from .config import Payload as ConfigPayload
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
-from .timer import SECONDS_IN_A_MINUTE
 from .timer import Payload as TimerPayload
+from .timer import SECONDS_IN_A_MINUTE
 from .timer import Timer, format_seconds
 
 logger = logging.getLogger(__name__)
@@ -31,10 +31,12 @@ class Type(enum.Enum):
     LONG_BREAK = 2
 
     @classmethod
-    def of(cls, index) -> Type:
+    def of(cls, index: int) -> Type:
         for number, attr in enumerate(cls):
             if number == index:
                 return attr
+
+        raise Exception(f"invalid index: {index}")
 
     @property
     def option(self) -> str:

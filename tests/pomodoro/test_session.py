@@ -261,6 +261,11 @@ def test_type_of(number, session_type):
     assert SessionType.of(number) == session_type
 
 
+def test_type_of_unknown():
+    with pytest.raises(Exception):
+        assert SessionType.of(999)
+
+
 @pytest.mark.parametrize(
     "session_type, option",
     [
