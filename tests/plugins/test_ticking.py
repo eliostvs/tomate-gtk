@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import gi
 import pytest
+
 from tomate.ui.testing import create_session_payload
 
 gi.require_version("Gtk", "3.0")
