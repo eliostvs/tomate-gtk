@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update -qq && apt-get install -y \
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     dbus-x11 \
     gir1.2-appindicator3-0.1 \
     gir1.2-gdkpixbuf-2.0 \
@@ -30,9 +30,10 @@ RUN apt-get update -qq && apt-get install -y \
     python3-wrapt \
     python3-xdg \
     python3-yapsy \
-    xvfb
+    xvfb \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install \
+RUN pip3 install --no-cache-dir \
     black \
     isort \
     ruff \
