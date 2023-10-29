@@ -82,7 +82,6 @@ class TestPlugin:
 
 def create_session_payload(**kwargs) -> SessionPayload:
     defaults = {
-        "id": "1234",
         "duration": 25 * 60,
         "pomodoros": 0,
         "type": SessionType.POMODORO,

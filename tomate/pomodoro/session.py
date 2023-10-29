@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 import logging
-import uuid
 from collections import namedtuple
 
 from wiring import SingletonScope, inject
@@ -12,14 +11,14 @@ from .config import Config
 from .config import Payload as ConfigPayload
 from .event import Bus, Events, Subscriber, on
 from .fsm import fsm
-from .timer import Payload as TimerPayload
 from .timer import SECONDS_IN_A_MINUTE
+from .timer import Payload as TimerPayload
 from .timer import Timer, format_seconds
 
 logger = logging.getLogger(__name__)
 
 
-class Payload(namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])):
+class Payload(namedtuple("SessionPayload", ["type", "pomodoros", "duration"])):
     @property
     def countdown(self) -> str:
         return format_seconds(self.duration)
@@ -156,7 +155,6 @@ class Session(Subscriber):
     def _create_payload(self, **kwargs) -> Payload:
         defaults = {
             "duration": self.duration,
-            "id": uuid.uuid4(),
             "pomodoros": self.pomodoros,
             "type": self.current,
         }

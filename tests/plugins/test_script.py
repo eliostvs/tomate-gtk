@@ -15,7 +15,6 @@ SECTION_NAME = "script_plugin"
 
 def random_payload(session_type: SessionType = SessionType.POMODORO) -> SessionPayload:
     return SessionPayload(
-        id="1234",
         type=session_type,
         duration=0,
         pomodoros=0,
