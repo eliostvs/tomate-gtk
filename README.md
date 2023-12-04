@@ -25,7 +25,7 @@ Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 If you have installed the program using the **old ppa repository** uninstall the old version first.
 If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** variable to the Ubuntu version number, such as 16.04, rather than running the sed script bellow.
 
-```
+```bash
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
 curl -fsSL "http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg > /dev/null
 echo "deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./" | sudo tee /etc/apt/sources.list.d/tomate.list
@@ -43,7 +43,7 @@ sudo apt-get update && sudo apt-get install tomate-gtk
 
 ### Opensuse Tumbleweed
 
-```
+```bash
 sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_Tumbleweed/home:eliostvs:tomate.repo
 sudo zypper install tomate-gtk
 ```
