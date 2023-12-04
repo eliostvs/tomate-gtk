@@ -27,7 +27,7 @@ If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** va
 
 ```
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
-wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_23.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
+wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chown root:root /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chmod ugo+r /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chmod go-w /etc/apt/trusted.gpg.d/tomate.gpg
@@ -39,7 +39,7 @@ sudo apt-get update && sudo apt-get install tomate-gtk
 
 ```bash
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
-wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_23.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
+wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chown root:root /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chmod ugo+r /etc/apt/trusted.gpg.d/tomate.gpg
 sudo chmod go-w /etc/apt/trusted.gpg.d/tomate.gpg
