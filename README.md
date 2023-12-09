@@ -25,13 +25,10 @@ Tomate is not affiliated by, associated with nor endorsed by Francesco Cirillo.
 If you have installed the program using the **old ppa repository** uninstall the old version first.
 If you use an Ubuntu-based distro, such as Mint, manually set the **RELEASE** variable to the Ubuntu version number, such as 16.04, rather than running the sed script bellow.
 
-```
+```bash
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
-wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chown root:root /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chmod ugo+r /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chmod go-w /etc/apt/trusted.gpg.d/tomate.gpg
-sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
+curl -fsSL "http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg > /dev/null
+echo "deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./" | sudo tee /etc/apt/sources.list.d/tomate.list
 sudo apt-get update && sudo apt-get install tomate-gtk
 ```
 
@@ -39,17 +36,14 @@ sudo apt-get update && sudo apt-get install tomate-gtk
 
 ```bash
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
-wget -q -O- http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chown root:root /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chmod ugo+r /etc/apt/trusted.gpg.d/tomate.gpg
-sudo chmod go-w /etc/apt/trusted.gpg.d/tomate.gpg
-sudo bash -c "echo 'deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/ ./' > /etc/apt/sources.list.d/tomate.list"
+curl -fsSL "http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg > /dev/null
+echo "deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./" | sudo tee /etc/apt/sources.list.d/tomate.list
 sudo apt-get update && sudo apt-get install tomate-gtk
 ```
 
 ### Opensuse Tumbleweed
 
-```
+```bash
 sudo zypper ar -f http://download.opensuse.org/repositories/home:/eliostvs:/tomate/openSUSE_Tumbleweed/home:eliostvs:tomate.repo
 sudo zypper install tomate-gtk
 ```
