@@ -4,10 +4,12 @@ from unittest.mock import patch
 import gi
 import pytest
 
+from tomate.ui.testing import create_session_payload
+
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gst", "1.0")
 
-from tomate.pomodoro import Events, SessionPayload, SessionType
+from tomate.pomodoro import Events, SessionType
 
 DEFAULT_ALARM = f'file://{join(dirname(dirname(__file__)), "data", "tomate", "media", "clock.ogg")}'
 
@@ -78,14 +80,3 @@ class TestPlugin:
         plugin.deactivate()
 
         player.return_value.stop.assert_called_once()
-
-
-def create_session_payload(**kwargs) -> SessionPayload:
-    defaults = {
-        "id": "1234",
-        "duration": 25 * 60,
-        "pomodoros": 0,
-        "type": SessionType.POMODORO,
-    }
-    defaults.update(kwargs)
-    return SessionPayload(**defaults)

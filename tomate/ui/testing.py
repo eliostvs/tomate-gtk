@@ -20,7 +20,6 @@ def active_shortcut(shortcut_engine: ShortcutEngine, shortcut: Shortcut, window:
 
 def create_session_payload(**kwargs) -> SessionPayload:
     defaults = {
-        "id": "1234",
         "duration": 25 * 60,
         "pomodoros": 0,
         "type": SessionType.POMODORO,

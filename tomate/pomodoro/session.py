@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import enum
 import logging
-import uuid
 from collections import namedtuple
 
 from wiring import SingletonScope, inject
@@ -19,7 +18,7 @@ from .timer import Timer, format_seconds
 logger = logging.getLogger(__name__)
 
 
-class Payload(namedtuple("SessionPayload", ["id", "type", "pomodoros", "duration"])):
+class Payload(namedtuple("SessionPayload", ["type", "pomodoros", "duration"])):
     @property
     def countdown(self) -> str:
         return format_seconds(self.duration)
@@ -31,10 +30,12 @@ class Type(enum.Enum):
     LONG_BREAK = 2
 
     @classmethod
-    def of(cls, index) -> Type:
+    def of(cls, index: int) -> Type:
         for number, attr in enumerate(cls):
             if number == index:
                 return attr
+
+        raise Exception(f"invalid index: {index}")
 
     @property
     def option(self) -> str:
@@ -154,7 +155,6 @@ class Session(Subscriber):
     def _create_payload(self, **kwargs) -> Payload:
         defaults = {
             "duration": self.duration,
-            "id": uuid.uuid4(),
             "pomodoros": self.pomodoros,
             "type": self.current,
         }

@@ -11,7 +11,6 @@ from tomate.ui.testing import create_session_payload, run_loop_for
 def session(graph, config, bus, mocker):
     graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.config", config)
-    mocker.patch("uuid.uuid4", return_value="1234")
     scan_to_graph(["tomate.pomodoro.timer", "tomate.pomodoro.session"], graph)
     return graph.get("tomate.session")
 
@@ -50,7 +49,6 @@ class TestSessionStart:
 
         assert result is True
         payload = SessionPayload(
-            id="1234",
             type=SessionType.POMODORO,
             pomodoros=0,
             duration=25 * 60,
@@ -75,7 +73,6 @@ class TestSessionStop:
 
         assert result is True
         payload = SessionPayload(
-            id="1234",
             type=SessionType.POMODORO,
             duration=25 * 60,
             pomodoros=0,
@@ -109,7 +106,6 @@ class TestSessionReset:
 
         assert result is True
         payload = SessionPayload(
-            id="1234",
             type=session_type,
             pomodoros=0,
             duration=duration,
@@ -184,7 +180,6 @@ class TestSessionEnd:
         run_loop_for(2)
 
         payload = SessionPayload(
-            id="1234",
             type=SessionType.SHORT_BREAK,
             duration=5 * 60,
             pomodoros=1,
@@ -259,6 +254,11 @@ class TestSessionChange:
 )
 def test_type_of(number, session_type):
     assert SessionType.of(number) == session_type
+
+
+def test_type_of_unknown():
+    with pytest.raises(Exception):
+        assert SessionType.of(999)
 
 
 @pytest.mark.parametrize(

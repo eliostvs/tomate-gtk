@@ -7,19 +7,10 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-from tomate.pomodoro import Events, SessionPayload, SessionType
-from tomate.ui.testing import Q
+from tomate.pomodoro import Events, SessionType
+from tomate.ui.testing import Q, create_session_payload
 
 SECTION_NAME = "script_plugin"
-
-
-def random_payload(session_type: SessionType = SessionType.POMODORO) -> SessionPayload:
-    return SessionPayload(
-        id="1234",
-        type=session_type,
-        duration=0,
-        pomodoros=0,
-    )
 
 
 @pytest.fixture
@@ -56,7 +47,7 @@ def test_execute_command_when_event_is_trigger(event, option, bus, subprocess_ru
     command = config.get(SECTION_NAME, option)
     plugin.activate()
 
-    bus.send(event, random_payload())
+    bus.send(event, create_session_payload())
 
     subprocess_run.assert_called_once_with(command, shell=True, check=True)
 
@@ -73,7 +64,7 @@ def test_command_variables(event, section, session_type, bus, subprocess_run, co
     config.set(SECTION_NAME, section, "$event $session")
     plugin.activate()
 
-    bus.send(event, random_payload(session_type))
+    bus.send(event, create_session_payload(type=session_type))
 
     subprocess_run.assert_called_once_with(f"{event.name} {session_type.name}", shell=True, check=True)
 
@@ -90,7 +81,7 @@ def test_does_not_execute_commands_when_they_are_not_configured(event, option, b
     config.remove(SECTION_NAME, option)
     plugin.activate()
 
-    assert bus.send(event, random_payload()) == [False]
+    assert bus.send(event, create_session_payload()) == [False]
 
     subprocess_run.assert_not_called()
 
@@ -100,7 +91,7 @@ def test_execute_command_fail(bus, config, plugin):
 
     plugin.activate()
 
-    assert bus.send(Events.SESSION_START, random_payload()) == [False]
+    assert bus.send(Events.SESSION_START, create_session_payload()) == [False]
 
 
 class TestSettingsWindow:

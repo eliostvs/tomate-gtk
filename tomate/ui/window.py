@@ -86,8 +86,8 @@ class Window(Subscriber):
             logger.debug("action=hide strategy=tray")
             return self.widget.hide_on_delete()
         else:
-            self.widget.iconify()
             logger.debug("action=hide strategy=minimize")
+            self.widget.iconify()
             return Gtk.true
 
     @on(Events.SESSION_END)
