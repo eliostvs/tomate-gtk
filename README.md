@@ -36,8 +36,8 @@ sudo apt-get update && sudo apt-get install tomate-gtk
 
 ```bash
 RELEASE=`sed -n 's/VERSION_ID="\(.*\)"/\1/p' /etc/os-release`
-curl -fsSL "http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/Release.key" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg > /dev/null
-echo "deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/xUbuntu_$RELEASE/ ./" | sudo tee /etc/apt/sources.list.d/tomate.list
+curl -fsSL "http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/Release.key" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/tomate.gpg > /dev/null
+echo "deb http://download.opensuse.org/repositories/home:/eliostvs:/tomate/Debian_$RELEASE/ ./" | sudo tee /etc/apt/sources.list.d/tomate.list
 sudo apt-get update && sudo apt-get install tomate-gtk
 ```
 
