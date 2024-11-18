@@ -21,15 +21,18 @@ class AutoPausePlugin(plugin.Plugin):
     def pause(self) -> None:
         try:
             for player in Playerctl.list_players():
-                instance = Playerctl.Player.new_from_name(player)
+                instance = Playerctl.Player.new_for_source(player.instance, player.source)
+                logger.debug(
+                    "action=check player=%s status=%s",
+                    player.name,
+                    instance.props.playback_status,
+                )
 
                 # pause is not an idempotent operation, it can start a paused player :(
                 # so we need to check if the player is running first
-                if instance.props.playback_status != Playerctl.PlaybackStatus.PLAYING:
-                    logger.debug("action=ignored player=%s status=%s", player.name, instance.props.playback_status)
-                    continue
+                if instance.props.playback_status == Playerctl.PlaybackStatus.PLAYING:
+                    instance.pause()
+                    logger.debug("action=paused player=%s", player.name)
 
-                instance.pause()
-                logger.debug("action=paused player=%s", player.name)
         except GLib.Error as err:
             logger.error("action=failed error='%s'", err)
