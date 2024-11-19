@@ -23,18 +23,21 @@ def test_stop_all_running_players(bus, plugin, mocker):
     playing = mocker.Mock(props=mocker.Mock(playback_status=Playerctl.PlaybackStatus.PLAYING))
     paused = mocker.Mock(props=mocker.Mock(playback_status=Playerctl.PlaybackStatus.PAUSED))
     players = {
-        "playing": playing,
-        "paused": paused,
+        "playing-playing": playing,
+        "paused-paused": paused,
     }
 
-    def side_effect(player):
-        return players.get(player.id)
+    def side_effect(instance, source):
+        return players.get(f"{instance}-{source}")
 
     mocker.patch(
         "autopause.Playerctl.list_players",
-        return_value=[mocker.Mock(id="playing"), mocker.Mock(id="paused")],
+        return_value=[
+            mocker.Mock(instance="playing", source="playing"),
+            mocker.Mock(instance="paused", source="paused"),
+        ],
     )
-    mocker.patch("autopause.Playerctl.Player.new_from_name", side_effect)
+    mocker.patch("autopause.Playerctl.Player.new_for_source", side_effect)
 
     plugin.activate()
 
