@@ -46,7 +46,7 @@ setup(
     py_modules=[],
     data_files=find_data_files(DATA_FILES, "tomate"),
     url="https://github.com/eliostvs/tomate-gtk",
-    version="0.25.1",
+    version="0.25.2",
     zip_safe=False,
     entry_points={"console_scripts": ["tomate-gtk=tomate.__main__:main"]},
 )
