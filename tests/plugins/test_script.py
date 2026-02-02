@@ -3,9 +3,7 @@ import subprocess
 import gi
 import pytest
 
-gi.require_version("Gtk", "3.0")
-
-from gi.repository import Gtk
+gi.require_version("Gtk", "4.0")
 
 from tomate.pomodoro import Events, SessionType
 from tomate.ui.testing import Q, create_session_payload
@@ -103,8 +101,8 @@ class TestSettingsWindow:
             ("finish_command", "echo finish"),
         ],
     )
-    def test_with_custom_commands(self, option, command, plugin):
-        dialog = plugin.settings_window(Gtk.Window())
+    def test_with_custom_commands(self, option, command, plugin, toplevel):
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", f"{option}_switch"))
         assert switch.props.active is True
@@ -113,13 +111,13 @@ class TestSettingsWindow:
         assert entry.props.text == command
 
     @pytest.mark.parametrize("option", ["start_command", "stop_command", "finish_command"])
-    def test_without_custom_commands(self, option, config, plugin):
+    def test_without_custom_commands(self, option, config, plugin, toplevel):
         config.remove_section(SECTION_NAME)
         config.save()
 
         assert config.has_section(SECTION_NAME) is False
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", f"{option}_switch"))
         assert switch.props.active is False
@@ -128,8 +126,8 @@ class TestSettingsWindow:
         assert entry.props.text == ""
 
     @pytest.mark.parametrize("option", ["start_command", "stop_command", "finish_command"])
-    def test_disable_command(self, option, config, plugin):
-        dialog = plugin.settings_window(Gtk.Window())
+    def test_disable_command(self, option, config, plugin, toplevel):
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", f"{option}_switch"))
         switch.props.active = False
@@ -139,16 +137,16 @@ class TestSettingsWindow:
         assert entry.props.text == ""
 
         dialog.widget.emit("response", 0)
-        assert dialog.widget.props.window is None
+        assert dialog.widget.get_visible() is False
 
         config.load()
         assert config.has_option(SECTION_NAME, option) is False
 
     @pytest.mark.parametrize("option", ["start_command", "stop_command", "finish_command"])
-    def test_configure_command(self, option, config, plugin):
+    def test_configure_command(self, option, config, plugin, toplevel):
         config.remove(SECTION_NAME, option)
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", f"{option}_switch"))
         switch.props.active = True
@@ -158,13 +156,13 @@ class TestSettingsWindow:
         entry.props.text = "echo changed"
 
         dialog.widget.emit("response", 0)
-        assert dialog.widget.props.window is None
+        assert dialog.widget.get_visible() is False
 
         config.load()
         assert config.get(SECTION_NAME, option) == "echo changed"
 
-    def test_text(self, config, plugin):
-        dialog = plugin.settings_window(Gtk.Window())
+    def test_text(self, config, plugin, toplevel):
+        dialog = plugin.settings_window(toplevel)
 
         expected = (
             "You can use the session and event names in your script using the"

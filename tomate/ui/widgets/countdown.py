@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class Countdown(Subscriber):
     @inject(bus="tomate.bus")
     def __init__(self, bus: Bus):
-        self.widget = Gtk.Label(margin_top=30, margin_bottom=10, margin_right=10, margin_left=10, label="00:00")
+        self.widget = Gtk.Label(margin_top=30, margin_bottom=10, margin_end=10, margin_start=10, label="00:00")
         self.connect(bus)
 
     @on(Events.TIMER_UPDATE, Events.SESSION_READY, Events.SESSION_INTERRUPT, Events.SESSION_CHANGE)

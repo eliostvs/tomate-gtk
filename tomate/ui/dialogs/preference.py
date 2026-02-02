@@ -24,24 +24,22 @@ class PreferenceDialog(Gtk.Dialog):
         stack.add_titled(extension_tab.widget, "extension", _("Extensions"))
 
         switcher = Gtk.StackSwitcher(halign=Gtk.Align.CENTER)
-        switcher.props.stack = stack
+        switcher.set_stack(stack)
 
         content_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12, margin_bottom=12)
-        content_area.pack_start(switcher, False, False, 0)
-        content_area.pack_start(stack, False, False, 0)
-        content_area.show_all()
+        content_area.append(switcher)
+        content_area.append(stack)
 
         super().__init__(
             title=_("Preferences"),
             border_width=12,
             resizable=False,
-            window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
-            flags=Gtk.DialogFlags.MODAL,
+            modal=True,
         )
         self.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         self.connect("response", lambda widget, response: widget.hide())
-        self.set_size_request(350, -1)
-        self.get_content_area().add(content_area)
+        self.set_default_size(350, -1)
+        self.get_content_area().append(content_area)
 
         stack.set_visible_child_name("timer")
 
@@ -55,7 +53,8 @@ class PreferenceDialog(Gtk.Dialog):
     def run(self):
         logger.debug("action=run")
         self._extension_tab.refresh()
-        return super().run()
+        self.present()
+        return self
 
 
 @register.factory("tomate.ui.preference.timer", scope=SingletonScope)
@@ -94,7 +93,7 @@ class TimerTab:
 
     def _create_option(self, name: str, label: str, option: str):
         label = Gtk.Label.new(label + ":")
-        label.set_properties(margin_left=12, hexpand=True, halign=Gtk.Align.END)
+        label.set_properties(margin_start=12, hexpand=True, halign=Gtk.Align.END)
 
         button = Gtk.SpinButton.new_with_range(1, 99, 1)
         button.set_properties(
@@ -138,20 +137,23 @@ class ExtensionTab:
         self.plugin_list.append_column(column)
 
         plugin_list_container = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
-        plugin_list_container.add(self.plugin_list)
+        plugin_list_container.set_child(self.plugin_list)
 
-        self.settings_button = Gtk.Button.new_from_icon_name("preferences-system", Gtk.IconSize.MENU)
+        settings_icon = Gtk.Image.new_from_icon_name("preferences-system")
+        settings_icon.set_pixel_size(16)
+        self.settings_button = Gtk.Button()
+        self.settings_button.set_child(settings_icon)
         self.settings_button.set_properties(name="plugin.settings", sensitive=False)
         self.settings_button.connect("clicked", self._on_plugin_settings_clicked)
 
         settings_button_container = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        settings_button_container.pack_end(self.settings_button, False, False, 0)
+        self.settings_button.set_hexpand(True)
+        self.settings_button.set_halign(Gtk.Align.END)
+        settings_button_container.append(self.settings_button)
 
         self.widget = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        self.widget.pack_start(plugin_list_container, True, True, 0)
-        self.widget.pack_start(settings_button_container, False, False, 0)
-
-        self.widget.show_all()
+        self.widget.append(plugin_list_container)
+        self.widget.append(settings_button_container)
 
     def _on_plugin_changed(self, selection):
         model, selected = selection.get_selected()

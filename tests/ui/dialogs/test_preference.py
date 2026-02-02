@@ -9,7 +9,6 @@ from tomate.ui.testing import TV, Q
 
 @pytest.fixture
 def preference(bus, plugin_engine, config, mocker) -> PreferenceDialog:
-    mocker.patch("tomate.ui.dialogs.preference.Gtk.Dialog.run")
     return PreferenceDialog(TimerTab(config), ExtensionTab(bus, config, plugin_engine))
 
 

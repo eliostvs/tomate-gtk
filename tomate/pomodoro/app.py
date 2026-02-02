@@ -37,7 +37,7 @@ class Application(dbus.service.Object):
             self._window.show()
         else:
             self.state = State.STARTED
-            self._window.run()
+            self._window.show()
 
         return True
 

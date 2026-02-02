@@ -1,6 +1,6 @@
 import logging
 from collections import namedtuple
-from typing import Any, Callable, Tuple
+from typing import Dict, Tuple
 
 from gi.repository import Gdk, Gtk
 from wiring import SingletonScope, inject
@@ -21,30 +21,48 @@ class Shortcut(namedtuple("Shortcut", ["name", "value"])):
 @register.factory("tomate.ui.shortcut", scope=SingletonScope)
 class ShortcutEngine:
     @inject(config="tomate.config")
-    def __init__(self, config, accel_group=Gtk.AccelGroup()):
+    def __init__(self, config):
         self._config = config
-        self.accel_group = accel_group
+        self._controller = Gtk.ShortcutController()
+        self._shortcuts: Dict[str, Gtk.Shortcut] = {}
+        self._actions: Dict[str, str] = {}
 
     def init(self, window: Gtk.Window) -> None:
         logger.debug("action=init")
-        window.add_accel_group(self.accel_group)
+        window.add_controller(self._controller)
 
     def change(self, shortcut: Shortcut) -> None:
         logger.debug("action=change %s", shortcut)
-        Gtk.AccelMap.change_entry(shortcut.accel_path, *Gtk.accelerator_parse(shortcut.value), True)
+        action_name = self._actions.get(shortcut.name)
+        self.disconnect(shortcut)
+        if action_name:
+            self.connect(shortcut, action_name)
 
-    def connect(self, shortcut: Shortcut, callback: Callable[[], Any]) -> None:
+    def connect(self, shortcut: Shortcut, action_name: str) -> None:
         logger.debug("action=connect %s", shortcut)
-        Gtk.AccelMap.add_entry(shortcut.accel_path, *self._parse(shortcut))
-        self.accel_group.connect_by_path(shortcut.accel_path, callback)
+        trigger = Gtk.ShortcutTrigger.parse_string(self._accel_str(shortcut))
+        action = Gtk.NamedAction.new(action_name)
+        gtk_shortcut = Gtk.Shortcut.new(trigger, action)
+        self._controller.add_shortcut(gtk_shortcut)
+        self._shortcuts[shortcut.name] = gtk_shortcut
+        self._actions[shortcut.name] = action_name
 
     def disconnect(self, shortcut: Shortcut) -> None:
         logger.debug("action=disconnect %s")
-        self.accel_group.disconnect_key(*self._parse(shortcut))
+        gtk_shortcut = self._shortcuts.pop(shortcut.name, None)
+        if gtk_shortcut is not None:
+            self._controller.remove_shortcut(gtk_shortcut)
+        self._actions.pop(shortcut.name, None)
 
     def label(self, shortcut: Shortcut) -> str:
-        return Gtk.accelerator_get_label(*self._parse(shortcut))
+        return Gtk.accelerator_get_label(*self._accel(shortcut))
 
-    def _parse(self, shortcut: Shortcut) -> Tuple[int, Gdk.ModifierType]:
+    def action_name(self, shortcut: Shortcut) -> str:
+        return self._actions.get(shortcut.name, "")
+
+    def _accel(self, shortcut: Shortcut) -> Tuple[int, Gdk.ModifierType]:
         accelerator = self._config.get(self._config.SHORTCUT_SECTION, shortcut.name, fallback=shortcut.value)
         return Gtk.accelerator_parse(accelerator)
+
+    def _accel_str(self, shortcut: Shortcut) -> str:
+        return self._config.get(self._config.SHORTCUT_SECTION, shortcut.name, fallback=shortcut.value)

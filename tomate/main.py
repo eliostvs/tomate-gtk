@@ -5,10 +5,10 @@ from locale import gettext as _
 
 import gi
 
-gi.require_version("Gdk", "3.0")
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gdk", "4.0")
+gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gdk
+from gi.repository import Gio, Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro.app import Application
@@ -23,12 +23,20 @@ def main():
         options = parse_options()
         setup_logging(options)
 
-        scan_to_graph(["tomate"], graph)
-        app = Application.from_graph(graph)
+        gtk_app = Gtk.Application(application_id=Application.BUS_NAME, flags=Gio.ApplicationFlags.FLAGS_NONE)
 
-        app.Run()
-        if app.IsRunning():
-            Gdk.notify_startup_complete()
+        def on_activate(app: Gtk.Application):
+            scan_to_graph(["tomate"], graph)
+            graph.register_instance("gtk.application", app)
+
+            instance = Application.from_graph(graph)
+            instance.Run()
+
+            if instance.IsRunning() and hasattr(app, "notify_startup_complete"):
+                app.notify_startup_complete()
+
+        gtk_app.connect("activate", on_activate)
+        gtk_app.run()
 
     except Exception as ex:
         logger.error(ex, exc_info=True)

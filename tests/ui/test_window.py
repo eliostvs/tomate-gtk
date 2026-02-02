@@ -1,5 +1,5 @@
 import pytest
-from gi.repository import Gdk, Gtk
+from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
@@ -8,10 +8,12 @@ from tomate.ui.testing import Q, active_shortcut, create_session_payload
 
 
 @pytest.fixture
-def window(bus, config, graph, session) -> Window:
+def window(bus, config, graph, session, shortcut_engine, gtk_app) -> Window:
+    graph.register_instance("gtk.application", gtk_app)
     graph.register_instance("tomate.bus", bus)
     graph.register_instance("tomate.config", config)
     graph.register_instance("tomate.session", session)
+    graph.register_instance("tomate.ui.shortcut", shortcut_engine)
 
     namespaces = [
         "tomate.ui",
@@ -52,13 +54,13 @@ def test_shortcuts(shortcut_engine, window):
 
 
 def test_run(mocker, window):
-    gtk_main = mocker.patch("tomate.ui.window.Gtk.main")
-    show_all = mocker.patch("tomate.ui.window.Gtk.Window.show_all")
+    app_run = mocker.patch.object(window._app, "run")
+    present = mocker.patch.object(window.widget, "present")
 
     window.run()
 
-    gtk_main.assert_called_once_with()
-    show_all.assert_called_once_with()
+    present.assert_called_once_with()
+    app_run.assert_called_once_with()
 
 
 class TestWindowHide:
@@ -68,7 +70,7 @@ class TestWindowHide:
 
         result = window.hide()
 
-        assert result is Gtk.true
+        assert result is True
         subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
 
     def test_deletes_when_tray_icon_plugin_is_registered(self, bus, graph, mocker, window):
@@ -86,30 +88,30 @@ class TestWindowHide:
 
 class TestWindowQuit:
     def test_quits_when_timer_is_not_running(self, mocker, session, window):
-        main_quit = mocker.patch("tomate.ui.window.Gtk.main_quit")
+        app_quit = mocker.patch.object(window._app, "quit")
         session.is_running.return_value = False
 
-        window.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
+        window.widget.emit("close-request")
 
-        main_quit.assert_called_once_with()
+        app_quit.assert_called_once_with()
 
     def test_hides_when_timer_is_running(self, bus, mocker, session, window):
         session.is_running.return_value = True
         subscriber = mocker.Mock()
         bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
 
-        window.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
+        window.widget.emit("close-request")
 
         subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
 
 
 def test_shows_window_when_session_end(bus, mocker, window):
-    window.widget.props.visible = False
+    window.widget.set_visible(False)
     subscriber = mocker.Mock()
     bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
 
     payload = create_session_payload()
     bus.send(Events.SESSION_END, payload=payload)
 
-    assert window.widget.props.visible is True
+    assert window.widget.get_visible() is True
     subscriber.assert_called_once_with(Events.WINDOW_SHOW, payload=None)

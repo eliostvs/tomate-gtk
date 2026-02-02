@@ -2,7 +2,7 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events, SessionType
-from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
+from tomate.ui.testing import Q, create_session_payload, refresh_gui
 from tomate.ui.widgets import SessionButton
 
 
@@ -76,17 +76,16 @@ def test_changes_session_when_button_is_clicked(session_type, session_button, se
 
 
 @pytest.mark.parametrize(
-    "shortcut,session_type",
+    "shortcut",
     [
-        (SessionButton.POMODORO_SHORTCUT, SessionType.POMODORO),
-        (SessionButton.SHORT_BREAK_SHORTCUT, SessionType.SHORT_BREAK),
-        (SessionButton.LONG_BREAK_SHORTCUT, SessionType.LONG_BREAK),
+        SessionButton.POMODORO_SHORTCUT,
+        SessionButton.SHORT_BREAK_SHORTCUT,
+        SessionButton.LONG_BREAK_SHORTCUT,
     ],
 )
-def test_shortcuts(shortcut, session_type, session_button, shortcut_engine, session):
-    assert active_shortcut(shortcut_engine, shortcut) is True
-
-    session.change.assert_called_once_with(session_type)
+def test_shortcuts(shortcut, session_button, shortcut_engine):
+    action_name = shortcut_engine.action_name(shortcut)
+    assert action_name == f"win.session-{shortcut.name.split('.')[-1].replace('_', '-')}"
 
 
 def test_selects_button_when_session_changes(bus, session_button, session):

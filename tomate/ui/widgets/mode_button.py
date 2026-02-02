@@ -18,24 +18,22 @@ class ModeButton(Gtk.Box):
         self.__items = {}
         self.__selected = None
 
-        style = self.get_style_context()
-        style.add_class(Gtk.STYLE_CLASS_LINKED)
-        style.add_class("raised")
+        self.add_css_class("linked")
+        self.add_css_class("raised")
 
     def get_selected(self):
         return self.__selected
 
     def append_text(self, text: str, **props: Dict[str, Any]):
         button = ModeButtonItem(len(self.__items), **props)
-        button.add(Gtk.Label.new(text))
-        button.connect("button_press_event", self.on_button_press_event)
-        button.show_all()
+        button.set_child(Gtk.Label.new(text))
+        button.connect("clicked", self.on_button_clicked)
 
         self.__items[button.index] = button
-        self.add(button)
+        self.append(button)
         self.set_selected(button.index)
 
-    def on_button_press_event(self, widget, event=None):
+    def on_button_clicked(self, widget):
         return self.set_selected(widget.index)
 
     def set_selected(self, index):

@@ -11,11 +11,14 @@ from tomate.ui import Shortcut, ShortcutEngine
 
 def active_shortcut(shortcut_engine: ShortcutEngine, shortcut: Shortcut, window: Optional[Gtk.Window] = None) -> bool:
     if window is None:
-        window = Gtk.Window()
+        app = Gtk.Application(application_id="com.github.Tomate.Test")
+        window = Gtk.ApplicationWindow(application=app)
 
     shortcut_engine.init(window)
-    key, mod = Gtk.accelerator_parse(shortcut.value)
-    return Gtk.accel_groups_activate(window, key, mod)
+    action_name = shortcut_engine.action_name(shortcut)
+    if not action_name:
+        return False
+    return window.activate_action(action_name, None)
 
 
 def create_session_payload(**kwargs) -> SessionPayload:
@@ -29,13 +32,16 @@ def create_session_payload(**kwargs) -> SessionPayload:
 
 
 def run_loop_for(seconds: int = 1) -> None:
-    GLib.timeout_add_seconds(seconds, Gtk.main_quit)
-    Gtk.main()
+    end = time.time() + seconds
+    context = GLib.MainContext.default()
+    while time.time() < end:
+        context.iteration(False)
 
 
 def refresh_gui(delay: int = 0) -> None:
-    while Gtk.events_pending():
-        Gtk.main_iteration_do(False)
+    context = GLib.MainContext.default()
+    while context.pending():
+        context.iteration(False)
     time.sleep(delay)
 
 
@@ -75,7 +81,16 @@ class Q:
             if fn(widget):
                 return widget
 
-            if hasattr(widget, "get_children"):
+            if hasattr(widget, "get_first_child"):
+                child = widget.get_first_child()
+                while child is not None:
+                    queue.append(child)
+                    child = child.get_next_sibling()
+            elif hasattr(widget, "get_child"):
+                child = widget.get_child()
+                if child is not None:
+                    queue.append(child)
+            elif hasattr(widget, "get_children"):
                 for child in widget.get_children():
                     queue.append(child)
 

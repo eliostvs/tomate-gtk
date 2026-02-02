@@ -38,7 +38,7 @@ class TestRun:
 
         app.Run()
 
-        window.run.assert_called_once_with()
+        window.show.assert_called_once_with()
 
     def test_shows_window_when_app_is_running(self, app, window):
         app.state = State.STARTED

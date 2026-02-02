@@ -8,8 +8,7 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     gir1.2-gdkpixbuf-2.0 \
     gir1.2-glib-2.0 \
     gir1.2-gstreamer-1.0 \
-    gir1.2-gtk-3.0 \
-    gir1.2-gtk-3.0 \
+    gir1.2-gtk-4.0 \
     gir1.2-notify-0.7 \
     gir1.2-playerctl-2.0 \
     gir1.2-unity-5.0 \

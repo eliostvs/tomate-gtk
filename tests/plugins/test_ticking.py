@@ -6,7 +6,6 @@ import pytest
 
 from tomate.ui.testing import create_session_payload
 
-gi.require_version("Gtk", "3.0")
 gi.require_version("Gst", "1.0")
 
 from tomate.pomodoro import Events, SessionType

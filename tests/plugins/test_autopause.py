@@ -2,7 +2,6 @@ import gi
 import pytest
 
 gi.require_version("Playerctl", "2.0")
-gi.require_version("Gtk", "3.0")
 
 from tomate.pomodoro import Events
 from tomate.ui.testing import create_session_payload

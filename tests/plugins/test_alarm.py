@@ -4,10 +4,8 @@ from unittest.mock import patch
 import gi
 import pytest
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 gi.require_version("Gst", "1.0")
-
-from gi.repository import Gtk
 
 from tomate.pomodoro import Events
 from tomate.ui.testing import Q
@@ -49,9 +47,9 @@ class TestPlugin:
 
 
 class TestSettingsWindow:
-    def test_without_custom_alarm(self, config, plugin):
+    def test_without_custom_alarm(self, config, plugin, toplevel):
         config.remove(SECTION_NAME, URI_OPTION_NAME)
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         entry = Q.select(dialog.widget, Q.props("name", "custom_entry"))
         assert entry.props.text == ""
@@ -60,10 +58,10 @@ class TestSettingsWindow:
         switch = Q.select(dialog.widget, Q.props("name", "custom_switch"))
         assert switch.props.active is False
 
-    def test_with_custom_alarm(self, plugin, config):
+    def test_with_custom_alarm(self, plugin, config, toplevel):
         config.set(SECTION_NAME, URI_OPTION_NAME, CUSTOM_ALARM)
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
         dialog.run()
 
         entry = Q.select(dialog.widget, Q.props("name", "custom_entry"))
@@ -73,8 +71,8 @@ class TestSettingsWindow:
         switch = Q.select(dialog.widget, Q.props("name", "custom_switch"))
         assert switch.props.active is True
 
-    def test_configures_custom_alarm(self, config, plugin):
-        dialog = plugin.settings_window(Gtk.Window())
+    def test_configures_custom_alarm(self, config, plugin, toplevel):
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", "custom_switch"))
         switch.props.active = True
@@ -84,14 +82,14 @@ class TestSettingsWindow:
         entry.set_text(CUSTOM_ALARM)
 
         dialog.widget.emit("response", 0)
-        assert dialog.widget.props.window is None
+        assert dialog.widget.get_visible() is False
 
         assert config.get(SECTION_NAME, URI_OPTION_NAME) == CUSTOM_ALARM
 
-    def test_disables_custom_alarm(self, config, plugin):
+    def test_disables_custom_alarm(self, config, plugin, toplevel):
         config.set(SECTION_NAME, URI_OPTION_NAME, CUSTOM_ALARM)
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         switch = Q.select(dialog.widget, Q.props("name", "custom_switch"))
         switch.props.active = False
@@ -101,6 +99,6 @@ class TestSettingsWindow:
         assert entry.props.sensitive is False
 
         dialog.widget.emit("response", 0)
-        assert dialog.widget.props.window is None
+        assert dialog.widget.get_visible() is False
 
         assert config.has_option(SECTION_NAME, URI_OPTION_NAME) is False

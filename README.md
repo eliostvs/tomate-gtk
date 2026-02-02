@@ -1,6 +1,8 @@
 # Tomate
 
-A Pomodoro timer written in Gtk3 and Python for Linux desktops.
+A Pomodoro timer written in Gtk4 and Python for Linux desktops.
+
+Minimum GTK version: 4.10 (Gtk.FileDialog).
 
 ## About the technique
 
@@ -77,6 +79,8 @@ The packages are available in [aur repository](https://aur.archlinux.org/package
 - [StatusIcon][statusicon-plugin] Displays a countdown icon in the systray (old method for creating a systray with GNOME)
 - [StatusNotifierItem][statusnotifieritem-plugin] Displays a countdown icon in the systray (freedesktop standard for creating a systray)
 - [Launcher][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only)
+
+Note: GTK4 no longer supports legacy status icons. External systray plugins must remain GTK3-based or move to non-GTK implementations.
 
 ---
 

@@ -1,16 +1,16 @@
 import pytest
-from gi.repository import Gtk
+from gi.repository import Gio, GLib
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Events
-from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
+from tomate.ui.testing import Q, create_session_payload, refresh_gui
 from tomate.ui.widgets import HeaderBar, HeaderBarMenu
 
 
 class TestHeaderBar:
     @pytest.fixture
     def menu(self, mocker):
-        return mocker.Mock(spec=HeaderBarMenu, widget=Gtk.Menu())
+        return mocker.Mock(spec=HeaderBarMenu, widget=Gio.Menu())
 
     @pytest.fixture
     def headerbar(self, graph, menu, shortcut_engine, session, bus, mocker) -> HeaderBar:
@@ -18,7 +18,7 @@ class TestHeaderBar:
         graph.register_instance("tomate.session", session)
         graph.register_factory("tomate.ui.about", mocker.Mock)
         graph.register_factory("tomate.ui.preference", mocker.Mock)
-        graph.register_instance("tomate.ui.menu", menu)
+        graph.register_instance("tomate.ui.headerbar.menu", menu)
         graph.register_instance("tomate.ui.shortcut", shortcut_engine)
 
         # gtk shortcuts binds leave beyond the scope
@@ -47,9 +47,7 @@ class TestHeaderBar:
         ],
     )
     def test_shortcuts(self, shortcut, action, headerbar, menu, session, shortcut_engine):
-        assert active_shortcut(shortcut_engine, shortcut)
-
-        getattr(session, action).assert_called_once_with()
+        assert shortcut_engine.action_name(shortcut) == f"win.session-{action}"
 
     @pytest.mark.parametrize(
         "button_name,action",
@@ -114,23 +112,13 @@ class TestHeaderBar:
 
 class TestHeaderBarMenu:
     @pytest.fixture
-    def preference(self, mocker):
-        return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
-
-    @pytest.fixture()
-    def about(self, mocker):
-        return mocker.Mock(widget=mocker.Mock(spec=Gtk.Dialog))
-
-    @pytest.fixture
-    def menu(self, bus, about, preference, shortcut_engine) -> HeaderBarMenu:
+    def menu(self, bus, shortcut_engine) -> HeaderBarMenu:
         shortcut_engine.disconnect(HeaderBarMenu.PREFERENCE_SHORTCUT)
 
-        return HeaderBarMenu(bus, about, preference, shortcut_engine)
+        return HeaderBarMenu(bus, shortcut_engine)
 
-    def test_module(self, about, bus, preference, graph, shortcut_engine):
+    def test_module(self, bus, graph, shortcut_engine):
         graph.register_instance("tomate.bus", bus)
-        graph.register_instance("tomate.ui.about", about)
-        graph.register_instance("tomate.ui.preference", preference)
         graph.register_instance("tomate.ui.shortcut", shortcut_engine)
 
         namespaces = ["tomate.ui.widgets.headerbar"]
@@ -141,24 +129,19 @@ class TestHeaderBarMenu:
         assert isinstance(instance, HeaderBarMenu)
         assert instance is graph.get("tomate.ui.headerbar.menu")
 
-    @pytest.mark.parametrize(
-        "widget,label,mock_name",
-        [
-            ("header.menu.preference", "Preferences", "preference"),
-            ("header.menu.about", "About", "about"),
-        ],
-    )
-    def test_menu_items(self, widget, label, mock_name, menu, about, preference):
-        menu_item = Q.select(menu.widget, Q.props("name", widget))
-        assert menu_item.props.label == label
+    def test_menu_items(self, menu):
+        assert menu.widget.get_n_items() == 2
+        labels = [
+            menu.widget.get_item_attribute_value(i, "label", GLib.VariantType.new("s")).get_string()
+            for i in range(menu.widget.get_n_items())
+        ]
+        actions = [
+            menu.widget.get_item_attribute_value(i, "action", GLib.VariantType.new("s")).get_string()
+            for i in range(menu.widget.get_n_items())
+        ]
 
-        menu_item.emit("activate")
-        refresh_gui()
+        assert labels == ["Preferences", "About"]
+        assert actions == ["win.preferences", "win.about"]
 
-        dialog = locals()[mock_name].widget
-        dialog.run.assert_called_once_with()
-
-    def test_shortcut(self, menu, shortcut_engine, preference):
-        assert active_shortcut(shortcut_engine, HeaderBarMenu.PREFERENCE_SHORTCUT) is True
-
-        preference.widget.run.assert_called_once_with()
+    def test_shortcut(self, menu, shortcut_engine):
+        assert shortcut_engine.action_name(HeaderBarMenu.PREFERENCE_SHORTCUT) == "win.preferences"

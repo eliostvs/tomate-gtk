@@ -2,7 +2,7 @@ import locale
 import logging
 from locale import gettext as _
 
-from gi.repository import Gtk
+from gi.repository import Gio, Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
@@ -19,25 +19,19 @@ class Menu(Subscriber):
 
     @inject(
         bus="tomate.bus",
-        about="tomate.ui.about",
-        preference="tomate.ui.preference",
         shortcuts="tomate.ui.shortcut",
     )
-    def __init__(self, bus: Bus, about, preference, shortcuts: ShortcutEngine):
+    def __init__(self, bus: Bus, shortcuts: ShortcutEngine):
         self.connect(bus)
 
-        self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
-        self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
-        self.widget.add(self._create_menu_item("header.menu.about", _("About"), about.widget))
-        self.widget.show_all()
+        self.widget = Gio.Menu()
+        self.widget.append_item(self._create_menu_item(_("Preferences"), "win.preferences"))
+        self.widget.append_item(self._create_menu_item(_("About"), "win.about"))
 
-        shortcuts.connect(Menu.PREFERENCE_SHORTCUT, lambda *_: preference.widget.run())
+        shortcuts.connect(Menu.PREFERENCE_SHORTCUT, "win.preferences")
 
-    def _create_menu_item(self, name: str, label: str, dialog: Gtk.Dialog) -> Gtk.MenuItem:
-        menu_item = Gtk.MenuItem.new_with_label(label)
-        menu_item.props.name = name
-        menu_item.connect("activate", lambda *_: dialog.run())
-        return menu_item
+    def _create_menu_item(self, label: str, action: str) -> Gio.MenuItem:
+        return Gio.MenuItem.new(label, action)
 
 
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
@@ -69,7 +63,6 @@ class HeaderBar(Subscriber):
             "Stops the session",
             HeaderBar.STOP_SHORTCUT,
             lambda *_: session.stop(),
-            no_show_all=True,
             visible=False,
         )
 
@@ -91,28 +84,29 @@ class HeaderBar(Subscriber):
         )
 
     def _add_button(self, icon: str, tooltip_text: str, shortcut: Shortcut, on_clicked, **props) -> Gtk.Button:
-        image = Gtk.Image.new_from_icon_name(icon, Gtk.IconSize.BUTTON)
-        image.show()
+        image = Gtk.Image.new_from_icon_name(icon)
+        image.set_pixel_size(16)
 
         button = Gtk.Button(
             tooltip_text=_("{} ({})".format(tooltip_text, self._shortcuts.label(shortcut))), name=shortcut.name, **props
         )
-        button.add(image)
+        button.set_child(image)
         button.connect("clicked", on_clicked)
 
         self.widget.pack_start(button)
-        self._shortcuts.connect(shortcut, on_clicked)
+        self._shortcuts.connect(shortcut, "win.session-{}".format(shortcut.name.split(".")[-1]))
 
         return button
 
     def _add_preference_button(self, menu, shortcuts) -> None:
-        icon = Gtk.Image.new_from_icon_name("preferences-system", Gtk.IconSize.BUTTON)
+        icon = Gtk.Image.new_from_icon_name("preferences-system")
+        icon.set_pixel_size(16)
         button = Gtk.MenuButton(
             name=Menu.PREFERENCE_SHORTCUT.name,
-            popup=menu.widget,
             tooltip_text=_("Open preferences ({})".format(shortcuts.label(Menu.PREFERENCE_SHORTCUT))),
         )
-        button.add(icon)
+        button.set_menu_model(menu.widget)
+        button.set_child(icon)
         self.widget.pack_end(button)
 
     @on(Events.SESSION_START)

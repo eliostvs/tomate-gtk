@@ -5,8 +5,8 @@ from typing import Dict
 
 import gi
 
-gi.require_version("Gtk", "3.0")
-gi.require_version("Gdk", "3.0")
+gi.require_version("Gtk", "4.0")
+gi.require_version("Gdk", "4.0")
 
 from gi.repository import Gdk, GLib, Gtk
 
@@ -70,7 +70,7 @@ class BreakScreen(Subscriber):
 
     def create_button(self) -> Gtk.Button:
         logger.debug("action=create_skip_button visibile=%s", self.options[SKIP_BREAK_OPTION])
-        button = Gtk.Button(label=_("Skip"), name="skip", visible=self.options[SKIP_BREAK_OPTION], no_show_all=True)
+        button = Gtk.Button(label=_("Skip"), name="skip", visible=self.options[SKIP_BREAK_OPTION])
         button.connect("clicked", self.skip_break)
         button.grab_focus()
         return button
@@ -82,31 +82,25 @@ class BreakScreen(Subscriber):
 
     def create_content_area(self, countdown: Gtk.Label, skip_button: Gtk.Button) -> Gtk.Box:
         content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        content.pack_start(countdown, False, False, 0)
-        content.pack_start(skip_button, False, False, 0)
+        content.append(countdown)
+        content.append(skip_button)
 
         space = Gtk.Box(halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER)
-        space.pack_start(content, True, True, 0)
+        space.append(content)
         return space
 
     def create_window(self, monitor: Monitor, box: Gtk.Box) -> Gtk.Window:
         window = Gtk.Window(
             can_focus=False,
-            decorated=False,
             deletable=False,
             focus_on_map=False,
-            gravity=Gdk.Gravity.CENTER,
             name="breakscreen",
-            skip_taskbar_hint=True,
-            urgency_hint=True,
         )
-        window.set_visual(window.get_screen().get_rgba_visual())
-        window.stick()
-        window.set_keep_above(True)
+        window.set_decorated(False)
+        window.set_resizable(False)
         window.fullscreen()
-        window.move(monitor.x, monitor.y)
-        window.resize(monitor.width, monitor.height)
-        window.add(box)
+        window.set_default_size(monitor.width, monitor.height)
+        window.set_child(box)
         return window
 
     @on(Events.SESSION_START)
@@ -115,7 +109,7 @@ class BreakScreen(Subscriber):
 
         if payload.type != SessionType.POMODORO:
             self.countdown.set_text(payload.countdown)
-            self.widget.show_all()
+            self.widget.present()
 
     @on(Events.SESSION_INTERRUPT)
     def on_session_interrupt(self, **__) -> None:
@@ -177,12 +171,11 @@ class SettingsDialog:
             resizable=False,
             title=_("Preferences"),
             transient_for=toplevel,
-            window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
         dialog.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         dialog.connect("response", lambda widget, _: widget.destroy())
-        dialog.set_size_request(350, -1)
-        dialog.get_content_area().add(self.create_options())
+        dialog.set_default_size(350, -1)
+        dialog.get_content_area().append(self.create_options())
         return dialog
 
     def create_options(self):
@@ -192,7 +185,7 @@ class SettingsDialog:
         return grid
 
     def run(self):
-        self.widget.show_all()
+        self.widget.present()
         return self.widget
 
     def create_option(self, grid: Gtk.Grid, row: int, label: str, option):
@@ -259,18 +252,26 @@ class BreakScreenPlugin(plugin.Plugin):
         """
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(style)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+        display = Gdk.Display.get_default()
+        if display is not None:
+            Gtk.StyleContext.add_provider_for_display(
+                display, style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            )
 
     @suppress_errors
     def activate(self):
         super().activate()
 
-        for monitor in range(self.display.get_n_monitors()):
-            geometry = self.display.get_monitor(monitor).get_geometry()
+        if self.display is None:
+            logger.debug("action=activate skip reason=no_display")
+            return
+
+        monitors = self.display.get_monitors()
+        for monitor_index in range(monitors.get_n_items()):
+            monitor = monitors.get_item(monitor_index)
+            geometry = monitor.get_geometry()
             screen = BreakScreen(
-                Monitor(monitor, geometry), self.graph.get("tomate.session"), self.graph.get("tomate.config")
+                Monitor(monitor_index, geometry), self.graph.get("tomate.session"), self.graph.get("tomate.config")
             )
             screen.connect(self.bus)
             self.screens.append(screen)

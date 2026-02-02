@@ -36,7 +36,7 @@ DATA_FILES = [
 setup(
     author="Elio Esteves Duarte",
     author_email="elio.esteves.duarte@gmail.com",
-    description="A pomodoro timer",
+    description="A GTK4 pomodoro timer",
     include_package_data=True,
     keywords="pomodoro,tomate",
     license="GPL-3",

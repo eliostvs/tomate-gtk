@@ -4,7 +4,7 @@ import gi
 import pytest
 from wiring import Graph
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk
 
@@ -32,8 +32,18 @@ def graph() -> Graph:
 
 
 @pytest.fixture
-def window(mocker):
-    return mocker.Mock(spec=Window, widget=Gtk.Window())
+def gtk_app():
+    return Gtk.Application(application_id="com.github.Tomate.Test")
+
+
+@pytest.fixture
+def window(mocker, gtk_app):
+    return mocker.Mock(spec=Window, widget=Gtk.ApplicationWindow(application=gtk_app))
+
+
+@pytest.fixture
+def toplevel(gtk_app):
+    return Gtk.ApplicationWindow(application=gtk_app)
 
 
 @pytest.fixture

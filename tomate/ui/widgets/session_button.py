@@ -1,7 +1,6 @@
 import locale
 import logging
 from locale import gettext as _
-from typing import Callable
 
 from wiring import SingletonScope, inject
 from wiring.scanning import register
@@ -50,8 +49,8 @@ class SessionButton(Subscriber):
             can_focus=False,
             homogeneous=True,
             margin_bottom=12,
-            margin_left=12,
-            margin_right=12,
+            margin_start=12,
+            margin_end=12,
             sensitive=True,
         )
 
@@ -61,15 +60,8 @@ class SessionButton(Subscriber):
             tooltip_text=_("{} ({})".format(label, self._shortcuts.label(shortcut))),
             name=shortcut.name,
         )
-        self._shortcuts.connect(shortcut, self._select(session_type))
-
-    def _select(self, session_type: SessionType) -> Callable[[], bool]:
-        def callback(*_) -> bool:
-            logger.debug("action=change session=%s", session_type)
-            self.widget.set_selected(session_type.value)
-            return True
-
-        return callback
+        action_name = "win.session-{}".format(shortcut.name.split(".")[-1].replace("_", "-"))
+        self._shortcuts.connect(shortcut, action_name)
 
     def _clicked(self, _, number):
         session_type = SessionType.of(number)

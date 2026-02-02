@@ -4,9 +4,7 @@ from typing import Iterator
 import gi
 import pytest
 
-gi.require_version("Gtk", "3.0")
-
-from gi.repository import Gtk
+gi.require_version("Gtk", "4.0")
 
 from tomate.pomodoro import ConfigPayload, Events, SessionType, TimerPayload
 from tomate.ui.testing import Q, create_session_payload, run_loop_for
@@ -161,35 +159,35 @@ class TestPlugin:
 
 
 class TestSettingsWindow:
-    def test_options_labels(self, plugin):
-        dialog = plugin.settings_window(Gtk.Window())
+    def test_options_labels(self, plugin, toplevel):
+        dialog = plugin.settings_window(toplevel)
 
         assert Q.select(dialog.widget, Q.props("label", "Auto start:")) is not None
         assert Q.select(dialog.widget, Q.props("label", "Skip break:")) is not None
 
-    def test_with_all_options_enabled(self, config, plugin):
+    def test_with_all_options_enabled(self, config, plugin, toplevel):
         config.set(SECTION_NAME, AUTO_START_OPTION, "true")
         config.set(SECTION_NAME, SKIP_BREAK_OPTION, "true")
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         assert Q.select(dialog.widget, Q.props("name", AUTO_START_OPTION)).props.active is True
         assert Q.select(dialog.widget, Q.props("name", SKIP_BREAK_OPTION)).props.active is True
 
-    def test_with_all_options_disabled(self, config, plugin):
+    def test_with_all_options_disabled(self, config, plugin, toplevel):
         config.remove(SECTION_NAME, AUTO_START_OPTION)
         config.remove(SECTION_NAME, SKIP_BREAK_OPTION)
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         assert Q.select(dialog.widget, Q.props("name", AUTO_START_OPTION)).props.active is False
         assert Q.select(dialog.widget, Q.props("name", SKIP_BREAK_OPTION)).props.active is False
 
-    def test_change_options(self, config, plugin):
+    def test_change_options(self, config, plugin, toplevel):
         config.remove(SECTION_NAME, AUTO_START_OPTION)
         config.remove(SECTION_NAME, SKIP_BREAK_OPTION)
 
-        dialog = plugin.settings_window(Gtk.Window())
+        dialog = plugin.settings_window(toplevel)
 
         Q.select(dialog.widget, Q.props("name", AUTO_START_OPTION)).props.active = True
         Q.select(dialog.widget, Q.props("name", SKIP_BREAK_OPTION)).props.active = True

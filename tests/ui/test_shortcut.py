@@ -1,5 +1,5 @@
 import pytest
-from gi.repository import Gtk
+from gi.repository import Gio, Gtk
 from wiring.scanning import scan_to_graph
 
 from tomate.ui import Shortcut, ShortcutEngine
@@ -32,36 +32,38 @@ def test_label_with_fallback(shortcut_engine):
     assert label == "Ctrl+P"
 
 
-def test_connect(shortcut_engine, mocker):
-    callback = mocker.Mock(return_value=True)
+def test_connect(shortcut_engine, mocker, gtk_app):
+    callback = mocker.Mock()
     shortcut = Shortcut("start", "<control>s")
+    window = Gtk.ApplicationWindow(application=gtk_app)
 
-    shortcut_engine.connect(shortcut, callback)
-    assert active_shortcut(shortcut_engine, shortcut) is True
+    action_group = Gio.SimpleActionGroup()
+    action = Gio.SimpleAction.new("start", None)
+    action.connect("activate", lambda *_: callback())
+    action_group.add_action(action)
+    window.insert_action_group("win", action_group)
 
-    key, mod = Gtk.accelerator_parse(shortcut.value)
-    callback.assert_called_once_with(shortcut_engine.accel_group, mocker.ANY, key, mod)
+    shortcut_engine.connect(shortcut, "win.start")
+    assert active_shortcut(shortcut_engine, shortcut, window=window) is True
+
+    callback.assert_called_once_with()
 
 
-def test_disconnect(shortcut_engine, mocker):
+def test_disconnect(shortcut_engine):
     shortcut = Shortcut("start", "<control>s")
-    shortcut_engine.connect(shortcut, mocker.Mock())
+    shortcut_engine.connect(shortcut, "win.start")
 
     shortcut_engine.disconnect(shortcut)
 
     assert active_shortcut(shortcut_engine, shortcut) is False
 
 
-def test_change(shortcut_engine, mocker):
-    callback = mocker.Mock(return_value=True)
+def test_change(shortcut_engine):
     old_shortcut = Shortcut("start", "<control>a")
     new_shortcut = Shortcut("start", "<control>b")
 
-    shortcut_engine.connect(old_shortcut, callback)
+    shortcut_engine.connect(old_shortcut, "win.start")
     shortcut_engine.change(new_shortcut)
 
-    assert active_shortcut(shortcut_engine, old_shortcut) is False
-    assert active_shortcut(shortcut_engine, new_shortcut) is True
-
-    key, mod = Gtk.accelerator_parse(new_shortcut.value)
-    callback.assert_called_once_with(shortcut_engine.accel_group, mocker.ANY, key, mod)
+    assert shortcut_engine.action_name(new_shortcut) == "win.start"
+    assert shortcut_engine.action_name(old_shortcut) == "win.start"

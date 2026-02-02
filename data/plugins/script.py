@@ -8,7 +8,7 @@ from typing import Dict, Optional
 import gi
 from wiring import Graph
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 
 from gi.repository import Gtk
 
@@ -97,12 +97,11 @@ class SettingsDialog:
             resizable=False,
             title=_("Preferences"),
             transient_for=toplevel,
-            window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
         dialog.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         dialog.connect("response", lambda widget, _: widget.destroy())
-        dialog.set_size_request(350, -1)
-        dialog.get_content_area().add(self.create_options())
+        dialog.set_default_size(350, -1)
+        dialog.get_content_area().append(self.create_options())
         return dialog
 
     def create_options(self):
@@ -138,7 +137,7 @@ class SettingsDialog:
         grid.attach(help_text, 0, 1, 4, 1)
 
     def run(self) -> None:
-        self.widget.show_all()
+        self.widget.present()
         return self.widget
 
     def create_option(self, grid: Gtk.Grid, row: int, label: str, option: str) -> None:

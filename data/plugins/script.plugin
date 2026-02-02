@@ -7,3 +7,4 @@ Author = Elio Esteves Duarte
 Version = 0.2.0
 Website = https://github.com/eliostvs/tomate-gtk
 Description = Run scripts when a session starts, stops or finishes
+Notes = GTK4 drops legacy status icons; external systray plugins must stay GTK3 or migrate to non-GTK solutions.

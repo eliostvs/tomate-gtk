@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 import gi
 from wiring import Graph
 
-gi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gtk
+from gi.repository import Gio, GLib, Gtk
 
 import tomate.pomodoro.plugin as plugin
 from tomate.audio import GStreamerPlayer
@@ -80,12 +80,11 @@ class SettingsDialog:
             resizable=False,
             title=_("Preferences"),
             transient_for=toplevel,
-            window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
         )
         dialog.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         dialog.connect("response", lambda widget, _: widget.destroy())
-        dialog.set_size_request(350, -1)
-        dialog.get_content_area().add(self.create_options())
+        dialog.set_default_size(350, -1)
+        dialog.get_content_area().append(self.create_options())
         return dialog
 
     def create_options(self) -> Gtk.Grid:
@@ -108,11 +107,10 @@ class SettingsDialog:
             editable=False,
             hexpand=True,
             name="custom_entry",
-            secondary_icon_activatable=True,
-            secondary_icon_name=Gtk.STOCK_FILE,
             sensitive=bool(custom_audio),
             text=custom_audio,
         )
+        entry.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "document-open-symbolic")
         entry.connect("icon-press", self.select_custom_alarm)
         entry.connect("notify::text", self.custom_alarm_changed)
         return entry
@@ -128,40 +126,28 @@ class SettingsDialog:
         return switch
 
     def select_custom_alarm(self, entry: Gtk.Entry, *_) -> None:
-        dialog = self.create_file_chooser(self.dirname(entry.props.text))
-        response = dialog.run()
-
-        if response == Gtk.ResponseType.OK:
-            entry.set_text(dialog.get_uri())
-
-        dialog.destroy()
+        dialog = self.create_file_dialog(self.dirname(entry.props.text))
+        dialog.open(self.widget, None, self._on_file_chosen, entry)
 
     def dirname(self, audio_path: str) -> str:
         return path.dirname(urlparse(audio_path).path) if audio_path else path.expanduser("~")
 
-    def create_file_chooser(self, current_folder: str) -> Gtk.FileChooserDialog:
-        dialog = Gtk.FileChooserDialog(
-            _("Please choose a file"),
-            self.widget,
-            Gtk.FileChooserAction.OPEN,
-            (
-                Gtk.STOCK_CANCEL,
-                Gtk.ResponseType.CANCEL,
-                Gtk.STOCK_OPEN,
-                Gtk.ResponseType.OK,
-            ),
-        )
-        dialog.add_filter(self.create_filter("audio/mp3", "audio/mpeg"))
-        dialog.add_filter(self.create_filter("audio/ogg", "audio/ogg"))
-        dialog.set_current_folder(current_folder)
+    def create_file_dialog(self, current_folder: str) -> Gtk.FileDialog:
+        dialog = Gtk.FileDialog(title=_("Please choose a file"))
+        dialog.set_filters(self.create_filters())
+        if current_folder:
+            dialog.set_initial_folder(Gio.File.new_for_path(current_folder))
         return dialog
 
     @staticmethod
-    def create_filter(name: str, mime_type: str) -> Gtk.FileFilter:
-        mime_type_filter = Gtk.FileFilter()
-        mime_type_filter.set_name(name)
-        mime_type_filter.add_mime_type(mime_type)
-        return mime_type_filter
+    def create_filters(self) -> Gio.ListStore:
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        for name, mime_type in (("audio/mp3", "audio/mpeg"), ("audio/ogg", "audio/ogg")):
+            mime_type_filter = Gtk.FileFilter()
+            mime_type_filter.set_name(name)
+            mime_type_filter.add_mime_type(mime_type)
+            filters.append(mime_type_filter)
+        return filters
 
     def custom_alarm_changed(self, entry: Gtk.Entry, _) -> None:
         custom_alarm = entry.props.text
@@ -181,5 +167,14 @@ class SettingsDialog:
             entry.set_properties(text="", sensitive=False)
 
     def run(self) -> Gtk.Dialog:
-        self.widget.show_all()
+        self.widget.present()
         return self.widget
+
+    def _on_file_chosen(self, dialog: Gtk.FileDialog, result: Gio.AsyncResult, entry: Gtk.Entry) -> None:
+        try:
+            file = dialog.open_finish(result)
+        except GLib.Error:
+            return
+
+        if file is not None:
+            entry.set_text(file.get_uri())
