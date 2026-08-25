@@ -1,7 +1,8 @@
 import enum
 import functools
 import logging
-from typing import Any, Callable, List, Tuple
+from collections.abc import Callable
+from typing import Any
 
 import blinker
 from wiring import SingletonScope
@@ -44,7 +45,7 @@ class Bus:
     def is_connect(self, event: Events, receiver: Receiver) -> bool:
         return receiver in self._bus.receivers_for(event)
 
-    def send(self, event: Events, payload: Any = None) -> List[Any]:
+    def send(self, event: Events, payload: Any = None) -> list[Any]:
         # ignore the receiver in the result
         return [result[1] for result in self._bus.send(event, payload=payload)]
 
@@ -89,9 +90,9 @@ class Subscriber:
                 )
                 bus.disconnect(event, method)
 
-    def __methods_with_events(self) -> List[Tuple[Any, List[Events]]]:
+    def __methods_with_events(self) -> list[tuple[Any, list[Events]]]:
         return [
-            (getattr(self, attr), getattr(getattr(self, attr), "_events"))
+            (getattr(self, attr), getattr(self, attr)._events)
             for attr in dir(self)
             if hasattr(getattr(self, attr), "_events")
         ]

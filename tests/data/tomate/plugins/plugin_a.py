@@ -1,7 +1,6 @@
 from gi.repository import Gtk
 
-import tomate.pomodoro.plugin as plugin
-from tomate.pomodoro import Events, on
+from tomate.pomodoro import Events, on, plugin
 
 
 class PluginA(plugin.Plugin):

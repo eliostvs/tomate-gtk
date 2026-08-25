@@ -88,7 +88,7 @@ class TimerTab:
 
     def _create_section(self, name):
         section = Gtk.Label.new()
-        section.set_markup("<b>{0}</b>".format(name))
+        section.set_markup(f"<b>{name}</b>")
         section.props.halign = Gtk.Align.START
         return section
 
@@ -211,7 +211,7 @@ class ExtensionTab:
         self.plugin_model.clear()
 
 
-class PluginGrid(object):
+class PluginGrid:
     NAME = 0
     ACTIVE = 1
     ICON = 2
@@ -268,9 +268,7 @@ class PluginGrid(object):
 
     @staticmethod
     def description(plugin):
-        return "<b>{name}</b> ({version})" "\n<small>{description}</small>".format(
-            name=plugin.name, version=plugin.version, description=plugin.description
-        )
+        return f"<b>{plugin.name}</b> ({plugin.version})" f"\n<small>{plugin.description}</small>"
 
     @classmethod
     def from_iter(cls, tree_store, tree_iter):

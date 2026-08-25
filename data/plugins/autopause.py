@@ -2,8 +2,7 @@ import logging
 
 import gi
 
-import tomate.pomodoro.plugin as plugin
-from tomate.pomodoro import Events, on, suppress_errors
+from tomate.pomodoro import Events, on, plugin, suppress_errors
 
 gi.require_version("Playerctl", "2.0")
 

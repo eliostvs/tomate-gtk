@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import List, Optional, Union
 
 import wrapt
 from gi.repository import Gtk
@@ -37,7 +36,7 @@ class Plugin(IPlugin, Subscriber):
         self.disconnect(self.bus)
         super().deactivate()
 
-    def settings_window(self, parent) -> Union[Gtk.Dialog, None]:
+    def settings_window(self, parent) -> Gtk.Dialog | None:
         return None
 
 
@@ -69,11 +68,11 @@ class PluginEngine:
     def activate(self, name: str) -> None:
         self._plugin_manager.activatePluginByName(name)
 
-    def all(self) -> List[PluginInfo]:
+    def all(self) -> list[PluginInfo]:
         logger.debug("action=all")
         return sorted(self._plugin_manager.getAllPlugins(), key=lambda info: info.name)
 
-    def lookup(self, name: str, category="Default") -> Optional[PluginInfo]:
+    def lookup(self, name: str, category="Default") -> PluginInfo | None:
         logger.debug("action=lookup name=%s category=%s", name, category)
         return self._plugin_manager.getPluginByName(name, category)
 

@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
 from locale import gettext as _
-from typing import Dict
 
 import gi
 
@@ -10,7 +9,6 @@ gi.require_version("Gdk", "3.0")
 
 from gi.repository import Gdk, GLib, Gtk
 
-import tomate.pomodoro.plugin as plugin
 from tomate.pomodoro import (
     Config,
     ConfigPayload,
@@ -22,6 +20,7 @@ from tomate.pomodoro import (
     Timer,
     TimerPayload,
     on,
+    plugin,
     suppress_errors,
 )
 
@@ -62,7 +61,7 @@ class BreakScreen(Subscriber):
         content = self.create_content_area(self.countdown, self.skip_button)
         self.widget = self.create_window(self.monitor, content)
 
-    def create_options(self, config) -> Dict[str, bool]:
+    def create_options(self, config) -> dict[str, bool]:
         return {
             SKIP_BREAK_OPTION: config.get_bool(SECTION_NAME, SKIP_BREAK_OPTION, fallback=False),
             AUTO_START_OPTION: config.get_bool(SECTION_NAME, AUTO_START_OPTION, fallback=False),

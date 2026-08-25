@@ -1,10 +1,10 @@
-from typing import Any, Dict
+from typing import Any
 
 from gi.repository import GObject, Gtk
 
 
 class ModeButtonItem(Gtk.ToggleButton):
-    def __init__(self, index: int, **props: Dict[str, Any]):
+    def __init__(self, index: int, **props: dict[str, Any]):
         Gtk.ToggleButton.__init__(self, can_focus=False, **props)
         self.index = index
 
@@ -25,7 +25,7 @@ class ModeButton(Gtk.Box):
     def get_selected(self):
         return self.__selected
 
-    def append_text(self, text: str, **props: Dict[str, Any]):
+    def append_text(self, text: str, **props: dict[str, Any]):
         button = ModeButtonItem(len(self.__items), **props)
         button.add(Gtk.Label.new(text))
         button.connect("button_press_event", self.on_button_press_event)

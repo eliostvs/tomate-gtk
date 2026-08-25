@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from locale import gettext as _
-from typing import Callable, Tuple
 
 from gi.repository import Gtk
 from wiring import SingletonScope, inject
@@ -23,7 +23,7 @@ class Menu(Subscriber):
         self.connect(bus)
         self.widget, self.show_item, self.hide_item = self._create_menu(window)
 
-    def _create_menu(self, window) -> Tuple[Gtk.Menu, Gtk.MenuItem, Gtk.MenuItem]:
+    def _create_menu(self, window) -> tuple[Gtk.Menu, Gtk.MenuItem, Gtk.MenuItem]:
         menu = Gtk.Menu(halign=Gtk.Align.CENTER)
         menu.add(self._create_menu_item("Show", lambda _: window.show(), visible=False, no_show_all=True))
         menu.add(self._create_menu_item("Hide", lambda _: window.hide(), visible=True))

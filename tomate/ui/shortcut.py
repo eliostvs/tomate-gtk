@@ -1,6 +1,7 @@
 import logging
 from collections import namedtuple
-from typing import Any, Callable, Tuple
+from collections.abc import Callable
+from typing import Any
 
 from gi.repository import Gdk, Gtk
 from wiring import SingletonScope, inject
@@ -11,11 +12,11 @@ logger = logging.getLogger(__name__)
 
 class Shortcut(namedtuple("Shortcut", ["name", "value"])):
     def __str__(self) -> str:
-        return "name={} value={}".format(self.name, self.value)
+        return f"name={self.name} value={self.value}"
 
     @property
     def accel_path(self) -> str:
-        return "<tomate>/Global/{}".format(self.name)
+        return f"<tomate>/Global/{self.name}"
 
 
 @register.factory("tomate.ui.shortcut", scope=SingletonScope)
@@ -45,6 +46,6 @@ class ShortcutEngine:
     def label(self, shortcut: Shortcut) -> str:
         return Gtk.accelerator_get_label(*self._parse(shortcut))
 
-    def _parse(self, shortcut: Shortcut) -> Tuple[int, Gdk.ModifierType]:
+    def _parse(self, shortcut: Shortcut) -> tuple[int, Gdk.ModifierType]:
         accelerator = self._config.get(self._config.SHORTCUT_SECTION, shortcut.name, fallback=shortcut.value)
         return Gtk.accelerator_parse(accelerator)

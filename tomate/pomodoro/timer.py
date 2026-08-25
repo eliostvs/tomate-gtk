@@ -15,7 +15,7 @@ SECONDS_IN_A_MINUTE = 60
 
 def format_seconds(seconds: int) -> str:
     minutes, seconds = divmod(seconds, SECONDS_IN_A_MINUTE)
-    return "{0:0>2}:{1:0>2}".format(minutes, seconds)
+    return f"{minutes:0>2}:{seconds:0>2}"
 
 
 class Payload(namedtuple("TimerPayload", ["time_left", "duration"])):

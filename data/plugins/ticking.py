@@ -5,7 +5,6 @@ from wiring import Graph
 
 gi.require_version("Gst", "1.0")
 
-import tomate.pomodoro.plugin as plugin
 from tomate.audio import GStreamerPlayer
 from tomate.pomodoro import (
     Bus,
@@ -13,6 +12,7 @@ from tomate.pomodoro import (
     SessionPayload,
     SessionType,
     on,
+    plugin,
     suppress_errors,
 )
 

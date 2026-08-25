@@ -2,7 +2,6 @@ import logging
 import os
 from collections import namedtuple
 from configparser import RawConfigParser
-from typing import List, Union
 
 from wiring import SingletonScope, inject
 from wiring.scanning import register
@@ -57,10 +56,10 @@ class Config:
     def media_uri(self, *resources: str) -> str:
         return "file://" + self._resource_path(self.APP_NAME, "media", *resources)
 
-    def plugin_paths(self) -> List[str]:
+    def plugin_paths(self) -> list[str]:
         return remove_duplicates(self._load_data_paths(self.APP_NAME, "plugins"))
 
-    def icon_paths(self) -> List[str]:
+    def icon_paths(self) -> list[str]:
         return remove_duplicates(self._load_data_paths("icons"))
 
     def _resource_path(self, *resources) -> str:
@@ -68,9 +67,9 @@ class Config:
             if os.path.exists(resource):
                 return resource
 
-        raise EnvironmentError("Resource '%s' not found!" % resources[-1])
+        raise OSError("Resource '%s' not found!" % resources[-1])
 
-    def _load_data_paths(self, *resources) -> List[str]:
+    def _load_data_paths(self, *resources) -> list[str]:
         return [path for path in BaseDirectory.load_data_paths(*resources)]
 
     def icon_path(self, iconname, size=None, theme=None) -> str:
@@ -79,7 +78,7 @@ class Config:
         if icon_path is not None:
             return icon_path
 
-        raise EnvironmentError("Icon '%s' not found!" % iconname)
+        raise OSError("Icon '%s' not found!" % iconname)
 
     def get_int(self, section: str, option: str, fallback=None) -> int:
         return self.get(section, option, fallback, method="getint")
@@ -90,7 +89,7 @@ class Config:
     def get_float(self, section: str, option: str, fallback=None) -> int:
         return self.get(section, option, fallback, method="getfloat")
 
-    def get(self, section: str, option: str, fallback=None, method="get") -> Union[str, int, bool]:
+    def get(self, section: str, option: str, fallback=None, method="get") -> str | int | bool:
         section = self.normalize(section)
         option = self.normalize(option)
         if not self.parser.has_section(section):
@@ -129,5 +128,5 @@ class Config:
         return name.replace(" ", "_").lower()
 
 
-def remove_duplicates(original: List[str]) -> List[str]:
+def remove_duplicates(original: list[str]) -> list[str]:
     return list(set(original))

@@ -1,17 +1,16 @@
 import logging
 from locale import gettext as _
-from typing import Tuple
 
 import gi
 from wiring import Graph
 
-import tomate.pomodoro.plugin as plugin
 from tomate.pomodoro import (
     Bus,
     Events,
     SessionPayload,
     SessionType,
     on,
+    plugin,
     suppress_errors,
 )
 
@@ -61,7 +60,7 @@ class NotifyPlugin(plugin.Plugin):
     def on_session_stopped(self, **__):
         self.show_notification(title="Session stopped manually")
 
-    def get_message(self, session: SessionType) -> Tuple[str, str]:
+    def get_message(self, session: SessionType) -> tuple[str, str]:
         return (
             self.messages[session]["title"],
             self.messages[session]["content"],

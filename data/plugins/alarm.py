@@ -10,9 +10,8 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-import tomate.pomodoro.plugin as plugin
 from tomate.audio import GStreamerPlayer
-from tomate.pomodoro import Bus, Config, Events, on, suppress_errors
+from tomate.pomodoro import Bus, Config, Events, on, plugin, suppress_errors
 
 logger = logging.getLogger(__name__)
 

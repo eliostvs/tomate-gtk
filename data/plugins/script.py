@@ -3,7 +3,6 @@ import logging
 import subprocess
 from locale import gettext as _
 from string import Template
-from typing import Dict, Optional
 
 import gi
 from wiring import Graph
@@ -12,8 +11,7 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-import tomate.pomodoro.plugin as plugin
-from tomate.pomodoro import Bus, Config, Events, SessionPayload, on, suppress_errors
+from tomate.pomodoro import Bus, Config, Events, SessionPayload, on, plugin, suppress_errors
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -24,7 +22,7 @@ STOP_OPTION = "stop_command"
 FINISH_OPTION = "finish_command"
 
 
-def strip_space(command: Optional[str]) -> Optional[str]:
+def strip_space(command: str | None) -> str | None:
     if command is not None:
         return command.strip()
 
@@ -73,12 +71,12 @@ class ScriptPlugin(plugin.Plugin):
                 )
         return False
 
-    def read_command(self, section: str, repl: Dict[str, str]) -> Optional[str]:
+    def read_command(self, section: str, repl: dict[str, str]) -> str | None:
         template = strip_space(self.config.get(SECTION_NAME, section))
         return self._interpolate(template, repl) if template else None
 
     @staticmethod
-    def _interpolate(template: str, replacements: Dict[str, str]) -> str:
+    def _interpolate(template: str, replacements: dict[str, str]) -> str:
         return Template(template).substitute(**replacements)
 
     def settings_window(self, toplevel):

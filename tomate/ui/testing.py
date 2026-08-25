@@ -1,7 +1,8 @@
 import time
 from collections import deque
+from collections.abc import Callable
 from functools import reduce
-from typing import Any, Callable, List, Optional
+from typing import Any
 
 from gi.repository import GLib, Gtk
 
@@ -9,7 +10,7 @@ from tomate.pomodoro import SessionPayload, SessionType
 from tomate.ui import Shortcut, ShortcutEngine
 
 
-def active_shortcut(shortcut_engine: ShortcutEngine, shortcut: Shortcut, window: Optional[Gtk.Window] = None) -> bool:
+def active_shortcut(shortcut_engine: ShortcutEngine, shortcut: Shortcut, window: Gtk.Window | None = None) -> bool:
     if window is None:
         window = Gtk.Window()
 
@@ -99,8 +100,8 @@ class TV:
         return tree_view.get_model()
 
     @staticmethod
-    def column(fn: Filter) -> Callable[[Gtk.TreeView], List[Gtk.TreeViewColumn]]:
-        def select(tree_view: Gtk.TreeView) -> List[Gtk.TreeViewColumn]:
+    def column(fn: Filter) -> Callable[[Gtk.TreeView], list[Gtk.TreeViewColumn]]:
+        def select(tree_view: Gtk.TreeView) -> list[Gtk.TreeViewColumn]:
             return [column for column in tree_view.get_columns() if fn(column)][0]
 
         return select
