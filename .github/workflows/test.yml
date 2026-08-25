@@ -14,16 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: eliostvs/tomate
-      volumes:
-        - ${{ github.workspace }}:/code
-    
+
     steps:
-      - uses: actions/checkout@v3
-        
+      - uses: actions/checkout@v7
+
+      - name: Create development environment
+        run: task dev
+
       - name: Create mime database
-        run: |
-          make mime
-        
+        run: task mime
+
       - name: Test
-        run: |
-          make test
+        run: task test
