@@ -1,5 +1,44 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tomate-gtk"
+version = "0.25.2"
+description = "A pomodoro timer"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-only"
+authors = [
+  { name = "Elio Esteves Duarte", email = "hello@eliostvs.dev" },
+]
+keywords = ["pomodoro", "tomate"]
+dependencies = [
+  "wiring @ git+https://github.com/eliostvs/wiring.git@master",
+]
+
+[project.urls]
+Homepage = "https://github.com/eliostvs/tomate-gtk"
+
+[project.scripts]
+tomate-gtk = "tomate.__main__:main"
+
+[dependency-groups]
+dev = [
+  "black",
+  "isort",
+  "pytest<9",
+  "pytest-cov",
+  "pytest-flake8",
+  "pytest-mock",
+  "python-dbusmock",
+  "ruff==0.16.3",
+  "ty==0.0.74",
+]
+
 [tool.black]
 line-length = 120
+target-version = ["py310"]
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -17,8 +56,19 @@ exclude = '''
 
 [tool.ruff]
 line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
 ignore = ["E402", "S101"]
-target-version = "py39"
+
+[tool.ty.environment]
+python-version = "3.10"
+
+[tool.pytest.ini_options]
+addopts = "--verbose --cov-report term-missing"
+
+[tool.coverage.run]
+include = ["tomate"]
 
 [tool.isort]
 profile = "black"

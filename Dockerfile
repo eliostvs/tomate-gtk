@@ -13,9 +13,9 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     gir1.2-notify-0.7 \
     gir1.2-playerctl-2.0 \
     gir1.2-unity-5.0 \
+    curl \
     git \
     gstreamer1.0-plugins-base \
-    make \
     notification-daemon \
     python3-blinker \
     python3-dbus \
@@ -33,14 +33,22 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     xvfb \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir \
-    black \
-    isort \
-    ruff \
-    git+https://git@github.com/eliostvs/wiring.git@master
+COPY pyproject.toml uv.lock /tmp/
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN cd /tmp && \
+    uv venv --system-site-packages --python python3 .venv && \
+    uv sync --frozen --group dev --no-install-project
+
+ENV PATH="/tmp/.venv/bin:${PATH}"
 
 WORKDIR /code
 
-ENTRYPOINT ["make"]
+RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin v3.48.0
+
+ENTRYPOINT ["task"]
 
 CMD ["test"]

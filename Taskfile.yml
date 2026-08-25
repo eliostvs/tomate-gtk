@@ -1,0 +1,130 @@
+version: '3'
+
+silent: true
+
+vars:
+  DATAPATH: '{{.ROOT_DIR}}/tests/data'
+  DOCKER_IMAGE: 'eliostvs/{{default "tomate" .PACKAGE}}'
+  OBS_API_URL: https://api.opensuse.org/trigger/runservice
+  PACKAGE: tomate
+  PLUGINPATH: '{{.ROOT_DIR}}/data/plugins'
+  ARGS:
+    sh: 'if command -v xvfb-run >/dev/null; then echo "xvfb-run -a"; fi'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+
+  clean:
+    desc: Clean development files.
+    cmds:
+      - find . -type d -iname __pycache__ -prune -exec rm -rf {} +
+      - rm -rf .eggs *.egg-info .coverage build .cache .pytest_cache tests/data/mime/mime.cache .venv venv
+
+  dev:
+    desc: Create a development environment.
+    cmds:
+      - uv venv --clear --system-site-packages --python python3 .venv
+      - uv sync --group dev
+
+  mime:
+    desc: Generate the test MIME index.
+    deps: 
+      - clean
+    env:
+      XDG_CONFIG_HOME: '{{.DATAPATH}}'
+      XDG_DATA_HOME: '{{.DATAPATH}}'
+      XDG_DATA_DIRS: '{{.DATAPATH}}'
+    cmds:
+      - update-mime-database tests/data/mime
+      - >-
+        rm -rf tests/data/mime/image tests/data/mime/aliases tests/data/mime/generic-icons tests/data/mime/globs
+        tests/data/mime/globs2 tests/data/mime/icons tests/data/mime/magic tests/data/mime/subclasses
+        tests/data/mime/treemagic tests/data/mime/types tests/data/mime/version tests/data/mime/XMLnamespaces
+
+  format:
+    desc: Format the code.
+    cmds:
+      - uv run --group dev black {{.PACKAGE}} tests {{.PLUGINPATH}}
+      - uv run --group dev isort {{.PACKAGE}} tests {{.PLUGINPATH}}
+
+  lint:
+    desc: Run linting.
+    cmds:
+      - ruff check {{.CLI_ARGS}} {{.PACKAGE}} tests {{.PLUGINPATH}}
+
+  typecheck:
+    desc: Run static analysis.
+    cmds:
+      - uv run --group dev ty check {{.CLI_ARGS}} {{.PACKAGE}} tests {{.PLUGINPATH}}
+
+  test:
+    desc: Run tests.
+    env:
+      XDG_CONFIG_HOME: '{{.DATAPATH}}'
+      XDG_DATA_HOME: '{{.DATAPATH}}'
+      XDG_DATA_DIRS: '{{.DATAPATH}}'
+      PYTHONPATH: '{{.ROOT_DIR}}:{{.PLUGINPATH}}'
+    cmds:
+      - '{{.ARGS}} uv run --group dev pytest {{.CLI_ARGS}} -v --cov={{.PACKAGE}}'
+
+  run:
+    desc: Run the app locally.
+    env:
+      XDG_CONFIG_HOME: '{{.DATAPATH}}'
+      XDG_DATA_HOME: '{{.DATAPATH}}'
+      XDG_DATA_DIRS: '{{.DATAPATH}}'
+      PYTHONPATH: '{{.ROOT_DIR}}:{{.PLUGINPATH}}'
+      TOMATE_DEBUG: 'true'
+    cmds:
+      - 'python3 -m {{.PACKAGE}} -v'
+
+  release-*:
+    desc: Create a major, minor, or patch release.
+    cmds:
+      - |
+        git flow init -d
+        grep -q '\[Unreleased\]' CHANGELOG.md || {
+          echo 'Create the [Unreleased] section in the changelog first!'
+          exit 1
+        }
+        bumpversion --verbose --commit {{index .MATCH 0}}
+        version=$(awk '/current_version/ { print $3 }' .bumpversion.cfg)
+        git flow release start "$version"
+        GIT_MERGE_AUTOEDIT=no git flow release finish -m "Merge branch release/$version" -T "$version" "$version" -p
+
+  trigger:
+    desc: Trigger an OBS build.
+    requires:
+      vars: 
+        - TOKEN
+    cmds:
+      - 'curl -X POST -H "Authorization: Token {{.TOKEN}}" {{.OBS_API_URL}}'
+
+  docker:
+    desc: Create a Docker image.
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}} .
+
+  docker-push:
+    desc: Push the Docker image to Docker Hub.
+    cmds:
+      - docker image push {{.DOCKER_IMAGE}}:latest
+
+  docker-run:
+    desc: Run the app inside Docker.
+    cmds:
+      - >-
+        docker run --rm -it -e DISPLAY --net=host -v {{.ROOT_DIR}}:/code -v $HOME/.Xauthority:/root/.Xauthority
+        {{.DOCKER_IMAGE}} run
+
+  docker-test:
+    desc: Run tests inside Docker.
+    cmds:
+      - docker run --rm -it -v {{.ROOT_DIR}}:/code --workdir /code {{.DOCKER_IMAGE}} mime test
+
+  docker-enter:
+    desc: Open a terminal inside the Docker environment.
+    cmds:
+      - docker run --rm -it -v {{.ROOT_DIR}}:/code --workdir /code --entrypoint=bash {{.DOCKER_IMAGE}}
