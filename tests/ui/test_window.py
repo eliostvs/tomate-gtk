@@ -110,7 +110,7 @@ class TestWindowQuit:
 
 def test_shows_window_and_updates_systray_after_session_end(bus, graph, mocker, window):
     systray_menu = graph.get("tomate.ui.systray.menu")
-    bus.send(Events.WINDOW_HIDE)
+    bus.publish(Events.WINDOW_HIDE)
     deliver_events()
 
     window.widget.props.visible = False
@@ -118,7 +118,7 @@ def test_shows_window_and_updates_systray_after_session_end(bus, graph, mocker, 
     bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
 
     payload = create_session_payload()
-    bus.send(Events.SESSION_END, payload=payload)
+    bus.publish(Events.SESSION_END, payload=payload)
 
     assert window.widget.props.visible is False
     assert systray_menu.hide_item.props.visible is False

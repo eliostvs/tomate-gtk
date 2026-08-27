@@ -46,7 +46,7 @@ def test_buttons_content(button_name, label, tooltip_text, session_button):
 
 
 def test_disables_buttons_when_session_starts(bus, session_button):
-    bus.send(Events.SESSION_START)
+    bus.publish(Events.SESSION_START)
     deliver_events()
 
     assert session_button.widget.props.sensitive is False
@@ -62,7 +62,7 @@ def test_disables_buttons_when_session_starts(bus, session_button):
 def test_selects_button_when_session_stops_and_begins(event, payload, session_type, bus, session_button, session):
     session_button.widget.props.sensitive = False
 
-    bus.send(event, payload=payload)
+    bus.publish(event, payload=payload)
     deliver_events()
 
     assert session_button.widget.props.sensitive is True
@@ -93,7 +93,7 @@ def test_shortcuts(shortcut, session_type, session_button, shortcut_engine, sess
 
 
 def test_selects_button_when_session_changes(bus, session_button, session):
-    bus.send(Events.SESSION_CHANGE, payload=create_session_payload(type=SessionType.SHORT_BREAK))
+    bus.publish(Events.SESSION_CHANGE, payload=create_session_payload(type=SessionType.SHORT_BREAK))
     deliver_events()
 
     assert session_button.widget.get_selected() is SessionType.SHORT_BREAK.value

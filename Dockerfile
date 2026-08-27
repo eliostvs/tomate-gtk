@@ -17,7 +17,6 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     git \
     gstreamer1.0-plugins-base \
     notification-daemon \
-    python3-blinker \
     python3-dbus \
     python3-dbusmock \
     python3-gi \

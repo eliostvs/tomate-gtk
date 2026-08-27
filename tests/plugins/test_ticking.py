@@ -60,7 +60,7 @@ class TestPlugin:
     def test_starts_player_when_session_start(self, player, bus, config, plugin):
         plugin.activate()
 
-        bus.send(Events.SESSION_START, payload=create_session_payload())
+        bus.publish(Events.SESSION_START, payload=create_session_payload())
         deliver_events()
 
         player.return_value.play.assert_called_once()
@@ -70,8 +70,8 @@ class TestPlugin:
     def test_stops_player_when_session_(self, player, event, bus, config, plugin):
         plugin.activate()
 
-        bus.send(Events.SESSION_START, payload=create_session_payload())
-        bus.send(event)
+        bus.publish(Events.SESSION_START, payload=create_session_payload())
+        bus.publish(event)
         deliver_events()
 
         player.return_value.stop.assert_called_once()

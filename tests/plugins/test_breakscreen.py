@@ -47,7 +47,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = create_session_payload(type=session_type)
-        bus.send(Events.SESSION_START, payload=payload)
+        bus.publish(Events.SESSION_START, payload=payload)
         deliver_events()
 
         assert all([screen.widget.props.visible for screen in plugin.screens])
@@ -57,7 +57,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = create_session_payload(type=SessionType.POMODORO)
-        bus.send(Events.SESSION_START, payload=payload)
+        bus.publish(Events.SESSION_START, payload=payload)
         deliver_events()
 
         assert none([screen.widget.props.visible for screen in plugin.screens])
@@ -66,7 +66,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = create_session_payload(type=SessionType.SHORT_BREAK)
-        bus.send(Events.SESSION_START, payload=payload)
+        bus.publish(Events.SESSION_START, payload=payload)
 
         plugin.deactivate()
         deliver_events()
@@ -79,7 +79,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = create_session_payload(type=SessionType.POMODORO)
-        bus.send(Events.SESSION_END, payload=payload)
+        bus.publish(Events.SESSION_END, payload=payload)
         deliver_events()
 
         run_loop_for(1)
@@ -92,7 +92,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = create_session_payload(type=SessionType.POMODORO)
-        bus.send(Events.SESSION_END, payload=payload)
+        bus.publish(Events.SESSION_END, payload=payload)
         deliver_events()
 
         session.start.assert_not_called()
@@ -102,8 +102,8 @@ class TestPlugin:
     def test_hides_when_session_is_interrupted(self, bus, plugin):
         plugin.activate()
 
-        bus.send(Events.SESSION_START, payload=create_session_payload(type=SessionType.SHORT_BREAK))
-        bus.send(Events.SESSION_INTERRUPT, payload=create_session_payload())
+        bus.publish(Events.SESSION_START, payload=create_session_payload(type=SessionType.SHORT_BREAK))
+        bus.publish(Events.SESSION_INTERRUPT, payload=create_session_payload())
         deliver_events()
 
         assert none([screen.widget.props.visible for screen in plugin.screens])
@@ -117,7 +117,7 @@ class TestPlugin:
             screen.widget.show()
 
         payload = create_session_payload(type=session_type)
-        bus.send(Events.SESSION_END, payload=payload)
+        bus.publish(Events.SESSION_END, payload=payload)
         deliver_events()
 
         session.start.assert_not_called()
@@ -130,7 +130,7 @@ class TestPlugin:
         time_left = random.randint(1, 100)
 
         payload = TimerPayload(time_left=time_left, duration=150)
-        bus.send(Events.TIMER_UPDATE, payload=payload)
+        bus.publish(Events.TIMER_UPDATE, payload=payload)
         deliver_events()
 
         assert label_text(payload.countdown, plugin)
@@ -149,7 +149,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = ConfigPayload(action, SECTION_NAME, option, value)
-        bus.send(Events.CONFIG_CHANGE, payload=payload)
+        bus.publish(Events.CONFIG_CHANGE, payload=payload)
         deliver_events()
 
         assert all([screen.options[option] == want for screen in plugin.screens])
@@ -165,7 +165,7 @@ class TestPlugin:
         plugin.activate()
 
         payload = ConfigPayload(action, SECTION_NAME, SKIP_BREAK_OPTION, "")
-        bus.send(Events.CONFIG_CHANGE, payload=payload)
+        bus.publish(Events.CONFIG_CHANGE, payload=payload)
         deliver_events()
 
         assert all([screen.skip_button.props.visible == want for screen in plugin.screens])

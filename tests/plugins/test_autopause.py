@@ -42,7 +42,7 @@ def test_stop_all_running_players(bus, plugin, mocker):
 
     plugin.activate()
 
-    bus.send(Events.SESSION_END, payload=create_session_payload())
+    bus.publish(Events.SESSION_END, payload=create_session_payload())
     deliver_events()
 
     paused.pause.assert_not_called()

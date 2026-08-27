@@ -48,7 +48,7 @@ def test_execute_command_when_event_is_trigger(event, option, bus, subprocess_ru
     command = config.get(SECTION_NAME, option)
     plugin.activate()
 
-    bus.send(event, create_session_payload())
+    bus.publish(event, create_session_payload())
     deliver_events()
 
     subprocess_run.assert_called_once_with(command, shell=True, check=True)
@@ -66,7 +66,7 @@ def test_command_variables(event, section, session_type, bus, subprocess_run, co
     config.set(SECTION_NAME, section, "$event $session")
     plugin.activate()
 
-    bus.send(event, create_session_payload(type=session_type))
+    bus.publish(event, create_session_payload(type=session_type))
     deliver_events()
 
     subprocess_run.assert_called_once_with(f"{event.name} {session_type.name}", shell=True, check=True)
@@ -84,7 +84,7 @@ def test_does_not_execute_commands_when_they_are_not_configured(event, option, b
     config.remove(SECTION_NAME, option)
     plugin.activate()
 
-    bus.send(event, create_session_payload())
+    bus.publish(event, create_session_payload())
     deliver_events()
 
     subprocess_run.assert_not_called()
@@ -95,7 +95,7 @@ def test_execute_command_fail(bus, config, plugin):
 
     plugin.activate()
 
-    bus.send(Events.SESSION_START, create_session_payload())
+    bus.publish(Events.SESSION_START, create_session_payload())
     deliver_events()
 
 

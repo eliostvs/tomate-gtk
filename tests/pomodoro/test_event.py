@@ -17,6 +17,12 @@ def deliver_events():
 
 
 class TestBus:
+    def test_exposes_publish_without_the_legacy_send_bridge(self):
+        bus = Bus()
+
+        assert callable(bus.publish)
+        assert not hasattr(bus, "send")
+
     def test_publish_creates_an_immutable_timestamped_event_before_delivery(self):
         event_id = uuid.UUID("12345678-1234-4abc-8def-123456789abc")
         occurred_at = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
@@ -117,7 +123,7 @@ class TestBus:
         subject = Subject()
         subject.connect(bus)
 
-        event = bus.send(Events.SESSION_START, payload="payload")
+        event = bus.publish(Events.SESSION_START, payload="payload")
         deliver_events()
 
         assert subject.event is event

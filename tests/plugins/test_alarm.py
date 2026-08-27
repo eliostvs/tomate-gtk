@@ -44,7 +44,7 @@ class TestPlugin:
     def test_plays_alarm_when_session_ends(self, player, bus, config, plugin):
         plugin.activate()
 
-        bus.send(Events.SESSION_END)
+        bus.publish(Events.SESSION_END)
         player.return_value.play.assert_not_called()
         deliver_events()
 

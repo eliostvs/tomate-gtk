@@ -89,7 +89,7 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     plugin_engine.collect()
     preference.run()
 
-    event = bus.send(Events.WINDOW_SHOW)
+    event = bus.publish(Events.WINDOW_SHOW)
     deliver_events()
     assert plugin_engine.lookup("PluginB").plugin_object.last_event is event
 
@@ -104,7 +104,7 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     toggle_plugin(0)
     toggle_plugin(1)
 
-    event = bus.send(Events.WINDOW_SHOW)
+    event = bus.publish(Events.WINDOW_SHOW)
     deliver_events()
     assert plugin_engine.lookup("PluginA").plugin_object.last_event is event
 

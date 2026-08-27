@@ -55,7 +55,7 @@ def test_show_notification_when_session_starts(event, session, title, message, b
     plugin.activate()
 
     payload = create_session_payload(type=session)
-    bus.send(event, payload=payload)
+    bus.publish(event, payload=payload)
     deliver_events()
 
     plugin.notification.update.assert_called_once_with(title, message, IconPath)

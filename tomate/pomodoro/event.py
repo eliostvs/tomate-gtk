@@ -102,10 +102,6 @@ class Bus:
             GLib.idle_add(self._deliver, priority=GLib.PRIORITY_DEFAULT_IDLE)
         return event
 
-    def send(self, event: Events, payload: T | None = None) -> Event[T]:
-        """Temporarily bridge legacy publishers to typed deferred publication."""
-        return self.publish(event, payload)
-
     def disconnect(self, event: Events, receiver: Receiver) -> None:
         subscriptions = self._subscriptions[event]
         for subscription in subscriptions:

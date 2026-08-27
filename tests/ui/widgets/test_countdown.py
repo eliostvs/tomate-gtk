@@ -33,7 +33,7 @@ def test_module(countdown, graph):
     ],
 )
 def test_updates_countdown_when_session_state_changes(event, payload, bus, countdown):
-    bus.send(event, payload=payload)
+    bus.publish(event, payload=payload)
 
     assert payload.countdown not in countdown.widget.get_text()
     deliver_events()

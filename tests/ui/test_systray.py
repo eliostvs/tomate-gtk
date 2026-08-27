@@ -50,7 +50,7 @@ def test_show_window_when_hide_item_is_clicked(window, subject):
 
 @pytest.mark.parametrize("event,hide,show", [(Events.WINDOW_HIDE, False, True), (Events.WINDOW_SHOW, True, False)])
 def test_change_items_visibility(event, hide, show, bus, subject):
-    bus.send(event)
+    bus.publish(event)
     deliver_events()
 
     assert subject.hide_item.props.visible is hide

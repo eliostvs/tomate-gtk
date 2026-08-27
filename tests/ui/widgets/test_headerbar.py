@@ -82,7 +82,7 @@ class TestHeaderBar:
         assert tooltip == button.props.tooltip_text
 
     def test_enable_only_the_stop_button_when_session_starts(self, bus, headerbar):
-        bus.send(Events.SESSION_START)
+        bus.publish(Events.SESSION_START)
         deliver_events()
 
         assert Q.select(headerbar.widget, Q.props("name", HeaderBar.START_SHORTCUT.name)).props.visible is False
@@ -93,7 +93,7 @@ class TestHeaderBar:
         reset_button = Q.select(headerbar.widget, Q.props("name", headerbar.RESET_SHORTCUT.name))
         reset_button.props.sensitive = True
 
-        bus.send(Events.SESSION_RESET)
+        bus.publish(Events.SESSION_RESET)
         deliver_events()
 
         assert reset_button.props.sensitive is False
@@ -107,7 +107,7 @@ class TestHeaderBar:
         ],
     )
     def test_buttons_visibility_and_title_in_the_first_session(self, event, title, reset, headerbar, payload, bus):
-        bus.send(event, payload=payload)
+        bus.publish(event, payload=payload)
         deliver_events()
 
         assert Q.select(headerbar.widget, Q.props("name", headerbar.START_SHORTCUT.name)).props.visible is True
