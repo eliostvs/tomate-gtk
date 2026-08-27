@@ -6,7 +6,7 @@ from gi.repository import Gtk
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Events, Session, SessionPayload, Subscriber, on
+from tomate.pomodoro import Bus, Event, Events, Session, SessionPayload
 from tomate.ui import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.factory("tomate.ui.headerbar.menu", scope=SingletonScope)
-class Menu(Subscriber):
+class Menu:
     PREFERENCE_SHORTCUT = Shortcut("session.settings", "<control>comma")
 
     @inject(
@@ -24,8 +24,6 @@ class Menu(Subscriber):
         shortcuts="tomate.ui.shortcut",
     )
     def __init__(self, bus: Bus, about, preference, shortcuts: ShortcutEngine):
-        self.connect(bus)
-
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
         self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
         self.widget.add(self._create_menu_item("header.menu.about", _("About"), about.widget))
@@ -41,7 +39,7 @@ class Menu(Subscriber):
 
 
 @register.factory("tomate.ui.headerbar", scope=SingletonScope)
-class HeaderBar(Subscriber):
+class HeaderBar:
     START_SHORTCUT = Shortcut("session.start", "<control>s")
     STOP_SHORTCUT = Shortcut("session.stop", "<control>p")
     RESET_SHORTCUT = Shortcut("session.reset", "<control>r")
@@ -53,7 +51,6 @@ class HeaderBar(Subscriber):
         shortcuts="tomate.ui.shortcut",
     )
     def __init__(self, bus: Bus, menu: Menu, session: Session, shortcuts: ShortcutEngine):
-        self.connect(bus)
         self._shortcuts = shortcuts
         self.widget = self._create_headerbar()
 
@@ -82,6 +79,11 @@ class HeaderBar(Subscriber):
         )
 
         self._add_preference_button(menu, shortcuts)
+
+        bus.connect(Events.SESSION_START, self._on_session_start)
+        bus.connect(Events.SESSION_INTERRUPT, self._on_session_stop)
+        bus.connect(Events.SESSION_END, self._on_session_stop)
+        bus.connect(Events.SESSION_RESET, self._on_session_reset)
 
     def _create_headerbar(self):
         return Gtk.HeaderBar(
@@ -115,23 +117,23 @@ class HeaderBar(Subscriber):
         button.add(icon)
         self.widget.pack_end(button)
 
-    @on(Events.SESSION_START)
-    def _on_session_start(self, **__):
+    def _on_session_start(self, _event: Event[None]):
         logger.debug("action=enable_stop")
         self._start_button.props.visible = False
         self._stop_button.props.visible = True
         self._reset_button.props.sensitive = False
 
-    @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def _on_session_stop(self, payload: SessionPayload) -> None:
+    def _on_session_stop(self, event: Event[SessionPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         logger.debug("action=enable_start pomodoros=%d", payload.pomodoros)
         self._start_button.props.visible = True
         self._stop_button.props.visible = False
         self._reset_button.props.sensitive = bool(payload.pomodoros)
         self._update_title(payload.pomodoros)
 
-    @on(Events.SESSION_RESET)
-    def _on_session_reset(self, **__):
+    def _on_session_reset(self, _event: Event[None]):
         logger.debug("action=disable_reset")
         self._reset_button.props.sensitive = False
         self._update_title(0)

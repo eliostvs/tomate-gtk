@@ -3,6 +3,7 @@ import random
 import pytest
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events, TimerPayload
 from tomate.ui.testing import create_session_payload
 from tomate.ui.widgets import Countdown
@@ -33,5 +34,8 @@ def test_module(countdown, graph):
 )
 def test_updates_countdown_when_session_state_changes(event, payload, bus, countdown):
     bus.send(event, payload=payload)
+
+    assert payload.countdown not in countdown.widget.get_text()
+    deliver_events()
 
     assert payload.countdown in countdown.widget.get_text()

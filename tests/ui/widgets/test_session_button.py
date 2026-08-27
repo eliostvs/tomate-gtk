@@ -1,6 +1,7 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events, SessionType
 from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
 from tomate.ui.widgets import SessionButton
@@ -46,6 +47,7 @@ def test_buttons_content(button_name, label, tooltip_text, session_button):
 
 def test_disables_buttons_when_session_starts(bus, session_button):
     bus.send(Events.SESSION_START)
+    deliver_events()
 
     assert session_button.widget.props.sensitive is False
 
@@ -61,6 +63,7 @@ def test_selects_button_when_session_stops_and_begins(event, payload, session_ty
     session_button.widget.props.sensitive = False
 
     bus.send(event, payload=payload)
+    deliver_events()
 
     assert session_button.widget.props.sensitive is True
     assert session_button.widget.get_selected() is session_type.value
@@ -91,5 +94,6 @@ def test_shortcuts(shortcut, session_type, session_button, shortcut_engine, sess
 
 def test_selects_button_when_session_changes(bus, session_button, session):
     bus.send(Events.SESSION_CHANGE, payload=create_session_payload(type=SessionType.SHORT_BREAK))
+    deliver_events()
 
     assert session_button.widget.get_selected() is SessionType.SHORT_BREAK.value

@@ -2,6 +2,7 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events
 from tomate.ui import SystrayMenu
 from tomate.ui.testing import refresh_gui
@@ -50,6 +51,7 @@ def test_show_window_when_hide_item_is_clicked(window, subject):
 @pytest.mark.parametrize("event,hide,show", [(Events.WINDOW_HIDE, False, True), (Events.WINDOW_SHOW, True, False)])
 def test_change_items_visibility(event, hide, show, bus, subject):
     bus.send(event)
+    deliver_events()
 
     assert subject.hide_item.props.visible is hide
     assert subject.show_item.props.visible is show

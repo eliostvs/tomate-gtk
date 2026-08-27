@@ -2,6 +2,7 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events
 from tomate.ui.testing import Q, active_shortcut, create_session_payload, refresh_gui
 from tomate.ui.widgets import HeaderBar, HeaderBarMenu
@@ -82,6 +83,7 @@ class TestHeaderBar:
 
     def test_enable_only_the_stop_button_when_session_starts(self, bus, headerbar):
         bus.send(Events.SESSION_START)
+        deliver_events()
 
         assert Q.select(headerbar.widget, Q.props("name", HeaderBar.START_SHORTCUT.name)).props.visible is False
         assert Q.select(headerbar.widget, Q.props("name", HeaderBar.STOP_SHORTCUT.name)).props.visible is True
@@ -92,6 +94,7 @@ class TestHeaderBar:
         reset_button.props.sensitive = True
 
         bus.send(Events.SESSION_RESET)
+        deliver_events()
 
         assert reset_button.props.sensitive is False
         assert headerbar.widget.props.title == "No session yet"
@@ -105,6 +108,7 @@ class TestHeaderBar:
     )
     def test_buttons_visibility_and_title_in_the_first_session(self, event, title, reset, headerbar, payload, bus):
         bus.send(event, payload=payload)
+        deliver_events()
 
         assert Q.select(headerbar.widget, Q.props("name", headerbar.START_SHORTCUT.name)).props.visible is True
         assert Q.select(headerbar.widget, Q.props("name", headerbar.STOP_SHORTCUT.name)).props.visible is False
