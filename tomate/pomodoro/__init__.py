@@ -1,7 +1,7 @@
 from .app import Application
 from .config import Config
 from .config import Payload as ConfigPayload
-from .event import Bus, Events, Subscriber, on
+from .event import Bus, Event, Events, Subscriber, on
 from .graph import graph
 from .plugin import Plugin, PluginEngine, suppress_errors
 from .session import Payload as SessionPayload
@@ -15,6 +15,7 @@ __all__ = [
     "Bus",
     "Config",
     "ConfigPayload",
+    "Event",
     "Events",
     "Plugin",
     "PluginEngine",
