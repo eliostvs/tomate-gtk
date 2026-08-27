@@ -4,6 +4,7 @@ from unittest.mock import patch
 import gi
 import pytest
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Config, Events, SessionType
 from tomate.ui.testing import create_session_payload
 
@@ -55,6 +56,7 @@ def test_show_notification_when_session_starts(event, session, title, message, b
 
     payload = create_session_payload(type=session)
     bus.send(event, payload=payload)
+    deliver_events()
 
     plugin.notification.update.assert_called_once_with(title, message, IconPath)
     plugin.notification.show.assert_called_once()

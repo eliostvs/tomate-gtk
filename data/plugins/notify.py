@@ -6,6 +6,7 @@ from wiring import Graph
 
 from tomate.pomodoro import (
     Bus,
+    Event,
     Events,
     SessionPayload,
     SessionType,
@@ -49,15 +50,18 @@ class NotifyPlugin(plugin.Plugin):
         Notify.uninit()
 
     @on(Events.SESSION_START)
-    def on_session_started(self, payload: SessionPayload):
+    def on_session_started(self, event: Event[SessionPayload]):
+        payload = event.payload
+        if payload is None:
+            return
         self.show_notification(*self.get_message(payload.type))
 
     @on(Events.SESSION_END)
-    def on_session_finished(self, **__):
+    def on_session_finished(self, _event: Event[SessionPayload]):
         self.show_notification(title="The time is up!")
 
     @on(Events.SESSION_INTERRUPT)
-    def on_session_stopped(self, **__):
+    def on_session_stopped(self, _event: Event[SessionPayload]):
         self.show_notification(title="Session stopped manually")
 
     def get_message(self, session: SessionType) -> tuple[str, str]:

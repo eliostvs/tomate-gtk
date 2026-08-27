@@ -4,6 +4,7 @@ import pytest
 gi.require_version("Playerctl", "2.0")
 gi.require_version("Gtk", "3.0")
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events
 from tomate.ui.testing import create_session_payload
 
@@ -42,6 +43,7 @@ def test_stop_all_running_players(bus, plugin, mocker):
     plugin.activate()
 
     bus.send(Events.SESSION_END, payload=create_session_payload())
+    deliver_events()
 
     paused.pause.assert_not_called()
     playing.pause.assert_called_once()

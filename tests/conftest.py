@@ -70,4 +70,5 @@ def shortcut_engine(config: Config) -> ShortcutEngine:
 
 @pytest.fixture
 def plugin_engine(bus: Bus, graph: Graph, config: Config) -> PluginEngine:
+    config.plugin_paths = lambda: [os.path.join(TEST_DATA_DIR, "tomate", "plugins")]
     return PluginEngine(bus, config, graph)

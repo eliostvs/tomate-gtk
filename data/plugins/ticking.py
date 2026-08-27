@@ -8,6 +8,7 @@ gi.require_version("Gst", "1.0")
 from tomate.audio import GStreamerPlayer
 from tomate.pomodoro import (
     Bus,
+    Event,
     Events,
     SessionPayload,
     SessionType,
@@ -56,14 +57,17 @@ class TickingPlugin(plugin.Plugin):
 
     @suppress_errors
     @on(Events.SESSION_START)
-    def on_start(self, payload: SessionPayload) -> None:
+    def on_start(self, event: Event[SessionPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         logger.debug(f"action=play session_type={payload.type}")
         if self.player and payload.type == SessionType.POMODORO:
             self.player.play()
 
     @suppress_errors
     @on(Events.SESSION_INTERRUPT, Events.SESSION_END)
-    def on_end(self, **_) -> None:
+    def on_end(self, _event: Event[SessionPayload]) -> None:
         logger.debug("action=stop")
         if self.player:
             self.player.stop()

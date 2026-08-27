@@ -11,7 +11,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from tomate.audio import GStreamerPlayer
-from tomate.pomodoro import Bus, Config, Events, on, plugin, suppress_errors
+from tomate.pomodoro import Bus, Config, Event, Events, SessionPayload, on, plugin, suppress_errors
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class AlarmPlugin(plugin.Plugin):
 
     @suppress_errors
     @on(Events.SESSION_END)
-    def on_end(self, **__) -> None:
+    def on_end(self, _event: Event[SessionPayload]) -> None:
         logger.debug("action=on_end")
         if self.player:
             self.player.play()

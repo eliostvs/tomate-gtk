@@ -106,13 +106,13 @@ class TestBus:
         assert str(event.id) in caplog.text
         assert Events.SESSION_START.name in caplog.text
 
-    def test_send_bridges_existing_payload_subscribers(self):
+    def test_subscriber_receives_the_typed_event_envelope(self):
         bus = Bus()
 
         class Subject(Subscriber):
             @on(Events.SESSION_START)
-            def receive(self, payload):
-                self.payload = payload
+            def receive(self, event: Event[str]):
+                self.event = event
 
         subject = Subject()
         subject.connect(bus)
@@ -120,8 +120,9 @@ class TestBus:
         event = bus.send(Events.SESSION_START, payload="payload")
         deliver_events()
 
-        assert subject.payload == "payload"
-        assert event.payload == "payload"
+        assert subject.event is event
+        assert subject.event.type is Events.SESSION_START
+        assert subject.event.payload == "payload"
 
 
 def test_module(graph):

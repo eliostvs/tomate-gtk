@@ -9,6 +9,7 @@ gi.require_version("Gst", "1.0")
 
 from gi.repository import Gtk
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Events
 from tomate.ui.testing import Q
 
@@ -44,8 +45,10 @@ class TestPlugin:
         plugin.activate()
 
         bus.send(Events.SESSION_END)
+        player.return_value.play.assert_not_called()
+        deliver_events()
 
-        assert player.return_value.play.called
+        player.return_value.play.assert_called_once()
 
 
 class TestSettingsWindow:

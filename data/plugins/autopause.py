@@ -2,7 +2,7 @@ import logging
 
 import gi
 
-from tomate.pomodoro import Events, on, plugin, suppress_errors
+from tomate.pomodoro import Event, Events, SessionPayload, on, plugin, suppress_errors
 
 gi.require_version("Playerctl", "2.0")
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class AutoPausePlugin(plugin.Plugin):
     @suppress_errors
     @on(Events.SESSION_END)
-    def on_session_end(self, **_):
+    def on_session_end(self, _event: Event[SessionPayload]):
         self.pause()
 
     def pause(self) -> None:

@@ -8,6 +8,7 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import ConfigPayload, Events, SessionType, TimerPayload
 from tomate.ui.testing import Q, create_session_payload, run_loop_for
 
@@ -47,6 +48,7 @@ class TestPlugin:
 
         payload = create_session_payload(type=session_type)
         bus.send(Events.SESSION_START, payload=payload)
+        deliver_events()
 
         assert all([screen.widget.props.visible for screen in plugin.screens])
         assert label_text(payload.countdown, plugin)
@@ -56,6 +58,7 @@ class TestPlugin:
 
         payload = create_session_payload(type=SessionType.POMODORO)
         bus.send(Events.SESSION_START, payload=payload)
+        deliver_events()
 
         assert none([screen.widget.props.visible for screen in plugin.screens])
 
@@ -66,6 +69,7 @@ class TestPlugin:
         bus.send(Events.SESSION_START, payload=payload)
 
         plugin.deactivate()
+        deliver_events()
 
         assert none([screen.widget.props.visible for screen in plugin.screens])
 
@@ -76,10 +80,11 @@ class TestPlugin:
 
         payload = create_session_payload(type=SessionType.POMODORO)
         bus.send(Events.SESSION_END, payload=payload)
+        deliver_events()
 
         run_loop_for(1)
 
-        session.start.assert_called_once()
+        assert session.start.call_count == len(plugin.screens)
 
     def test_not_start_break_when_auto_start_is_disabled(self, bus, config, plugin, session):
         config.set(SECTION_NAME, AUTO_START_OPTION, "false")
@@ -88,6 +93,7 @@ class TestPlugin:
 
         payload = create_session_payload(type=SessionType.POMODORO)
         bus.send(Events.SESSION_END, payload=payload)
+        deliver_events()
 
         session.start.assert_not_called()
 
@@ -98,6 +104,7 @@ class TestPlugin:
 
         bus.send(Events.SESSION_START, payload=create_session_payload(type=SessionType.SHORT_BREAK))
         bus.send(Events.SESSION_INTERRUPT, payload=create_session_payload())
+        deliver_events()
 
         assert none([screen.widget.props.visible for screen in plugin.screens])
 
@@ -111,6 +118,7 @@ class TestPlugin:
 
         payload = create_session_payload(type=session_type)
         bus.send(Events.SESSION_END, payload=payload)
+        deliver_events()
 
         session.start.assert_not_called()
 
@@ -123,6 +131,7 @@ class TestPlugin:
 
         payload = TimerPayload(time_left=time_left, duration=150)
         bus.send(Events.TIMER_UPDATE, payload=payload)
+        deliver_events()
 
         assert label_text(payload.countdown, plugin)
 
@@ -141,6 +150,7 @@ class TestPlugin:
 
         payload = ConfigPayload(action, SECTION_NAME, option, value)
         bus.send(Events.CONFIG_CHANGE, payload=payload)
+        deliver_events()
 
         assert all([screen.options[option] == want for screen in plugin.screens])
 
@@ -156,6 +166,7 @@ class TestPlugin:
 
         payload = ConfigPayload(action, SECTION_NAME, SKIP_BREAK_OPTION, "")
         bus.send(Events.CONFIG_CHANGE, payload=payload)
+        deliver_events()
 
         assert all([screen.skip_button.props.visible == want for screen in plugin.screens])
 

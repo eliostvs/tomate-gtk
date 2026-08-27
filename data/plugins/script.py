@@ -11,7 +11,7 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-from tomate.pomodoro import Bus, Config, Events, SessionPayload, on, plugin, suppress_errors
+from tomate.pomodoro import Bus, Config, Event, Events, SessionPayload, on, plugin, suppress_errors
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -41,17 +41,26 @@ class ScriptPlugin(plugin.Plugin):
 
     @suppress_errors
     @on(Events.SESSION_START)
-    def on_session_started(self, payload: SessionPayload):
+    def on_session_started(self, event: Event[SessionPayload]):
+        payload = event.payload
+        if payload is None:
+            return False
         return self.call_command(START_OPTION, Events.SESSION_START, payload)
 
     @suppress_errors
     @on(Events.SESSION_INTERRUPT)
-    def on_session_interrupted(self, payload: SessionPayload):
+    def on_session_interrupted(self, event: Event[SessionPayload]):
+        payload = event.payload
+        if payload is None:
+            return False
         return self.call_command(STOP_OPTION, Events.SESSION_INTERRUPT, payload)
 
     @suppress_errors
     @on(Events.SESSION_END)
-    def on_session_end(self, payload: SessionPayload):
+    def on_session_end(self, event: Event[SessionPayload]):
+        payload = event.payload
+        if payload is None:
+            return False
         return self.call_command(FINISH_OPTION, Events.SESSION_END, payload)
 
     def call_command(self, section, event: Events, payload: SessionPayload):

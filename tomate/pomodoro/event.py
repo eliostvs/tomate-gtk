@@ -144,7 +144,7 @@ def on(*events: Events):
 class Subscriber:
     def connect(self, bus: Bus) -> None:
         self.disconnect(bus)
-        self._legacy_receivers: list[tuple[Events, Receiver]] = []
+        self._receivers: list[tuple[Events, Receiver]] = []
         for method, events in self.__methods_with_events():
             for event in events:
                 logger.debug(
@@ -155,16 +155,16 @@ class Subscriber:
                 )
 
                 def receiver(envelope: Event[Any], method=method):
-                    return method(payload=envelope.payload)
+                    return method(envelope)
 
                 bus.connect(event, receiver)
-                self._legacy_receivers.append((event, receiver))
+                self._receivers.append((event, receiver))
 
     def disconnect(self, bus: Bus) -> None:
-        for event, receiver in getattr(self, "_legacy_receivers", []):
+        for event, receiver in getattr(self, "_receivers", []):
             logger.debug("action=disconnect event=%s receiver=%r", event, receiver)
             bus.disconnect(event, receiver)
-        self._legacy_receivers = []
+        self._receivers = []
 
     def __methods_with_events(self) -> list[tuple[Any, tuple[Events, ...]]]:
         return [

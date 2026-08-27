@@ -12,6 +12,7 @@ from gi.repository import Gdk, GLib, Gtk
 from tomate.pomodoro import (
     Config,
     ConfigPayload,
+    Event,
     Events,
     Session,
     SessionPayload,
@@ -109,7 +110,10 @@ class BreakScreen(Subscriber):
         return window
 
     @on(Events.SESSION_START)
-    def on_session_start(self, payload=SessionPayload) -> None:
+    def on_session_start(self, event: Event[SessionPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         logger.debug("action=session_start monitor=%d session=%s", self.monitor.number, payload.type)
 
         if payload.type != SessionType.POMODORO:
@@ -117,12 +121,15 @@ class BreakScreen(Subscriber):
             self.widget.show_all()
 
     @on(Events.SESSION_INTERRUPT)
-    def on_session_interrupt(self, **__) -> None:
+    def on_session_interrupt(self, _event: Event[SessionPayload]) -> None:
         logger.debug("action=session_start monitor=%d", self.monitor.number)
         self.widget.hide()
 
     @on(Events.SESSION_END)
-    def on_session_end(self, payload: SessionPayload) -> None:
+    def on_session_end(self, event: Event[SessionPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         logger.debug(
             "action=session_end monitor=%d auto_start=%s session_type=%s",
             self.monitor.number,
@@ -144,12 +151,18 @@ class BreakScreen(Subscriber):
         return self.options[AUTO_START_OPTION]
 
     @on(Events.TIMER_UPDATE)
-    def on_timer_update(self, payload: TimerPayload) -> None:
+    def on_timer_update(self, event: Event[TimerPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         logger.debug("action=update_countdown monitor=%s countdown=%s", payload.countdown, self.monitor.number)
         self.countdown.set_text(payload.countdown)
 
     @on(Events.CONFIG_CHANGE)
-    def on_settings_change(self, payload: ConfigPayload) -> None:
+    def on_settings_change(self, event: Event[ConfigPayload]) -> None:
+        payload = event.payload
+        if payload is None:
+            return
         if payload.section != SECTION_NAME:
             return
 

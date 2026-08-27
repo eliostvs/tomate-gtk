@@ -1,6 +1,6 @@
 from gi.repository import Gtk
 
-from tomate.pomodoro import Events, on, plugin
+from tomate.pomodoro import Event, Events, on, plugin
 
 
 class PluginA(plugin.Plugin):
@@ -11,7 +11,8 @@ class PluginA(plugin.Plugin):
         self.parent = None
 
     @on(Events.WINDOW_SHOW)
-    def listener(self, **__) -> str:
+    def listener(self, _event: Event[None]) -> str:
+        self.last_event = _event
         return "plugin_a"
 
     def settings_window(self, parent: Gtk.Widget) -> Gtk.Dialog:

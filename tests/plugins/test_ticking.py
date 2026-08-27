@@ -4,6 +4,7 @@ from unittest.mock import patch
 import gi
 import pytest
 
+from tests.conftest import deliver_events
 from tomate.ui.testing import create_session_payload
 
 gi.require_version("Gtk", "3.0")
@@ -60,6 +61,7 @@ class TestPlugin:
         plugin.activate()
 
         bus.send(Events.SESSION_START, payload=create_session_payload())
+        deliver_events()
 
         player.return_value.play.assert_called_once()
 
@@ -70,6 +72,7 @@ class TestPlugin:
 
         bus.send(Events.SESSION_START, payload=create_session_payload())
         bus.send(event)
+        deliver_events()
 
         player.return_value.stop.assert_called_once()
 

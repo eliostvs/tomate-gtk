@@ -2,6 +2,7 @@ import pytest
 from gi.repository import Gtk
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import deliver_events
 from tomate.pomodoro import Config, Events
 from tomate.ui.dialogs import ExtensionTab, PluginGrid, PreferenceDialog, TimerTab
 from tomate.ui.testing import TV, Q
@@ -88,8 +89,9 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     plugin_engine.collect()
     preference.run()
 
-    result = bus.send(Events.WINDOW_SHOW)
-    assert len(result) == 1 and result[0] == "plugin_b"
+    event = bus.send(Events.WINDOW_SHOW)
+    deliver_events()
+    assert plugin_engine.lookup("PluginB").plugin_object.last_event is event
 
     def toggle_plugin(row: int):
         Q.map(
@@ -102,8 +104,9 @@ def test_connect_and_disconnect_plugins(bus, plugin_engine, preference):
     toggle_plugin(0)
     toggle_plugin(1)
 
-    result = bus.send(Events.WINDOW_SHOW)
-    assert len(result) == 1 and result[0] == "plugin_a"
+    event = bus.send(Events.WINDOW_SHOW)
+    deliver_events()
+    assert plugin_engine.lookup("PluginA").plugin_object.last_event is event
 
 
 @pytest.mark.parametrize(
