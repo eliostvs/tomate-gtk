@@ -80,7 +80,7 @@ class Window(Subscriber):
             Gtk.main_quit()
 
     def hide(self):
-        self._bus.send(Events.WINDOW_HIDE)
+        self._bus.publish(Events.WINDOW_HIDE)
 
         if Systray in self._graph.providers:
             logger.debug("action=hide strategy=tray")
@@ -93,5 +93,5 @@ class Window(Subscriber):
     @on(Events.SESSION_END)
     def show(self, **__) -> None:
         logger.debug("action=show")
-        self._bus.send(Events.WINDOW_SHOW)
+        self._bus.publish(Events.WINDOW_SHOW)
         self.widget.present_with_time(time.time())

@@ -9,7 +9,7 @@ from wiring.scanning import register
 
 from .config import Config
 from .config import Payload as ConfigPayload
-from .event import Bus, Events, Subscriber, on
+from .event import Bus, Event, Events
 from .fsm import fsm
 from .timer import SECONDS_IN_A_MINUTE, Timer, format_seconds
 from .timer import Payload as TimerPayload
@@ -50,7 +50,7 @@ class State(enum.Enum):
 
 
 @register.factory("tomate.session", scope=SingletonScope)
-class Session(Subscriber):
+class Session:
     @inject(
         bus="tomate.bus",
         config="tomate.config",
@@ -64,6 +64,20 @@ class Session(Subscriber):
         self.current = Type.POMODORO
         self.pomodoros = 0
         self.connect(bus)
+
+    def connect(self, bus: Bus) -> None:
+        self.disconnect(bus)
+        self._receivers = (
+            (Events.CONFIG_CHANGE, self._on_config_change),
+            (Events.TIMER_END, self._end),
+        )
+        for event_type, receiver in self._receivers:
+            bus.connect(event_type, receiver, weak=False)
+
+    def disconnect(self, bus: Bus) -> None:
+        for event_type, receiver in getattr(self, "_receivers", ()):
+            bus.disconnect(event_type, receiver)
+        self._receivers = ()
 
     @fsm(source=[State.INITIAL], target=State.STOPPED, exit=lambda self: self._trigger(Events.SESSION_READY))
     def ready(self) -> None:
@@ -97,8 +111,10 @@ class Session(Subscriber):
         self.pomodoros = 0
         return True
 
-    @on(Events.CONFIG_CHANGE)
-    def _on_config_change(self, payload: ConfigPayload) -> bool:
+    def _on_config_change(self, event: Event[ConfigPayload]) -> bool:
+        payload = event.payload
+        if payload is None:
+            return False
         if payload.section != "timer":
             return False
 
@@ -118,14 +134,16 @@ class Session(Subscriber):
     def timer_is_up(self) -> bool:
         return not self._timer.is_running()
 
-    @on(Events.TIMER_END)
     @fsm(
         source=[State.STARTED],
         target=State.ENDED,
         condition=timer_is_up,
         exit=lambda self: self._trigger(Events.SESSION_CHANGE),
     )
-    def _end(self, payload: TimerPayload) -> bool:
+    def _end(self, event: Event[TimerPayload]) -> bool:
+        if event.payload is None:
+            return False
+        payload = event.payload
         payload = self._create_payload(duration=payload.duration)
 
         if self.current == Type.POMODORO:
@@ -137,7 +155,7 @@ class Session(Subscriber):
         logger.debug("action=end previous=%s current=%s", payload.type, self.current)
 
         self.state = State.ENDED
-        self._bus.send(Events.SESSION_END, payload=payload._replace(pomodoros=self.pomodoros))
+        self._bus.publish(Events.SESSION_END, payload=payload._replace(pomodoros=self.pomodoros))
 
         return True
 
@@ -149,7 +167,7 @@ class Session(Subscriber):
         return not self.pomodoros % long_break_interval
 
     def _trigger(self, event: Events) -> None:
-        self._bus.send(event, payload=self._create_payload())
+        self._bus.publish(event, payload=self._create_payload())
 
     def _create_payload(self, **kwargs) -> Payload:
         defaults = {

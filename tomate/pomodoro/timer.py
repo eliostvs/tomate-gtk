@@ -107,4 +107,4 @@ class Timer:
         self.duration = self.time_left = 0
 
     def _trigger(self, event) -> None:
-        self._bus.send(event, payload=Payload(time_left=self.time_left, duration=self.duration))
+        self._bus.publish(event, payload=Payload(time_left=self.time_left, duration=self.duration))

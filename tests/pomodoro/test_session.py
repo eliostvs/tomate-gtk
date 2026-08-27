@@ -1,7 +1,8 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import Events, Session, SessionPayload, SessionType
+from tests.conftest import assert_received_event, deliver_events
+from tomate.pomodoro import Events, Session, SessionPayload, SessionType, TimerPayload
 from tomate.pomodoro.config import Config
 from tomate.pomodoro.session import State
 from tomate.ui.testing import create_session_payload, run_loop_for
@@ -29,7 +30,9 @@ def test_sends_ready_event(bus, mocker, session):
     session.ready()
 
     payload = create_session_payload()
-    subscriber.assert_called_once_with(Events.SESSION_READY, payload=payload)
+    subscriber.assert_not_called()
+    deliver_events()
+    assert_received_event(subscriber, Events.SESSION_READY, payload)
 
 
 class TestSessionStart:
@@ -53,7 +56,9 @@ class TestSessionStart:
             pomodoros=0,
             duration=25 * 60,
         )
-        subscriber.assert_called_once_with(Events.SESSION_START, payload=payload)
+        subscriber.assert_not_called()
+        deliver_events()
+        assert_received_event(subscriber, Events.SESSION_START, payload)
 
 
 class TestSessionStop:
@@ -77,7 +82,8 @@ class TestSessionStop:
             duration=25 * 60,
             pomodoros=0,
         )
-        subscriber.assert_called_once_with(Events.SESSION_INTERRUPT, payload=payload)
+        deliver_events()
+        assert_received_event(subscriber, Events.SESSION_INTERRUPT, payload)
 
 
 class TestSessionReset:
@@ -110,20 +116,28 @@ class TestSessionReset:
             pomodoros=0,
             duration=duration,
         )
-        subscriber.assert_called_once_with(Events.SESSION_RESET, payload=payload)
+        deliver_events()
+        assert_received_event(subscriber, Events.SESSION_RESET, payload)
 
 
 class TestSessionEnd:
     @pytest.mark.parametrize("state", [State.INITIAL, State.ENDED, State.STOPPED])
-    def test_ends_when_session_is_not_running(self, state, session):
+    def test_ends_when_session_is_not_running(self, state, bus, session):
         session.state = state
 
-        assert not session._end(None, None)
+        bus.publish(Events.TIMER_END, TimerPayload(time_left=0, duration=1))
+        deliver_events()
 
-    def test_not_end_when_session_start_but_time_still_running(self, session):
+        assert session.state is state
+
+    def test_not_end_when_session_start_but_time_still_running(self, bus, session):
+        session.ready()
         session.start()
 
-        assert not session._end(None, None)
+        bus.publish(Events.TIMER_END, TimerPayload(time_left=1, duration=1))
+        deliver_events()
+
+        assert session.state is State.STARTED
 
     @pytest.mark.parametrize(
         "old_session,old_pomodoros,new_session,new_pomodoros",
@@ -159,13 +173,14 @@ class TestSessionEnd:
         session.ready()
         session.start()
         run_loop_for(2)
+        deliver_events()
 
         payload = create_session_payload(
             type=old_session,
             pomodoros=new_pomodoros,
             duration=1,
         )
-        subscriber.assert_called_once_with(Events.SESSION_END, payload=payload)
+        assert_received_event(subscriber, Events.SESSION_END, payload)
         assert session.current is new_session
 
     def test_changes_session_type(self, bus, config, mocker, session):
@@ -178,13 +193,14 @@ class TestSessionEnd:
         session.ready()
         session.start()
         run_loop_for(2)
+        deliver_events()
 
         payload = SessionPayload(
             type=SessionType.SHORT_BREAK,
             duration=5 * 60,
             pomodoros=1,
         )
-        subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
+        assert_received_event(subscriber, Events.SESSION_CHANGE, payload)
 
 
 class TestSessionChange:
@@ -213,7 +229,8 @@ class TestSessionChange:
         payload = create_session_payload(
             type=session_type, duration=config.get_int(config.DURATION_SECTION, session_type.option) * 60
         )
-        subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
+        deliver_events()
+        assert_received_event(subscriber, Events.SESSION_CHANGE, payload)
 
     @pytest.mark.parametrize("state", [State.STOPPED, State.ENDED])
     def test_changes_when_config_change_and_session_is_not_running(self, state, bus, config, mocker, session):
@@ -224,7 +241,9 @@ class TestSessionChange:
         config.set(config.DURATION_SECTION, SessionType.POMODORO.option, 20)
 
         payload = create_session_payload(duration=20 * 60)
-        subscriber.assert_called_once_with(Events.SESSION_CHANGE, payload=payload)
+        subscriber.assert_not_called()
+        deliver_events()
+        assert_received_event(subscriber, Events.SESSION_CHANGE, payload)
 
     def test_not_change_when_config_section_is_not_timer(self, bus, config, mocker, session):
         subscriber = mocker.Mock()

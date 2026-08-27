@@ -110,7 +110,7 @@ class Config:
         self.save()
 
         payload = Payload(action="set", section=section, option=option, value=value)
-        self._bus.send(Events.CONFIG_CHANGE, payload=payload)
+        self._bus.publish(Events.CONFIG_CHANGE, payload=payload)
 
     def remove(self, section, option) -> None:
         logger.debug("action=remove section=%s option=%s", section, option)
@@ -121,7 +121,7 @@ class Config:
         self.save()
 
         payload = Payload(action="remove", section=section, option=option, value="")
-        self._bus.send(Events.CONFIG_CHANGE, payload=payload)
+        self._bus.publish(Events.CONFIG_CHANGE, payload=payload)
 
     @staticmethod
     def normalize(name: str) -> str:

@@ -1,9 +1,8 @@
 import os
-
 import pytest
 from wiring.scanning import scan_to_graph
 
-from tests.conftest import TEST_DATA_DIR
+from tests.conftest import TEST_DATA_DIR, assert_received_event, deliver_events
 from tomate.pomodoro import Config, ConfigPayload, Events
 
 
@@ -93,7 +92,9 @@ def test_set_option(bus, config, mocker, tmpdir):
     assert config.get("section", "option") == "value"
 
     payload = ConfigPayload("set", "section", "option", "value")
-    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)
+    subscriber.assert_not_called()
+    deliver_events()
+    assert_received_event(subscriber, Events.CONFIG_CHANGE, payload)
 
 
 def test_remove_option(bus, config, mocker, tmpdir):
@@ -109,4 +110,6 @@ def test_remove_option(bus, config, mocker, tmpdir):
     assert config.parser.has_option("section", "option") is False
 
     payload = ConfigPayload("remove", "section", "option", "")
-    subscriber.assert_called_once_with(Events.CONFIG_CHANGE, payload=payload)
+    subscriber.assert_not_called()
+    deliver_events()
+    assert_received_event(subscriber, Events.CONFIG_CHANGE, payload)

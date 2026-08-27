@@ -2,6 +2,7 @@ import pytest
 from gi.repository import Gdk, Gtk
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import assert_received_event, deliver_events
 from tomate.pomodoro import Events
 from tomate.ui import Systray, Window
 from tomate.ui.testing import Q, active_shortcut, create_session_payload
@@ -69,7 +70,9 @@ class TestWindowHide:
         result = window.hide()
 
         assert result is Gtk.true
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
+        subscriber.assert_not_called()
+        deliver_events()
+        assert_received_event(subscriber, Events.WINDOW_HIDE, None)
 
     def test_deletes_when_tray_icon_plugin_is_registered(self, bus, graph, mocker, window):
         graph.register_factory(Systray, mocker.Mock)
@@ -81,7 +84,8 @@ class TestWindowHide:
 
         assert result
         assert window.widget.get_visible() is False
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
+        deliver_events()
+        assert_received_event(subscriber, Events.WINDOW_HIDE, None)
 
 
 class TestWindowQuit:
@@ -100,7 +104,8 @@ class TestWindowQuit:
 
         window.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
-        subscriber.assert_called_once_with(Events.WINDOW_HIDE, payload=None)
+        deliver_events()
+        assert_received_event(subscriber, Events.WINDOW_HIDE, None)
 
 
 def test_shows_window_when_session_end(bus, mocker, window):
@@ -110,6 +115,7 @@ def test_shows_window_when_session_end(bus, mocker, window):
 
     payload = create_session_payload()
     bus.send(Events.SESSION_END, payload=payload)
+    deliver_events()
 
     assert window.widget.props.visible is True
-    subscriber.assert_called_once_with(Events.WINDOW_SHOW, payload=None)
+    assert_received_event(subscriber, Events.WINDOW_SHOW, None)

@@ -1,6 +1,7 @@
 import pytest
 from wiring.scanning import scan_to_graph
 
+from tests.conftest import assert_received_event, deliver_events
 from tomate.pomodoro import Events, Timer, TimerPayload
 from tomate.pomodoro.timer import State
 from tomate.ui.testing import run_loop_for
@@ -33,7 +34,9 @@ class TestTimerStart:
         result = timer.start(60)
 
         assert result is True
-        subscriber.assert_called_once_with(Events.TIMER_START, payload=TimerPayload(time_left=60, duration=60))
+        subscriber.assert_not_called()
+        deliver_events()
+        assert_received_event(subscriber, Events.TIMER_START, TimerPayload(time_left=60, duration=60))
 
 
 class TestTimerStop:
@@ -54,7 +57,8 @@ class TestTimerStop:
 
         assert result is True
         assert timer.is_running() is False
-        subscriber.assert_called_once_with(Events.TIMER_STOP, payload=TimerPayload(time_left=0, duration=0))
+        deliver_events()
+        assert_received_event(subscriber, Events.TIMER_STOP, TimerPayload(time_left=0, duration=0))
 
 
 class TestTimerEnd:
@@ -75,10 +79,11 @@ class TestTimerEnd:
 
         timer.start(1)
         run_loop_for(2)
+        deliver_events()
 
         assert timer.is_running() is False
-        changed.assert_called_once_with(Events.TIMER_UPDATE, payload=TimerPayload(time_left=0, duration=1))
-        finished.assert_called_once_with(Events.TIMER_END, payload=TimerPayload(time_left=0, duration=1))
+        assert_received_event(changed, Events.TIMER_UPDATE, TimerPayload(time_left=0, duration=1))
+        assert_received_event(finished, Events.TIMER_END, TimerPayload(time_left=0, duration=1))
 
 
 class TestTimerPayload:
