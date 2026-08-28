@@ -6,8 +6,8 @@ import pytest
 from gi.repository import GLib
 from wiring.scanning import scan_to_graph
 
-from tomate.pomodoro import Bus, Event, Events, Subscriber, on
 from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT, TestClock, TestIDFactory
+from tomate.pomodoro import Bus, Event, Events, Subscriber, on
 
 
 def deliver_events():

@@ -2,8 +2,8 @@ import uuid
 
 import pytest
 
-from tomate.pomodoro import IDFactory
 from tests.conftest import TestIDFactory
+from tomate.pomodoro import IDFactory
 
 
 def test_uuid_factory_creates_a_string_uuid():
