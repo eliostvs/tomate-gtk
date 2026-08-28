@@ -5,7 +5,16 @@ from gi.repository import GdkPixbuf, Gtk
 from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Config, Event, Events, Session, SessionPayload
+from tomate.pomodoro import (
+    Bus,
+    Config,
+    Event,
+    Events,
+    Session,
+    SessionPayload,
+    Subscriber,
+    on,
+)
 
 from .shortcut import ShortcutEngine
 from .systray import Systray
@@ -15,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.factory("tomate.ui.view", scope=SingletonScope)
-class Window:
+class Window(Subscriber):
     @inject(
         bus="tomate.bus",
         config="tomate.config",
@@ -44,7 +53,7 @@ class Window:
         self.widget = self._create_window(config, headerbar, content)
 
         shortcuts.init(self.widget)
-        bus.connect(Events.SESSION_END, self.show)
+        self.connect(bus)
         session.ready()
 
     def _create_window(self, config: Config, headerbar: HeaderBar, box: Gtk.Box) -> Gtk.Window:
@@ -89,6 +98,7 @@ class Window:
             self.widget.iconify()
             return Gtk.true
 
+    @on(Events.SESSION_END)
     def show(self, _event: Event[SessionPayload] | None = None) -> None:
         logger.debug("action=show")
         self._bus.publish(Events.WINDOW_SHOW)

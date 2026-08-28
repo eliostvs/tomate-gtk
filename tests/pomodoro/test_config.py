@@ -1,4 +1,5 @@
 import os
+
 import pytest
 from wiring.scanning import scan_to_graph
 

@@ -9,10 +9,11 @@ from wiring.scanning import register
 
 from .config import Config
 from .config import Payload as ConfigPayload
-from .event import Bus, Event, Events
+from .event import Bus, Event, Events, Subscriber, on
 from .fsm import fsm
-from .timer import SECONDS_IN_A_MINUTE, Timer, format_seconds
+from .timer import SECONDS_IN_A_MINUTE
 from .timer import Payload as TimerPayload
+from .timer import Timer, format_seconds
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class State(enum.Enum):
 
 
 @register.factory("tomate.session", scope=SingletonScope)
-class Session:
+class Session(Subscriber):
     @inject(
         bus="tomate.bus",
         config="tomate.config",
@@ -64,20 +65,6 @@ class Session:
         self.current = Type.POMODORO
         self.pomodoros = 0
         self.connect(bus)
-
-    def connect(self, bus: Bus) -> None:
-        self.disconnect(bus)
-        self._receivers = (
-            (Events.CONFIG_CHANGE, self._on_config_change),
-            (Events.TIMER_END, self._end),
-        )
-        for event_type, receiver in self._receivers:
-            bus.connect(event_type, receiver, weak=False)
-
-    def disconnect(self, bus: Bus) -> None:
-        for event_type, receiver in getattr(self, "_receivers", ()):
-            bus.disconnect(event_type, receiver)
-        self._receivers = ()
 
     @fsm(source=[State.INITIAL], target=State.STOPPED, exit=lambda self: self._trigger(Events.SESSION_READY))
     def ready(self) -> None:
@@ -111,6 +98,7 @@ class Session:
         self.pomodoros = 0
         return True
 
+    @on(Events.CONFIG_CHANGE)
     def _on_config_change(self, event: Event[ConfigPayload]) -> bool:
         payload = event.payload
         if payload is None:
@@ -134,6 +122,7 @@ class Session:
     def timer_is_up(self) -> bool:
         return not self._timer.is_running()
 
+    @on(Events.TIMER_END)
     @fsm(
         source=[State.STARTED],
         target=State.ENDED,

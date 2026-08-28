@@ -13,6 +13,8 @@ from tomate.pomodoro import (
     Session,
     SessionPayload,
     SessionType,
+    Subscriber,
+    on,
 )
 from tomate.ui import Shortcut, ShortcutEngine
 
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @register.factory("tomate.ui.taskbutton", scope=SingletonScope)
-class SessionButton:
+class SessionButton(Subscriber):
     POMODORO_SHORTCUT = Shortcut("session.pomodoro", "<control>1")
     SHORT_BREAK_SHORTCUT = Shortcut("session.short_break", "<control>2")
     LONG_BREAK_SHORTCUT = Shortcut("session.long_break", "<control>3")
@@ -43,10 +45,7 @@ class SessionButton:
         self._add_button(SessionButton.LONG_BREAK_SHORTCUT, "Long Break", SessionType.LONG_BREAK)
         self.widget.connect("mode_changed", self._clicked)
 
-        bus.connect(Events.SESSION_CHANGE, self._change)
-        bus.connect(Events.SESSION_START, self._disable)
-        bus.connect(Events.SESSION_READY, self._enable)
-        bus.connect(Events.SESSION_INTERRUPT, self._enable)
+        self.connect(bus)
 
     def _create_mode_button(self) -> ModeButton:
         return ModeButton(
@@ -79,6 +78,7 @@ class SessionButton:
         logger.debug("action=mode_changed session=%s", session_type)
         self._session.change(session_type)
 
+    @on(Events.SESSION_CHANGE)
     def _change(self, event: Event[SessionPayload]) -> None:
         payload = event.payload
         if payload is None:
@@ -87,10 +87,12 @@ class SessionButton:
         if self.widget.get_selected() != payload.type.value:
             self._enable(event)
 
+    @on(Events.SESSION_START)
     def _disable(self, _event: Event[None]):
         logger.debug("action=disable")
         self.widget.props.sensitive = False
 
+    @on(Events.SESSION_READY, Events.SESSION_INTERRUPT)
     def _enable(self, event: Event[SessionPayload]):
         payload = event.payload
         if payload is None:
