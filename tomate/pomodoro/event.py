@@ -4,20 +4,20 @@ import weakref
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Generic, TypeVar
-from uuid import UUID, uuid4
 
 from gi.repository import GLib
-from wiring import SingletonScope
+from wiring import SingletonScope, inject
 from wiring.scanning import register
+
+from .clock import Clock
+from .id import IDFactory
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 Receiver = Callable[["Event[Any]"], Any]
-Clock = Callable[[], datetime]
-IdFactory = Callable[[], UUID]
 
 
 @enum.unique
@@ -42,20 +42,16 @@ class Events(enum.Enum):
 
 @dataclass(frozen=True, slots=True)
 class Event(Generic[T]):
-    id: UUID
+    id: str
     occurred_at: datetime
     type: Events
     payload: T | None
 
 
 class Subscription:
-    def __init__(self, receiver: Receiver, weak: bool):
+    def __init__(self, receiver: Receiver):
         self.active = True
-        self._receiver: Receiver | weakref.ReferenceType[Receiver]
-        if weak:
-            self._receiver = self._weak_reference(receiver)
-        else:
-            self._receiver = receiver
+        self._receiver = self._weak_reference(receiver)
 
     @staticmethod
     def _weak_reference(receiver: Receiver) -> weakref.ReferenceType[Receiver]:
@@ -64,9 +60,7 @@ class Subscription:
         return weakref.ref(receiver)
 
     def resolve(self) -> Receiver | None:
-        if isinstance(self._receiver, weakref.ReferenceType):
-            return self._receiver()
-        return self._receiver
+        return self._receiver()
 
     def matches(self, receiver: Receiver) -> bool:
         return self.resolve() == receiver
@@ -74,16 +68,17 @@ class Subscription:
 
 @register.factory("tomate.bus", scope=SingletonScope)
 class Bus:
-    def __init__(self, id_factory=uuid4, clock=None):
-        self._id_factory: IdFactory = id_factory
-        self._clock: Clock = clock or (lambda: datetime.now(timezone.utc))
+    @inject(clock="tomate.clock", id_factory="tomate.id_factory")
+    def __init__(self, clock: Clock, id_factory: IDFactory):
+        self._clock = clock
+        self._id_factory = id_factory
         self._subscriptions: dict[Events, list[Subscription]] = {event: [] for event in Events}
         self._queue: deque[tuple[Event[Any], tuple[Subscription, ...]]] = deque()
         self._delivery_scheduled = False
 
-    def connect(self, event: Events, receiver: Receiver, weak: bool = True) -> None:
+    def connect(self, event: Events, receiver: Receiver) -> None:
         if not self.is_connect(event, receiver):
-            self._subscriptions[event].append(Subscription(receiver, weak))
+            self._subscriptions[event].append(Subscription(receiver))
 
     def is_connect(self, event: Events, receiver: Receiver) -> bool:
         return any(
@@ -91,10 +86,7 @@ class Bus:
         )
 
     def publish(self, event_type: Events, payload: T | None = None) -> Event[T]:
-        occurred_at = self._clock()
-        if occurred_at.tzinfo is None or occurred_at.utcoffset() is None:
-            raise ValueError("clock must return a timezone-aware datetime")
-        event = Event(self._id_factory(), occurred_at.astimezone(timezone.utc), event_type, payload)
+        event = Event(self._id_factory.new(), self._clock.now(), event_type, payload)
         subscriptions = tuple(subscription for subscription in self._subscriptions[event_type] if subscription.active)
         self._queue.append((event, subscriptions))
         if not self._delivery_scheduled:

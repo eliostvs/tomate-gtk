@@ -1,5 +1,4 @@
 import gc
-import uuid
 from dataclasses import FrozenInstanceError
 from datetime import datetime, timezone
 
@@ -8,6 +7,7 @@ from gi.repository import GLib
 from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Bus, Event, Events, Subscriber, on
+from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT, TestClock, TestIDFactory
 
 
 def deliver_events():
@@ -17,16 +17,15 @@ def deliver_events():
 
 
 class TestBus:
-    def test_exposes_publish_without_the_legacy_send_bridge(self):
-        bus = Bus()
+    def test_exposes_publish_without_the_legacy_send_bridge(self, bus):
 
         assert callable(bus.publish)
         assert not hasattr(bus, "send")
 
     def test_publish_creates_an_immutable_timestamped_event_before_delivery(self):
-        event_id = uuid.UUID("12345678-1234-4abc-8def-123456789abc")
+        event_id = "12345678-1234-4abc-8def-123456789abc"
         occurred_at = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
-        bus = Bus(id_factory=lambda: event_id, clock=lambda: occurred_at)
+        bus = Bus(TestClock(occurred_at), TestIDFactory(event_id))
         received = []
 
         def receive(event):
@@ -47,8 +46,7 @@ class TestBus:
 
         assert received == [event]
 
-    def test_publish_preserves_fifo_order_when_a_receiver_publishes(self):
-        bus = Bus()
+    def test_publish_preserves_fifo_order_when_a_receiver_publishes(self, bus):
         received = []
 
         def on_start(event):
@@ -71,14 +69,7 @@ class TestBus:
 
         assert received == [Events.SESSION_START, Events.SESSION_READY, Events.SESSION_END]
 
-    def test_publish_rejects_a_naive_clock_value(self):
-        bus = Bus(clock=lambda: datetime(2026, 8, 27, 12, 30))  # noqa: DTZ001
-
-        with pytest.raises(ValueError, match="timezone-aware"):
-            bus.publish(Events.SESSION_START)
-
-    def test_disconnect_skips_a_receiver_already_queued_for_delivery(self):
-        bus = Bus()
+    def test_disconnect_skips_a_receiver_already_queued_for_delivery(self, bus):
         received = []
 
         def receive(event):
@@ -91,8 +82,7 @@ class TestBus:
 
         assert received == []
 
-    def test_collected_weak_receiver_is_removed_before_delivery(self):
-        bus = Bus()
+    def test_collected_weak_receiver_is_removed_before_delivery(self, bus):
         received = []
 
         class Receiver:
@@ -108,8 +98,7 @@ class TestBus:
 
         assert received == []
 
-    def test_failing_receiver_is_logged_without_stopping_later_receivers(self, caplog):
-        bus = Bus()
+    def test_failing_receiver_is_logged_without_stopping_later_receivers(self, bus, caplog):
         received = []
 
         def fail(_):
@@ -128,8 +117,7 @@ class TestBus:
         assert str(event.id) in caplog.text
         assert Events.SESSION_START.name in caplog.text
 
-    def test_subscriber_receives_the_typed_event_envelope(self):
-        bus = Bus()
+    def test_subscriber_receives_the_typed_event_envelope(self, bus):
 
         class Subject(Subscriber):
             @on(Events.SESSION_START)
@@ -148,6 +136,8 @@ class TestBus:
 
 
 def test_module(graph):
+    graph.register_instance("tomate.clock", TestClock(EVENT_OCCURRED_AT))
+    graph.register_instance("tomate.id_factory", TestIDFactory(EVENT_ID))
     scan_to_graph(["tomate.pomodoro.event"], graph)
     instance = graph.get("tomate.bus")
 

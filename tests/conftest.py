@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from uuid import UUID
+from itertools import repeat
 
 import gi
 import pytest
@@ -14,8 +14,32 @@ from tomate.pomodoro import Bus, Config, PluginEngine, Session
 from tomate.ui import ShortcutEngine, Window
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-EVENT_ID = UUID("12345678-1234-4abc-8def-123456789abc")
+EVENT_ID = "12345678-1234-4abc-8def-123456789abc"
 EVENT_OCCURRED_AT = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
+
+
+class TestClock:
+    __test__ = False
+
+    def __init__(self, occurred_at: datetime):
+        if occurred_at.tzinfo is None or occurred_at.utcoffset() is None:
+            raise ValueError("occurred_at must be timezone-aware")
+        self._occurred_at = occurred_at.astimezone(timezone.utc)
+
+    def now(self) -> datetime:
+        return self._occurred_at
+
+
+class TestIDFactory:
+    __test__ = False
+
+    def __init__(self, *ids: str):
+        if not ids:
+            raise ValueError("at least one ID is required")
+        self._ids = repeat(ids[0]) if len(ids) == 1 else iter(ids)
+
+    def new(self) -> str:
+        return next(self._ids)
 
 
 def deliver_events() -> None:
@@ -40,7 +64,7 @@ def session(mocker):
 
 @pytest.fixture
 def bus() -> Bus:
-    return Bus(id_factory=lambda: EVENT_ID, clock=lambda: EVENT_OCCURRED_AT)
+    return Bus(TestClock(EVENT_OCCURRED_AT), TestIDFactory(EVENT_ID))
 
 
 @pytest.fixture
