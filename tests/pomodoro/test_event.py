@@ -28,7 +28,11 @@ class TestBus:
         occurred_at = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
         bus = Bus(id_factory=lambda: event_id, clock=lambda: occurred_at)
         received = []
-        bus.connect(Events.SESSION_START, received.append, weak=False)
+
+        def receive(event):
+            received.append(event)
+
+        bus.connect(Events.SESSION_START, receive)
 
         event = bus.publish(Events.SESSION_START, payload="payload")
 
@@ -51,9 +55,15 @@ class TestBus:
             received.append(event.type)
             bus.publish(Events.SESSION_END)
 
-        bus.connect(Events.SESSION_START, on_start, weak=False)
-        bus.connect(Events.SESSION_READY, lambda event: received.append(event.type), weak=False)
-        bus.connect(Events.SESSION_END, lambda event: received.append(event.type), weak=False)
+        def on_ready(event):
+            received.append(event.type)
+
+        def on_end(event):
+            received.append(event.type)
+
+        bus.connect(Events.SESSION_START, on_start)
+        bus.connect(Events.SESSION_READY, on_ready)
+        bus.connect(Events.SESSION_END, on_end)
 
         bus.publish(Events.SESSION_START)
         bus.publish(Events.SESSION_READY)
@@ -71,9 +81,12 @@ class TestBus:
         bus = Bus()
         received = []
 
-        bus.connect(Events.SESSION_START, received.append, weak=False)
+        def receive(event):
+            received.append(event)
+
+        bus.connect(Events.SESSION_START, receive)
         bus.publish(Events.SESSION_START)
-        bus.disconnect(Events.SESSION_START, received.append)
+        bus.disconnect(Events.SESSION_START, receive)
         deliver_events()
 
         assert received == []
@@ -102,8 +115,11 @@ class TestBus:
         def fail(_):
             raise ValueError("broken receiver")
 
-        bus.connect(Events.SESSION_START, fail, weak=False)
-        bus.connect(Events.SESSION_START, received.append, weak=False)
+        def receive(event):
+            received.append(event)
+
+        bus.connect(Events.SESSION_START, fail)
+        bus.connect(Events.SESSION_START, receive)
 
         event = bus.publish(Events.SESSION_START)
         deliver_events()

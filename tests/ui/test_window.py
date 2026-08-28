@@ -65,7 +65,7 @@ def test_run(mocker, window):
 class TestWindowHide:
     def test_iconify_when_tray_icon_plugin_is_not_registered(self, window, bus, mocker):
         subscriber = mocker.Mock()
-        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber)
 
         result = window.hide()
 
@@ -77,7 +77,7 @@ class TestWindowHide:
     def test_deletes_when_tray_icon_plugin_is_registered(self, bus, graph, mocker, window):
         graph.register_factory(Systray, mocker.Mock)
         subscriber = mocker.Mock()
-        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber)
         window.widget.set_visible(True)
 
         result = window.hide()
@@ -100,7 +100,7 @@ class TestWindowQuit:
     def test_hides_when_timer_is_running(self, bus, mocker, session, window):
         session.is_running.return_value = True
         subscriber = mocker.Mock()
-        bus.connect(Events.WINDOW_HIDE, subscriber, weak=False)
+        bus.connect(Events.WINDOW_HIDE, subscriber)
 
         window.widget.emit("delete-event", Gdk.Event.new(Gdk.EventType.DELETE))
 
@@ -115,7 +115,7 @@ def test_shows_window_and_updates_systray_after_session_end(bus, graph, mocker, 
 
     window.widget.props.visible = False
     subscriber = mocker.Mock()
-    bus.connect(Events.WINDOW_SHOW, subscriber, weak=False)
+    bus.connect(Events.WINDOW_SHOW, subscriber)
 
     payload = create_session_payload()
     bus.publish(Events.SESSION_END, payload=payload)

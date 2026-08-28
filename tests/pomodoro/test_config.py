@@ -85,7 +85,7 @@ def test_set_option(bus, config, mocker, tmpdir):
     config.config_path = lambda: config_path
 
     subscriber = mocker.Mock()
-    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
+    bus.connect(Events.CONFIG_CHANGE, subscriber)
 
     config.set("section", "option", "value")
 
@@ -104,7 +104,7 @@ def test_remove_option(bus, config, mocker, tmpdir):
 
     config.set("section", "option", "value")
     subscriber = mocker.Mock()
-    bus.connect(Events.CONFIG_CHANGE, subscriber, weak=False)
+    bus.connect(Events.CONFIG_CHANGE, subscriber)
     config.remove("section", "option")
 
     config.load()

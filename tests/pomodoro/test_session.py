@@ -25,7 +25,7 @@ def test_module(graph, session):
 
 def test_sends_ready_event(bus, mocker, session):
     subscriber = mocker.Mock()
-    bus.connect(Events.SESSION_READY, subscriber, weak=False)
+    bus.connect(Events.SESSION_READY, subscriber)
 
     session.ready()
 
@@ -46,7 +46,7 @@ class TestSessionStart:
         session.state = state
 
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_START, subscriber, weak=False)
+        bus.connect(Events.SESSION_START, subscriber)
 
         result = session.start()
 
@@ -70,7 +70,7 @@ class TestSessionStop:
 
     def test_stops_when_session_is_running(self, session, bus, mocker):
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_INTERRUPT, subscriber, False)
+        bus.connect(Events.SESSION_INTERRUPT, subscriber)
 
         session.ready()
         session.start()
@@ -106,7 +106,7 @@ class TestSessionReset:
         session.pomodoros = 1
 
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_RESET, subscriber, False)
+        bus.connect(Events.SESSION_RESET, subscriber)
 
         result = session.reset()
 
@@ -168,7 +168,7 @@ class TestSessionEnd:
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_END, subscriber, False)
+        bus.connect(Events.SESSION_END, subscriber)
 
         session.ready()
         session.start()
@@ -188,7 +188,7 @@ class TestSessionEnd:
         config.parser.getint = config.parser.getfloat
 
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+        bus.connect(Events.SESSION_CHANGE, subscriber)
 
         session.ready()
         session.start()
@@ -221,7 +221,7 @@ class TestSessionChange:
     def test_changes_when_session_is_not_running(self, state, session_type, bus, config, mocker, session):
         session.state = state
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+        bus.connect(Events.SESSION_CHANGE, subscriber)
 
         assert session.change(session=session_type) is True
         assert session.current is session_type
@@ -236,7 +236,7 @@ class TestSessionChange:
     def test_changes_when_config_change_and_session_is_not_running(self, state, bus, config, mocker, session):
         session.state = state
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+        bus.connect(Events.SESSION_CHANGE, subscriber)
 
         config.set(config.DURATION_SECTION, SessionType.POMODORO.option, 20)
 
@@ -247,7 +247,7 @@ class TestSessionChange:
 
     def test_not_change_when_config_section_is_not_timer(self, bus, config, mocker, session):
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+        bus.connect(Events.SESSION_CHANGE, subscriber)
 
         config.set("section", "option", "value")
 
@@ -256,7 +256,7 @@ class TestSessionChange:
     def test_not_change_when_config_timer_changes_and_session_is_running(self, bus, config, mocker, session):
         session.state = State.STARTED
         subscriber = mocker.Mock()
-        bus.connect(Events.SESSION_CHANGE, subscriber, False)
+        bus.connect(Events.SESSION_CHANGE, subscriber)
 
         config.set(config.DURATION_SECTION, SessionType.POMODORO.option, 24)
 
