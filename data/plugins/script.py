@@ -11,7 +11,16 @@ gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gtk
 
-from tomate.pomodoro import Bus, Config, Event, Events, SessionPayload, on, plugin, suppress_errors
+from tomate.pomodoro import (
+    Bus,
+    Config,
+    Event,
+    Events,
+    SessionPayload,
+    on,
+    plugin,
+    suppress_errors,
+)
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
