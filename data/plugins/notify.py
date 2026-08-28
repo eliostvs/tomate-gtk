@@ -32,7 +32,6 @@ class NotifyPlugin(plugin.Plugin):
     @suppress_errors
     def __init__(self):
         super().__init__()
-        self.config = None
         self.notification = Notify.Notification.new("tomate-notify-plugin")
 
     def configure(self, bus: Bus, graph: Graph) -> None:
@@ -51,10 +50,11 @@ class NotifyPlugin(plugin.Plugin):
 
     @on(Events.SESSION_START)
     def on_session_started(self, event: Event[SessionPayload]):
-        payload = event.payload
-        if payload is None:
+        session = event.payload
+        if session is None:
             return
-        self.show_notification(*self.get_message(payload.type))
+
+        self.show_notification(*self.get_message(session.type))
 
     @on(Events.SESSION_END)
     def on_session_finished(self, _event: Event[SessionPayload]):
