@@ -26,9 +26,6 @@ def test_test_clock_rejects_a_naive_datetime():
 
 
 def test_clock_protocol_describes_test_clock():
-    def read(clock: Clock) -> datetime:
-        return clock.now()
+    now =  datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
 
-    assert read(TestClock(datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc))) == datetime(
-        2026, 8, 27, 12, 30, tzinfo=timezone.utc
-    )
+    assert TestClock(now).now() == now
