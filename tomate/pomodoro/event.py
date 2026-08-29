@@ -88,17 +88,22 @@ class Bus:
     def publish(self, event_type: Events, payload: T | None = None) -> Event[T]:
         event = Event(self._id_factory.new(), self._clock.now(), event_type, payload)
         subscriptions = tuple(subscription for subscription in self._subscriptions[event_type] if subscription.active)
+
         self._queue.append((event, subscriptions))
+
         if not self._delivery_scheduled:
             self._delivery_scheduled = True
             GLib.idle_add(self._deliver, priority=GLib.PRIORITY_DEFAULT_IDLE)
+
         return event
 
     def disconnect(self, event: Events, receiver: Receiver) -> None:
         subscriptions = self._subscriptions[event]
+
         for subscription in subscriptions:
             if subscription.matches(receiver):
                 subscription.active = False
+
         self._subscriptions[event] = [subscription for subscription in subscriptions if subscription.active]
 
     def _deliver(self) -> bool:
@@ -132,7 +137,9 @@ def on(*events: Events):
 class Subscriber:
     def connect(self, bus: Bus) -> None:
         self.disconnect(bus)
+
         self._receivers: list[tuple[Events, Receiver]] = []
+
         for method, events in self.__methods_with_events():
             for event in events:
                 logger.debug(
