@@ -93,7 +93,7 @@ class Bus:
 
         if not self._delivery_scheduled:
             self._delivery_scheduled = True
-            GLib.idle_add(self._deliver, priority=GLib.PRIORITY_DEFAULT_IDLE)
+            GLib.idle_add(self._deliver, priority=GLib.PRIORITY_HIGH_IDLE)
 
         return event
 
