@@ -11,9 +11,8 @@ from .config import Config
 from .config import Payload as ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
 from .fsm import fsm
-from .timer import SECONDS_IN_A_MINUTE
+from .timer import SECONDS_IN_A_MINUTE, Timer, format_seconds
 from .timer import Payload as TimerPayload
-from .timer import Timer, format_seconds
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,6 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from tests.conftest import TestClock
-from tomate.pomodoro import Clock
 
 
 def test_system_clock_returns_a_utc_aware_datetime():
