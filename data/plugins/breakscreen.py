@@ -232,9 +232,9 @@ class BreakScreenPlugin(plugin.Plugin):
     has_settings = True
 
     @suppress_errors
-    def __init__(self, display=Gdk.Display.get_default()):
+    def __init__(self, display=None):
         super().__init__()
-        self.display = display
+        self.display = display if display is not None else Gdk.Display.get_default()
         self.screens = []
         self.configure_style()
 

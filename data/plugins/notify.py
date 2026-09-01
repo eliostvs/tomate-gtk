@@ -21,14 +21,13 @@ from gi.repository import Notify
 
 logger = logging.getLogger(__name__)
 
+MESSAGES = {
+    SessionType.POMODORO: {"title": _("Pomodoro"), "content": _("Get back to work!")},
+    SessionType.SHORT_BREAK: {"title": _("Short Break"), "content": _("It's coffee time!")},
+    SessionType.LONG_BREAK: {"title": _("Long Break"), "content": _("Step away from the machine!")},
+}
 
 class NotifyPlugin(plugin.Plugin):
-    messages = {
-        SessionType.POMODORO: {"title": _("Pomodoro"), "content": _("Get back to work!")},
-        SessionType.SHORT_BREAK: {"title": _("Short Break"), "content": _("It's coffee time!")},
-        SessionType.LONG_BREAK: {"title": _("Long Break"), "content": _("Step away from the machine!")},
-    }
-
     @suppress_errors
     def __init__(self):
         super().__init__()
@@ -66,8 +65,8 @@ class NotifyPlugin(plugin.Plugin):
 
     def get_message(self, session: SessionType) -> tuple[str, str]:
         return (
-            self.messages[session]["title"],
-            self.messages[session]["content"],
+            MESSAGES[session]["title"],
+            MESSAGES[session]["content"],
         )
 
     @suppress_errors

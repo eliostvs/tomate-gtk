@@ -32,12 +32,12 @@ def plugin(bus, config, graph, session):
 
 
 def none(values: Iterator) -> bool:
-    return all([value is False for value in values])
+    return all(value is False for value in values)
 
 
 def label_text(countdown: str, plugin) -> bool:
     return len(plugin.screens) > 0 and all(
-        [Q.select(screen.widget, Q.props("name", "countdown")).get_text() == countdown for screen in plugin.screens]
+        Q.select(screen.widget, Q.props("name", "countdown")).get_text() == countdown for screen in plugin.screens
     )
 
 
@@ -50,7 +50,7 @@ class TestPlugin:
         bus.publish(Events.SESSION_START, payload=payload)
         deliver_events()
 
-        assert all([screen.widget.props.visible for screen in plugin.screens])
+        assert all(screen.widget.props.visible for screen in plugin.screens)
         assert label_text(payload.countdown, plugin)
 
     def test_not_show_when_pomodoro_begins(self, bus, plugin):
@@ -152,7 +152,7 @@ class TestPlugin:
         bus.publish(Events.CONFIG_CHANGE, payload=payload)
         deliver_events()
 
-        assert all([screen.options[option] == want for screen in plugin.screens])
+        assert all(screen.options[option] == want for screen in plugin.screens)
 
     @pytest.mark.parametrize(
         "action, want",
@@ -168,7 +168,7 @@ class TestPlugin:
         bus.publish(Events.CONFIG_CHANGE, payload=payload)
         deliver_events()
 
-        assert all([screen.skip_button.props.visible == want for screen in plugin.screens])
+        assert all(screen.skip_button.props.visible == want for screen in plugin.screens)
 
 
 class TestSettingsWindow:

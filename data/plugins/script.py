@@ -132,7 +132,7 @@ class SettingsDialog:
     @staticmethod
     def create_section(grid: Gtk.Grid) -> None:
         title = Gtk.Label(
-            label="<b>{0}</b>".format(_("Scripts")),
+            label="<b>{}</b>".format(_("Scripts")),
             halign=Gtk.Align.START,
             hexpand=True,
             use_markup=True,
