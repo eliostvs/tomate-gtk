@@ -36,7 +36,7 @@ class TestPluginEngine:
             assert plugin.plugin_object.bus is bus
             assert plugin.plugin_object.graph is graph
 
-    def test_activate(self, bus, plugin_engine):
+    def test_activate(self, _bus, plugin_engine):
         plugin_engine.collect()
         plugin_a = plugin_engine.lookup("PluginA")
 
@@ -45,7 +45,7 @@ class TestPluginEngine:
         plugin_engine.activate("PluginA")
         assert plugin_a.is_activated is True
 
-    def test_deactivate(self, bus, plugin_engine):
+    def test_deactivate(self, _bus, plugin_engine):
         plugin_engine.collect()
         plugin_b = plugin_engine.lookup("PluginB")
 
