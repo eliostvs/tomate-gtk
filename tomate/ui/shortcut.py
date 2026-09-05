@@ -22,7 +22,10 @@ class Shortcut(namedtuple("Shortcut", ["name", "value"])):
 @register.factory("tomate.ui.shortcut", scope=SingletonScope)
 class ShortcutEngine:
     @inject(config="tomate.config")
-    def __init__(self, config, accel_group=Gtk.AccelGroup()):
+    def __init__(self, config, accel_group=None):
+        if accel_group is None:
+            accel_group = Gtk.AccelGroup()
+
         self._config = config
         self.accel_group = accel_group
 

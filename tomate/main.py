@@ -31,7 +31,7 @@ def main():
             Gdk.notify_startup_complete()
 
     except Exception as ex:
-        logger.exception(ex)
+        logger.exception("Unhandled exception")
         raise
 
 

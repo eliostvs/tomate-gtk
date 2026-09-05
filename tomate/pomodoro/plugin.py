@@ -94,7 +94,7 @@ def suppress_errors(wrapped, _, args, kwargs):
             raise
 
         log = logging.getLogger(__name__)
-        log.exception(ex)
+        log.exception("Failed to execute plugin callback")
 
     return None
 
