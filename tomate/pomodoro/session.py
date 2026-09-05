@@ -10,6 +10,7 @@ from wiring.scanning import register
 from .config import Config
 from .config import Payload as ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
+from .exception import PomodoroException
 from .fsm import fsm
 from .timer import SECONDS_IN_A_MINUTE, Timer, format_seconds
 from .timer import Payload as TimerPayload
@@ -34,7 +35,7 @@ class Type(enum.Enum):
             if number == index:
                 return attr
 
-        raise Exception(f"invalid index: {index}")
+        raise PomodoroException(f"invalid index: {index}")
 
     @property
     def option(self) -> str:

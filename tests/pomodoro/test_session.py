@@ -2,7 +2,7 @@ import pytest
 from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_received_event, deliver_events
-from tomate.pomodoro import Events, Session, SessionPayload, SessionType, TimerPayload
+from tomate.pomodoro import Events, PomodoroException, Session, SessionPayload, SessionType, TimerPayload
 from tomate.pomodoro.config import Config
 from tomate.pomodoro.session import State
 from tomate.ui.testing import create_session_payload, run_loop_for
@@ -276,7 +276,7 @@ def test_type_of(number, session_type):
 
 
 def test_type_of_unknown():
-    with pytest.raises(Exception):
+    with pytest.raises(PomodoroException):
         assert SessionType.of(999)
 
 

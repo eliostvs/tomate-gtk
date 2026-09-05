@@ -31,8 +31,8 @@ def main():
             Gdk.notify_startup_complete()
 
     except Exception as ex:
-        logger.error(ex, exc_info=True)
-        raise ex
+        logger.exception(ex)
+        raise
 
 
 def setup_logging(options):

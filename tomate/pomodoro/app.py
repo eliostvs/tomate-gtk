@@ -42,7 +42,10 @@ class Application(dbus.service.Object):
         return True
 
     @classmethod
-    def from_graph(cls, graph, bus=dbus.SessionBus(mainloop=DBusGMainLoop())):
+    def from_graph(cls, graph, bus=None):
+        if bus is None:
+            bus = dbus.SessionBus(mainloop=DBusGMainLoop())
+
         request = bus.request_name(cls.BUS_NAME, dbus.bus.NAME_FLAG_DO_NOT_QUEUE)
 
         if request != dbus.bus.REQUEST_NAME_REPLY_EXISTS:

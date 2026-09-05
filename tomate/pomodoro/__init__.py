@@ -3,6 +3,7 @@ from .clock import Clock
 from .config import Config
 from .config import Payload as ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
+from .exception import PomodoroException
 from .graph import graph
 from .id import IDFactory
 from .plugin import Plugin, PluginEngine, suppress_errors
@@ -23,6 +24,7 @@ __all__ = [
     "IDFactory",
     "Plugin",
     "PluginEngine",
+    "PomodoroException",
     "Session",
     "SessionPayload",
     "SessionType",

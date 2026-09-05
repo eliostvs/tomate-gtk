@@ -1,0 +1,2 @@
+class PomodoroException(Exception):
+    pass

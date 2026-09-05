@@ -91,13 +91,13 @@ def suppress_errors(wrapped, _, args, kwargs):
         return wrapped(*args, **kwargs)
     except Exception as ex:
         if in_debug_mode():
-            raise ex
+            raise
 
         log = logging.getLogger(__name__)
-        log.error(ex, exc_info=True)
+        log.exception(ex)
 
     return None
 
 
 def in_debug_mode():
-    return "TOMATE_DEBUG" in os.environ.keys()
+    return "TOMATE_DEBUG" in os.environ

@@ -2,6 +2,7 @@ import logging
 import os
 from collections import namedtuple
 from configparser import RawConfigParser
+from typing import ClassVar
 
 from wiring import SingletonScope, inject
 from wiring.scanning import register
@@ -22,7 +23,7 @@ class Config:
     DURATION_LONG_BREAK = "longbreak_duration"
     DURATION_POMODORO = "pomodoro_duration"
     DURATION_SHORT_BREAK = "shortbreak_duration"
-    DEFAULTS = {
+    DEFAULTS: ClassVar[dict[str, str]] = {
         DURATION_POMODORO: "25",
         DURATION_SHORT_BREAK: "5",
         DURATION_LONG_BREAK: "15",
@@ -30,7 +31,10 @@ class Config:
     }
 
     @inject(bus="tomate.bus")
-    def __init__(self, bus: Bus, parser=RawConfigParser(defaults=DEFAULTS, strict=True)):
+    def __init__(self, bus: Bus, parser=None):
+        if parser is None:
+            parser = RawConfigParser(defaults=self.DEFAULTS, strict=True)
+
         self.parser = parser
         self._bus = bus
         self.load()
@@ -67,7 +71,7 @@ class Config:
             if os.path.exists(resource):
                 return resource
 
-        raise OSError("Resource '%s' not found!" % resources[-1])
+        raise OSError(f"Resource '{resources[-1]}' not found!")
 
     def _load_data_paths(self, *resources) -> list[str]:
         return [path for path in BaseDirectory.load_data_paths(*resources)]
@@ -78,7 +82,7 @@ class Config:
         if icon_path is not None:
             return icon_path
 
-        raise OSError("Icon '%s' not found!" % iconname)
+        raise OSError(f"Icon '{iconname}' not found!")
 
     def get_int(self, section: str, option: str, fallback=None) -> int:
         return self.get(section, option, fallback, method="getint")

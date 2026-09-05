@@ -7,6 +7,10 @@ from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT, deliver_events
 from tomate.pomodoro import Event, Events, Plugin, PluginEngine, on, suppress_errors
 
 
+class ExpectedError(Exception):
+    pass
+
+
 @pytest.fixture
 def plugin_engine(bus, graph, config) -> PluginEngine:
     config.plugin_paths = lambda: [os.path.join(os.path.dirname(__file__), "..", "data", "tomate", "plugins")]
@@ -129,7 +133,7 @@ class TestRaiseException:
 
         @suppress_errors
         def raise_exception():
-            raise Exception()
+            raise ExpectedError()
 
         assert not raise_exception()
 
@@ -138,7 +142,7 @@ class TestRaiseException:
 
         @suppress_errors
         def raise_exception():
-            raise Exception()
+            raise ExpectedError()
 
-        with pytest.raises(Exception):
+        with pytest.raises(ExpectedError):
             raise_exception()

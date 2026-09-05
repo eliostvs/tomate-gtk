@@ -1,6 +1,7 @@
 import locale
 import logging
 from locale import gettext as _
+from typing import ClassVar
 
 from gi.repository import GdkPixbuf, Gtk, Pango
 from wiring import SingletonScope, inject
@@ -217,7 +218,7 @@ class PluginGrid:
     ICON = 2
     DETAIL = 3
     INSTANCE = 4
-    MODEL = [
+    MODEL: ClassVar = [
         str,
         bool,
         GdkPixbuf.Pixbuf,
