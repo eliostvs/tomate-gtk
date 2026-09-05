@@ -30,7 +30,7 @@ def main():
         if app.IsRunning():
             Gdk.notify_startup_complete()
 
-    except Exception as ex:
+    except Exception:
         logger.exception("Unhandled exception")
         raise
 

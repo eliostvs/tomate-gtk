@@ -60,7 +60,7 @@ class SessionButton(Subscriber):
     def _add_button(self, shortcut: Shortcut, label: str, session_type: SessionType) -> None:
         self.widget.append_text(
             _(label),
-            tooltip_text=_(f"{label} ({self._shortcuts.label(shortcut)})"),
+            tooltip_text=_("%s (%s)") % (label, self._shortcuts.label(shortcut)),
             name=shortcut.name,
         )
         self._shortcuts.connect(shortcut, self._select(session_type))

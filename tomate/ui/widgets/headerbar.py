@@ -94,7 +94,7 @@ class HeaderBar(Subscriber):
         image.show()
 
         button = Gtk.Button(
-            tooltip_text=_(f"{tooltip_text} ({self._shortcuts.label(shortcut)})"), name=shortcut.name, **props
+            tooltip_text=_("%s (%s)") % (tooltip_text, self._shortcuts.label(shortcut)), name=shortcut.name, **props
         )
         button.add(image)
         button.connect("clicked", on_clicked)
@@ -109,7 +109,7 @@ class HeaderBar(Subscriber):
         button = Gtk.MenuButton(
             name=Menu.PREFERENCE_SHORTCUT.name,
             popup=menu.widget,
-            tooltip_text=_(f"Open preferences ({shortcuts.label(Menu.PREFERENCE_SHORTCUT)})"),
+            tooltip_text=_("Open preferences (%s)") % shortcuts.label(Menu.PREFERENCE_SHORTCUT),
         )
         button.add(icon)
         self.widget.pack_end(button)
@@ -139,4 +139,4 @@ class HeaderBar(Subscriber):
         self._update_title(0)
 
     def _update_title(self, pomodoros: int) -> None:
-        self.widget.props.title = _(f"Session {pomodoros}") if pomodoros else _("No session yet")
+        self.widget.props.title = _("Session %s") % pomodoros if pomodoros else _("No session yet")

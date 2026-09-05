@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from gi.repository import GObject, Gtk
 
@@ -10,7 +10,7 @@ class ModeButtonItem(Gtk.ToggleButton):
 
 
 class ModeButton(Gtk.Box):
-    __gsignals__ = {"mode_changed": (GObject.SignalFlags.RUN_FIRST, None, (int,))}
+    __gsignals__: ClassVar = {"mode_changed": (GObject.SignalFlags.RUN_FIRST, None, (int,))}
 
     def __init__(self, **kwargs):
         Gtk.Box.__init__(self, **kwargs)
@@ -39,7 +39,7 @@ class ModeButton(Gtk.Box):
         return self.set_selected(widget.index)
 
     def set_selected(self, index):
-        if self.get_sensitive() and index in self.__items.keys():
+        if self.get_sensitive() and index in self.__items:
             try:
                 old_item = self.__items[self.__selected]
                 old_item.set_active(False)

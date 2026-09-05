@@ -60,10 +60,7 @@ class Q:
     @staticmethod
     def combine(*fns: Filter) -> Filter:
         def select(w: Gtk.Widget) -> bool:
-            for fn in fns:
-                if not fn(w):
-                    return False
-                return True
+            return all(fn(w) for fn in fns)
 
         return select
 
@@ -100,9 +97,9 @@ class TV:
         return tree_view.get_model()
 
     @staticmethod
-    def column(fn: Filter) -> Callable[[Gtk.TreeView], list[Gtk.TreeViewColumn]]:
-        def select(tree_view: Gtk.TreeView) -> list[Gtk.TreeViewColumn]:
-            return [column for column in tree_view.get_columns() if fn(column)][0]
+    def column(fn: Filter) -> Callable[[Gtk.TreeView], Gtk.TreeViewColumn]:
+        def select(tree_view: Gtk.TreeView) -> Gtk.TreeViewColumn:
+            return next(column for column in tree_view.get_columns() if fn(column))
 
         return select
 

@@ -89,7 +89,7 @@ class PluginEngine:
 def suppress_errors(wrapped, _, args, kwargs):
     try:
         return wrapped(*args, **kwargs)
-    except Exception as ex:
+    except Exception:
         if in_debug_mode():
             raise
 
