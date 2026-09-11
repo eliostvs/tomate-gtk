@@ -42,7 +42,7 @@ class ScriptPlugin(plugin.Plugin):
     @suppress_errors
     def __init__(self):
         super().__init__()
-        self.config = None
+        self.config: Config
 
     def configure(self, bus: Bus, graph: Graph) -> None:
         super().configure(bus, graph)
@@ -97,8 +97,8 @@ class ScriptPlugin(plugin.Plugin):
     def _interpolate(template: str, replacements: dict[str, str]) -> str:
         return Template(template).substitute(**replacements)
 
-    def settings_window(self, toplevel):
-        return SettingsDialog(self.config, toplevel)
+    def settings_window(self, parent):
+        return SettingsDialog(self.config, parent)
 
 
 class SettingsDialog:
@@ -153,15 +153,15 @@ class SettingsDialog:
         )
         grid.attach(help_text, 0, 1, 4, 1)
 
-    def run(self) -> None:
+    def run(self) -> Gtk.Dialog:
         self.widget.show_all()
         return self.widget
 
     def create_option(self, grid: Gtk.Grid, row: int, label: str, option: str) -> None:
         command = self.config.get(SECTION_NAME, option, fallback="")
 
-        label = Gtk.Label(label=_(label), hexpand=True, halign=Gtk.Align.END)
-        grid.attach(label, 0, row, 1, 1)
+        label_widget = Gtk.Label(label=_(label), hexpand=True, halign=Gtk.Align.END)
+        grid.attach(label_widget, 0, row, 1, 1)
 
         entry = Gtk.Entry(editable=True, sensitive=bool(command), text=command, name=option + "_entry")
         entry.connect("notify::text", self.on_command_change, option)
@@ -169,7 +169,7 @@ class SettingsDialog:
 
         switch = Gtk.Switch(hexpand=True, halign=Gtk.Align.START, active=bool(command), name=option + "_switch")
         switch.connect("notify::active", self.on_option_change, entry, option)
-        grid.attach_next_to(switch, label, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(switch, label_widget, Gtk.PositionType.RIGHT, 1, 1)
 
     def on_command_change(self, entry: Gtk.Entry, _, option: str) -> None:
         command = strip_space(entry.props.text)

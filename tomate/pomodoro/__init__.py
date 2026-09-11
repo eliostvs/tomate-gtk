@@ -1,7 +1,6 @@
 from .app import Application
 from .clock import Clock
-from .config import Config
-from .config import Payload as ConfigPayload
+from .config import Config, ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
 from .exception import PomodoroException
 from .graph import graph

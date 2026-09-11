@@ -19,7 +19,7 @@ def plugin(bus, graph):
 
 
 def test_stop_all_running_players(bus, plugin, mocker):
-    from gi.repository import Playerctl
+    from gi.repository import Playerctl  # ty: ignore[unresolved-import]
 
     playing = mocker.Mock(props=mocker.Mock(playback_status=Playerctl.PlaybackStatus.PLAYING))
     paused = mocker.Mock(props=mocker.Mock(playback_status=Playerctl.PlaybackStatus.PAUSED))

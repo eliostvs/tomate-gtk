@@ -102,4 +102,4 @@ class Window(Subscriber):
     def show(self, _event: Event[SessionPayload] | None = None) -> None:
         logger.debug("action=show")
         self._bus.publish(Events.WINDOW_SHOW)
-        self.widget.present_with_time(time.time())
+        self.widget.present_with_time(int(time.time()))

@@ -23,6 +23,9 @@ Homepage = "https://github.com/eliostvs/tomate-gtk"
 [project.scripts]
 tomate-gtk = "tomate.__main__:main"
 
+[tool.uv]
+config-settings-package = { pygobject-stubs = { config = "Gtk3,Gdk3" } }
+
 [dependency-groups]
 dev = [
   "black",
@@ -31,6 +34,7 @@ dev = [
   "pytest-cov",
   "pytest-flake8",
   "pytest-mock",
+  "pygobject-stubs==2.16.0",
   "python-dbusmock",
   "ruff==0.16.3",
   "ty==0.0.74",

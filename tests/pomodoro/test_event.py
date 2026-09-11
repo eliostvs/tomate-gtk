@@ -40,7 +40,7 @@ class TestBus:
         assert received == []
 
         with pytest.raises(FrozenInstanceError):
-            event.payload = "changed"
+            event.payload = "changed"  # ty: ignore[invalid-assignment]
 
         deliver_events()
 

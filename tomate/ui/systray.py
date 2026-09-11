@@ -25,12 +25,14 @@ class Menu(Subscriber):
 
     def _create_menu(self, window) -> tuple[Gtk.Menu, Gtk.MenuItem, Gtk.MenuItem]:
         menu = Gtk.Menu(halign=Gtk.Align.CENTER)
-        menu.add(self._create_menu_item("Show", lambda _: window.show(), visible=False, no_show_all=True))
-        menu.add(self._create_menu_item("Hide", lambda _: window.hide(), visible=True))
+        show_item = self._create_menu_item("Show", lambda _: window.show(), visible=False, no_show_all=True)
+        hide_item = self._create_menu_item("Hide", lambda _: window.hide(), visible=True)
+        menu.add(show_item)
+        menu.add(hide_item)
         menu.show_all()
-        return menu, *menu.get_children()
+        return menu, show_item, hide_item
 
-    def _create_menu_item(self, label: str, activate: Callable[[], None], **props) -> Gtk.MenuItem:
+    def _create_menu_item(self, label: str, activate: Callable[[Gtk.MenuItem], None], **props) -> Gtk.MenuItem:
         menu_item = Gtk.MenuItem.new_with_label(_(label))
         menu_item.set_properties(**props)
         menu_item.connect("activate", activate)

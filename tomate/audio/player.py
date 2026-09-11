@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 import gi
 
@@ -15,11 +16,11 @@ class GStreamerPlayer:
     def __init__(self, repeat=False):
         Gst.init(None)
         self.repeat = repeat
-        self._file = None
+        self._file: str | None = None
         self._is_about_to_finished = False
 
-        self._playbin = Gst.ElementFactory.make("playbin", "player")
-        self._volume_filter = Gst.ElementFactory.make("volume", "volume")
+        self._playbin: Any = self._create_element("playbin", "player")
+        self._volume_filter: Any = self._create_element("volume", "volume")
         self._playbin.props.audio_filter = self._volume_filter
         self._playbin.bus.add_signal_watch()
         self._playbin.bus.connect("message", self._on_bus_callback)
@@ -29,7 +30,14 @@ class GStreamerPlayer:
 
     @property
     def file(self) -> str:
-        return self._file
+        return self._file or ""
+
+    @staticmethod
+    def _create_element(factory_name: str, instance_name: str) -> Any:
+        element = Gst.ElementFactory.make(factory_name, instance_name)
+        if element is None:
+            raise RuntimeError(f"Unable to create GStreamer element: {factory_name}")
+        return element
 
     @file.setter
     def file(self, filepath: str) -> None:

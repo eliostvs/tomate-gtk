@@ -15,7 +15,7 @@ class PluginA(plugin.Plugin):
         self.last_event = _event
         return "plugin_a"
 
-    def settings_window(self, parent: Gtk.Widget) -> Gtk.Dialog:
+    def settings_window(self, parent: Gtk.Window) -> Gtk.Dialog:
         self.parent = parent
         dialog = Gtk.MessageDialog(
             message_type=Gtk.MessageType.INFO,

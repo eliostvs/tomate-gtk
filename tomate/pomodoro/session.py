@@ -7,8 +7,7 @@ from collections import namedtuple
 from wiring import SingletonScope, inject
 from wiring.scanning import register
 
-from .config import Config
-from .config import Payload as ConfigPayload
+from .config import Config, ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
 from .exception import PomodoroException
 from .fsm import fsm

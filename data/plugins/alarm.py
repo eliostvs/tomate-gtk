@@ -34,8 +34,8 @@ class AlarmPlugin(plugin.Plugin):
     @suppress_errors
     def __init__(self):
         super().__init__()
-        self.config = None
-        self.player = None
+        self.config: Config
+        self.player: GStreamerPlayer | None = None
 
     def configure(self, bus: Bus, graph: Graph) -> None:
         super().configure(bus, graph)
@@ -72,8 +72,8 @@ class AlarmPlugin(plugin.Plugin):
     def volume(self) -> float:
         return self.config.get_float(SECTION_NAME, "volume", fallback=1.0)
 
-    def settings_window(self, toplevel: Gtk.Dialog) -> "SettingsDialog":
-        return SettingsDialog(self.config, toplevel)
+    def settings_window(self, parent: Gtk.Dialog) -> "SettingsDialog":
+        return SettingsDialog(self.config, parent)
 
 
 class SettingsDialog:
@@ -140,7 +140,7 @@ class SettingsDialog:
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            entry.set_text(dialog.get_uri())
+            entry.set_text(dialog.get_uri() or "")
 
         dialog.destroy()
 
@@ -149,15 +149,15 @@ class SettingsDialog:
 
     def create_file_chooser(self, current_folder: str) -> Gtk.FileChooserDialog:
         dialog = Gtk.FileChooserDialog(
-            _("Please choose a file"),
-            self.widget,
-            Gtk.FileChooserAction.OPEN,
-            (
-                Gtk.STOCK_CANCEL,
-                Gtk.ResponseType.CANCEL,
-                Gtk.STOCK_OPEN,
-                Gtk.ResponseType.OK,
-            ),
+            title=_("Please choose a file"),
+            transient_for=self.widget,
+            action=Gtk.FileChooserAction.OPEN,
+        )
+        dialog.add_buttons(
+            Gtk.STOCK_CANCEL,
+            Gtk.ResponseType.CANCEL,
+            Gtk.STOCK_OPEN,
+            Gtk.ResponseType.OK,
         )
         dialog.add_filter(self.create_filter("audio/mp3", "audio/mpeg"))
         dialog.add_filter(self.create_filter("audio/ogg", "audio/ogg"))

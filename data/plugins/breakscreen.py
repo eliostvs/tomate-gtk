@@ -1,6 +1,7 @@
 import logging
 from collections import namedtuple
 from locale import gettext as _
+from typing import cast
 
 import gi
 
@@ -211,12 +212,12 @@ class SettingsDialog:
         active = self.config.get_bool(SECTION_NAME, option, fallback=False)
         self.options[option] = active
 
-        label = Gtk.Label(label=_(label), hexpand=True, halign=Gtk.Align.END)
-        grid.attach(label, 0, row, 1, 1)
+        label_widget = Gtk.Label(label=_(label), hexpand=True, halign=Gtk.Align.END)
+        grid.attach(label_widget, 0, row, 1, 1)
 
         switch = Gtk.Switch(hexpand=True, halign=Gtk.Align.START, name=option, active=active)
         switch.connect("notify::active", self.on_option_change, option)
-        grid.attach_next_to(switch, label, Gtk.PositionType.RIGHT, 1, 1)
+        grid.attach_next_to(switch, label_widget, Gtk.PositionType.RIGHT, 1, 1)
 
     def on_option_change(self, switch: Gtk.Switch, _, option: str):
         self.options[option] = switch.props.active
@@ -232,10 +233,10 @@ class BreakScreenPlugin(plugin.Plugin):
     has_settings = True
 
     @suppress_errors
-    def __init__(self, display=None):
+    def __init__(self, display: Gdk.Display | None = None):
         super().__init__()
-        self.display = display if display is not None else Gdk.Display.get_default()
-        self.screens = []
+        self.display = display if display else Gdk.Display.get_default()
+        self.screens: list[BreakScreen] = []
         self.configure_style()
 
     @staticmethod
@@ -271,19 +272,25 @@ class BreakScreenPlugin(plugin.Plugin):
         """
         style_provider = Gtk.CssProvider()
         style_provider.load_from_data(style)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
+        screen = Gdk.Screen.get_default()
+        if screen is not None:
+            Gtk.StyleContext.add_provider_for_screen(screen, style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     @suppress_errors
     def activate(self):
         super().activate()
+        session = cast(Session, self.graph.get("tomate.session"))
+        config = cast(Config, self.graph.get("tomate.config"))
+
+        if self.display is None:
+            return
 
         for monitor in range(self.display.get_n_monitors()):
-            geometry = self.display.get_monitor(monitor).get_geometry()
-            screen = BreakScreen(
-                Monitor(monitor, geometry), self.graph.get("tomate.session"), self.graph.get("tomate.config")
-            )
+            monitor_info = self.display.get_monitor(monitor)
+            if monitor_info is None:
+                continue
+            geometry = monitor_info.get_geometry()
+            screen = BreakScreen(Monitor(monitor, geometry), session, config)
             screen.connect(self.bus)
             self.screens.append(screen)
 
@@ -297,5 +304,5 @@ class BreakScreenPlugin(plugin.Plugin):
 
         del self.screens[:]
 
-    def settings_window(self, toplevel) -> SettingsDialog:
-        return SettingsDialog(self.graph.get("tomate.config"), toplevel)
+    def settings_window(self, parent) -> SettingsDialog:
+        return SettingsDialog(cast(Config, self.graph.get("tomate.config")), parent)

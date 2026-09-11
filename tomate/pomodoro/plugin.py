@@ -1,8 +1,8 @@
 import logging
 import os
+from typing import Protocol
 
 import wrapt
-from gi.repository import Gtk
 from wiring import Graph, SingletonScope, inject
 from wiring.scanning import register
 from yapsy.ConfigurablePluginManager import ConfigurablePluginManager
@@ -16,13 +16,17 @@ from .event import Bus, Subscriber
 logger = logging.getLogger(__name__)
 
 
+class SettingsWindow(Protocol):
+    def run(self) -> object: ...
+
+
 class Plugin(IPlugin, Subscriber):
     has_settings = False
 
     def __init__(self):
         super().__init__()
-        self.bus = None
-        self.graph = None
+        self.bus: Bus
+        self.graph: Graph
 
     def configure(self, bus: Bus, graph: Graph) -> None:
         self.bus = bus
@@ -36,7 +40,7 @@ class Plugin(IPlugin, Subscriber):
         self.disconnect(self.bus)
         super().deactivate()
 
-    def settings_window(self, parent) -> Gtk.Dialog | None:
+    def settings_window(self, parent) -> SettingsWindow | None:
         return None
 
 
@@ -59,7 +63,7 @@ class PluginEngine:
         self._plugin_manager.loadPlugins(callback_after=self._configure_plugin)
 
     def _configure_plugin(self, plugin: PluginInfo) -> None:
-        if plugin.error is None:
+        if plugin.error is None and isinstance(plugin.plugin_object, Plugin):
             plugin.plugin_object.configure(self._bus, self._graph)
 
     def deactivate(self, name: str) -> None:

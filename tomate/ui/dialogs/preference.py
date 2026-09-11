@@ -37,7 +37,7 @@ class PreferenceDialog(Gtk.Dialog):
             border_width=12,
             resizable=False,
             window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
-            flags=Gtk.DialogFlags.MODAL,
+            modal=True,
         )
         self.add_button(_("Close"), Gtk.ResponseType.CLOSE)
         self.connect("response", lambda widget, response: widget.hide())
@@ -94,8 +94,8 @@ class TimerTab:
         return section
 
     def _create_option(self, name: str, label: str, option: str):
-        label = Gtk.Label.new(label + ":")
-        label.set_properties(margin_left=12, hexpand=True, halign=Gtk.Align.END)
+        label_widget = Gtk.Label.new(label + ":")
+        label_widget.set_properties(margin_left=12, hexpand=True, halign=Gtk.Align.END)
 
         button = Gtk.SpinButton.new_with_range(1, 99, 1)
         button.set_properties(
@@ -103,7 +103,7 @@ class TimerTab:
         )
         button.connect("value-changed", self._on_change, option)
 
-        return label, button
+        return label_widget, button
 
     def _on_change(self, widget, option):
         value = str(widget.get_value_as_int())
@@ -205,7 +205,9 @@ class ExtensionTab:
         self.plugin_model.append(PluginGrid.create_row(plugin, self._config))
 
     def _select_first(self):
-        self.plugin_list.get_selection().select_iter(self.plugin_model.get_iter_first())
+        tree_iter = self.plugin_model.get_iter_first()
+        if tree_iter is not None:
+            self.plugin_list.get_selection().select_iter(tree_iter)
 
     def _clear(self):
         logger.debug("action=clear_plugin_list")

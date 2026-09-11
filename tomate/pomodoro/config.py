@@ -2,7 +2,7 @@ import logging
 import os
 from collections import namedtuple
 from configparser import RawConfigParser
-from typing import ClassVar
+from typing import ClassVar, cast
 
 from wiring import SingletonScope, inject
 from wiring.scanning import register
@@ -12,7 +12,7 @@ from .event import Bus, Events
 
 logger = logging.getLogger(__name__)
 
-Payload = namedtuple("ConfigPayload", "action section option value")
+ConfigPayload = namedtuple("ConfigPayload", "action section option value")
 
 
 @register.factory("tomate.config", scope=SingletonScope)
@@ -84,24 +84,30 @@ class Config:
 
         raise OSError(f"Icon '{iconname}' not found!")
 
-    def get_int(self, section: str, option: str, fallback=None) -> int:
-        return self.get(section, option, fallback, method="getint")
+    def get_int(self, section: str, option: str, fallback: int | None = None) -> int:
+        section, option = self._prepare_option(section, option)
+        return cast(int, self.parser.getint(section, option, fallback=fallback))
 
-    def get_bool(self, section: str, option: str, fallback=None) -> bool:
-        return self.get(section, option, fallback, method="getboolean")
+    def get_bool(self, section: str, option: str, fallback: bool | None = None) -> bool:
+        section, option = self._prepare_option(section, option)
+        return cast(bool, self.parser.getboolean(section, option, fallback=fallback))
 
-    def get_float(self, section: str, option: str, fallback=None) -> int:
-        return self.get(section, option, fallback, method="getfloat")
+    def get_float(self, section: str, option: str, fallback: float | None = None) -> float:
+        section, option = self._prepare_option(section, option)
+        return cast(float, self.parser.getfloat(section, option, fallback=fallback))
 
-    def get(self, section: str, option: str, fallback=None, method="get") -> str | int | bool:
+    def get(self, section: str, option: str, fallback: str | None = None) -> str:
+        section, option = self._prepare_option(section, option)
+        return cast(str, self.parser.get(section, option, fallback=fallback))
+
+    def _prepare_option(self, section: str, option: str) -> tuple[str, str]:
         section = self.normalize(section)
         option = self.normalize(option)
         if not self.parser.has_section(section):
             self.parser.add_section(section)
 
         logger.debug("action=get section=%s option=%s", section, option)
-
-        return getattr(self.parser, method)(section, option, fallback=fallback)
+        return section, option
 
     def set(self, section: str, option: str, value) -> None:
         logger.debug("action=set section=%s option=%s value=%s", section, option, value)
@@ -113,7 +119,7 @@ class Config:
         self.parser.set(section, option, value)
         self.save()
 
-        payload = Payload(action="set", section=section, option=option, value=value)
+        payload = ConfigPayload(action="set", section=section, option=option, value=value)
         self._bus.publish(Events.CONFIG_CHANGE, payload=payload)
 
     def remove(self, section, option) -> None:
@@ -124,7 +130,7 @@ class Config:
         self.parser.remove_option(section, option)
         self.save()
 
-        payload = Payload(action="remove", section=section, option=option, value="")
+        payload = ConfigPayload(action="remove", section=section, option=option, value="")
         self._bus.publish(Events.CONFIG_CHANGE, payload=payload)
 
     @staticmethod

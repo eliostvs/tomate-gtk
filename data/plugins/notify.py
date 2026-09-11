@@ -27,6 +27,7 @@ MESSAGES = {
     SessionType.LONG_BREAK: {"title": _("Long Break"), "content": _("Step away from the machine!")},
 }
 
+
 class NotifyPlugin(plugin.Plugin):
     @suppress_errors
     def __init__(self):

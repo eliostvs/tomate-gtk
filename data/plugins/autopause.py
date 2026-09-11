@@ -6,7 +6,7 @@ from tomate.pomodoro import Event, Events, SessionPayload, on, plugin, suppress_
 
 gi.require_version("Playerctl", "2.0")
 
-from gi.repository import GLib, Playerctl
+from gi.repository import GLib, Playerctl  # ty: ignore[unresolved-import]
 
 logger = logging.getLogger(__name__)
 

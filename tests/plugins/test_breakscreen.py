@@ -1,5 +1,5 @@
 import random
-from collections.abc import Iterator
+from collections.abc import Iterable
 
 import gi
 import pytest
@@ -31,7 +31,7 @@ def plugin(bus, config, graph, session):
     return instance
 
 
-def none(values: Iterator) -> bool:
+def none(values: Iterable[object]) -> bool:
     return all(value is False for value in values)
 
 

@@ -1,5 +1,6 @@
 import enum
 
+import dbus.bus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 from wiring import SingletonScope, inject

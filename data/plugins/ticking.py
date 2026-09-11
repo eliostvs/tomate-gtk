@@ -8,8 +8,10 @@ gi.require_version("Gst", "1.0")
 from tomate.audio import GStreamerPlayer
 from tomate.pomodoro import (
     Bus,
+    Config,
     Event,
     Events,
+    Session,
     SessionPayload,
     SessionType,
     on,
@@ -27,9 +29,9 @@ class TickingPlugin(plugin.Plugin):
     @suppress_errors
     def __init__(self):
         super().__init__()
-        self.config = None
-        self.player = None
-        self.session = None
+        self.config: Config
+        self.player: GStreamerPlayer | None = None
+        self.session: Session
 
     def configure(self, bus: Bus, graph: Graph) -> None:
         super().configure(bus, graph)

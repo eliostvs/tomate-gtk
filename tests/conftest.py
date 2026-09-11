@@ -80,10 +80,11 @@ def window(mocker):
 
 
 @pytest.fixture
-def config(bus, tmpdir) -> Config:
+def config(bus, tmp_path, monkeypatch) -> Config:
     cfg = Config(bus)
-    tmp_path = tmpdir.mkdir("tomate").join("tomate.config")
-    cfg.config_path = lambda: tmp_path.strpath
+    config_path = tmp_path / "tomate" / "tomate.config"
+    config_path.parent.mkdir()
+    monkeypatch.setattr(cfg, "config_path", lambda: str(config_path))
     return cfg
 
 
@@ -93,6 +94,6 @@ def shortcut_engine(config: Config) -> ShortcutEngine:
 
 
 @pytest.fixture
-def plugin_engine(bus: Bus, graph: Graph, config: Config) -> PluginEngine:
-    config.plugin_paths = lambda: [os.path.join(TEST_DATA_DIR, "tomate", "plugins")]
+def plugin_engine(bus: Bus, graph: Graph, config: Config, monkeypatch) -> PluginEngine:
+    monkeypatch.setattr(config, "plugin_paths", lambda: [os.path.join(TEST_DATA_DIR, "tomate", "plugins")])
     return PluginEngine(bus, config, graph)

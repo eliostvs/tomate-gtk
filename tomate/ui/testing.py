@@ -2,7 +2,7 @@ import time
 from collections import deque
 from collections.abc import Callable
 from functools import reduce
-from typing import Any
+from typing import Any, cast
 
 from gi.repository import GLib, Gtk
 
@@ -65,7 +65,7 @@ class Q:
         return select
 
     @staticmethod
-    def select(root: Gtk.Widget, *fns: Filter) -> Gtk.Widget:
+    def select(root: Gtk.Widget, *fns: Filter) -> Any:
         fn = Q.combine(*fns)
         queue = deque([root])
         while queue:
@@ -73,9 +73,8 @@ class Q:
             if fn(widget):
                 return widget
 
-            if hasattr(widget, "get_children"):
-                for child in widget.get_children():
-                    queue.append(child)
+            if isinstance(widget, Gtk.Container):
+                queue.extend(widget.get_children())
 
         raise GtkWidgetNotFound()
 
@@ -94,7 +93,7 @@ class Q:
 class TV:
     @staticmethod
     def model(tree_view: Gtk.TreeView) -> Gtk.TreeStore:
-        return tree_view.get_model()
+        return cast(Gtk.TreeStore, tree_view.get_model())
 
     @staticmethod
     def column(fn: Filter) -> Callable[[Gtk.TreeView], Gtk.TreeViewColumn]:
