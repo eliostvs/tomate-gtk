@@ -57,7 +57,7 @@ tasks:
   typecheck:
     desc: Run static analysis.
     cmds:
-      - uv run --group dev ty check {{.CLI_ARGS}} {{.PACKAGE}} tests {{.PLUGINPATH}}
+      - uv run --group dev ty check --extra-search-path {{.PLUGINPATH}} {{.CLI_ARGS}} {{.PACKAGE}} tests {{.PLUGINPATH}}
 
   test:
     desc: Run tests.
