@@ -18,6 +18,22 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Install system dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            build-essential \
+            gir1.2-gstreamer-1.0 \
+            gir1.2-gtk-3.0 \
+            gir1.2-notify-0.7 \
+            gir1.2-playerctl-2.0 \
+            python3-gi \
+            libdbus-1-dev \
+            libglib2.0-dev \
+            pkg-config
+
       - name: Set up Task
         uses: go-task/setup-task@v1
 
