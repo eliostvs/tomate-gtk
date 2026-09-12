@@ -12,11 +12,36 @@ jobs:
   lint:
     name: Run linter
     runs-on: ubuntu-latest
-    container:
-      image: eliostvs/tomate
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Install system dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            dbus-x11 \
+            gir1.2-appindicator3-0.1 \
+            gir1.2-gdkpixbuf-2.0 \
+            gir1.2-glib-2.0 \
+            gir1.2-gstreamer-1.0 \
+            gir1.2-gtk-3.0 \
+            gir1.2-notify-0.7 \
+            gir1.2-playerctl-2.0 \
+            gir1.2-unity-5.0 \
+            gstreamer1.0-plugins-base \
+            notification-daemon \
+            python3-dbus \
+            python3-dbusmock \
+            python3-gi \
+            python3-venusian \
+            python3-wrapt \
+            python3-xdg \
+            python3-yapsy \
+            shared-mime-info \
+            xvfb
 
       - name: Set up uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
