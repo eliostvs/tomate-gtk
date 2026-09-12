@@ -10,7 +10,7 @@ on:
 
 jobs:
   lint:
-    name: Run linter
+    name: Run Statick Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -47,5 +47,8 @@ jobs:
       - name: Sync development dependencies
         run: uv sync --group dev
 
-      - name: Run static analysis
-        run: task lint typecheck
+      - name: Run lint
+        run: task lint
+
+      - name: Run typecheck
+        run: task typecheck
