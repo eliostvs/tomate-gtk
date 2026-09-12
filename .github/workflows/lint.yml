@@ -16,17 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev
+
       - name: Set up uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           activate-environment: true
           enable-cache: true
 
-      - name: Set up Task
-        uses: go-task/setup-task@v1
-
       - name: Create development environment
         run: uv venv --clear --system-site-packages --python python3 .venv
+
+      - name: Set up Task
+        uses: go-task/setup-task@v1
 
       - name: Sync development dependencies
         run: uv sync --group dev

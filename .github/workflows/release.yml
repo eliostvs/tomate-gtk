@@ -20,7 +20,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Set up Task
+        uses: go-task/setup-task@v1
+
       - name: Trigger build
         env:
           TOKEN: ${{ secrets.OBS_TOKEN }}
-        run: make trigger-build
+        run: task trigger

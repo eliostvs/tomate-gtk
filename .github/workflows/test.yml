@@ -18,6 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Set up Task
+        uses: go-task/setup-task@v1
+
       - name: Create development environment
         run: task dev
 
