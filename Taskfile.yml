@@ -30,8 +30,6 @@ tasks:
 
   mime:
     desc: Generate the test MIME index.
-    deps: 
-      - clean
     env:
       XDG_CONFIG_HOME: '{{.DATAPATH}}'
       XDG_DATA_HOME: '{{.DATAPATH}}'
