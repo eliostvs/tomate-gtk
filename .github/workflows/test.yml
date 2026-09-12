@@ -32,6 +32,15 @@ jobs:
             libglib2.0-dev \
             pkg-config
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          activate-environment: true
+          enable-cache: true
+
+      - name: Create development environment
+        run: uv venv --clear --system-site-packages --python python3 .venv
+
       - name: Set up Task
         uses: go-task/setup-task@v1
 
