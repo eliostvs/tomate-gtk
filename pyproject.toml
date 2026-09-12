@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["pomodoro", "tomate"]
 dependencies = [
-  "wiring @ git+https://github.com/eliostvs/wiring.git@master",
+  "wiring[scanning] @ git+https://github.com/eliostvs/wiring.git@master",
 ]
 
 [project.urls]

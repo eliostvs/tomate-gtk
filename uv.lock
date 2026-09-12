@@ -484,7 +484,7 @@ name = "tomate-gtk"
 version = "0.25.2"
 source = { editable = "." }
 dependencies = [
-    { name = "wiring" },
+    { name = "wiring", extra = ["scanning"] },
 ]
 
 [package.dev-dependencies]
@@ -502,7 +502,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "wiring", git = "https://github.com/eliostvs/wiring.git?rev=master" }]
+requires-dist = [{ name = "wiring", extras = ["scanning"], git = "https://github.com/eliostvs/wiring.git?rev=master" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -607,9 +607,23 @@ wheels = [
 ]
 
 [[package]]
+name = "venusian"
+version = "3.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/4c/eefa68085c555dc11e6744b9c6fbe5966b1c9378c47267776a448923e9a5/venusian-3.1.1.tar.gz", hash = "sha256:534fb3b355669283eb3954581931e5d1d071fce61d029d58f3219a5e3a6f0c41", size = 39269, upload-time = "2024-12-02T02:35:04.033Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5a/4b/34d926eba40db81b204066a60b4efdc5d8867a8efcbfe44d69b634b1c907/venusian-3.1.1-py3-none-any.whl", hash = "sha256:0845808a985976acbceaa1fbb871c7fac4fb28ae75453232970e9c2c2866dbf4", size = 14026, upload-time = "2024-12-02T02:35:03.056Z" },
+]
+
+[[package]]
 name = "wiring"
 version = "0.4.0"
 source = { git = "https://github.com/eliostvs/wiring.git?rev=master#c32165b680356fe9f1e422a1d11127f867065f94" }
 dependencies = [
     { name = "six" },
+]
+
+[package.optional-dependencies]
+scanning = [
+    { name = "venusian" },
 ]
