@@ -28,6 +28,9 @@ jobs:
             gir1.2-notify-0.7 \
             gir1.2-playerctl-2.0 \
             python3-gi \
+            python3-wrapt \
+            python3-xdg \
+            python3-yapsy \
             libdbus-1-dev \
             libglib2.0-dev \
             pkg-config
