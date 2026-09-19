@@ -1,13 +1,10 @@
-import gc
 from dataclasses import FrozenInstanceError
-from datetime import datetime, timezone
 
 import pytest
 from gi.repository import GLib
-from wiring.scanning import scan_to_graph
 
-from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT, TestClock, TestIDFactory
-from tomate.pomodoro import Bus, Event, Events, Subscriber, on
+from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT
+from tomate.pomodoro.event import Event, Events, Subscriber, on
 
 
 def deliver_events():
@@ -17,15 +14,44 @@ def deliver_events():
 
 
 class TestBus:
-    def test_exposes_publish_without_the_legacy_send_bridge(self, bus):
+    def test_connect_registers_a_receiver_for_its_event_type(self, bus):
+        received = []
 
-        assert callable(bus.publish)
-        assert not hasattr(bus, "send")
+        def receive(event):
+            received.append(event)
 
-    def test_publish_creates_an_immutable_timestamped_event_before_delivery(self):
-        event_id = "12345678-1234-4abc-8def-123456789abc"
-        occurred_at = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
-        bus = Bus(TestClock(occurred_at), TestIDFactory(event_id))
+        bus.connect(Events.SESSION_START, receive)
+        bus.publish(Events.SESSION_READY)
+        deliver_events()
+
+        assert received == []
+
+    def test_is_connect_reports_whether_a_receiver_is_connected(self, bus):
+        def receive(_):
+            pass
+
+        assert not bus.is_connect(Events.SESSION_START, receive)
+
+        bus.connect(Events.SESSION_START, receive)
+
+        assert bus.is_connect(Events.SESSION_START, receive)
+        assert not bus.is_connect(Events.SESSION_READY, receive)
+
+    def test_connect_does_not_register_the_same_receiver_twice(self, bus):
+        received = []
+
+        def receive(event):
+            received.append(event)
+
+        bus.connect(Events.SESSION_START, receive)
+        bus.connect(Events.SESSION_START, receive)
+
+        event = bus.publish(Events.SESSION_START)
+        deliver_events()
+
+        assert received == [event]
+
+    def test_publish_creates_and_delivers_an_immutable_timestamped_event(self, bus):
         received = []
 
         def receive(event):
@@ -35,39 +61,27 @@ class TestBus:
 
         event = bus.publish(Events.SESSION_START, payload="payload")
 
-        assert event == Event(event_id, occurred_at, Events.SESSION_START, "payload")
-        assert event.occurred_at.tzinfo == timezone.utc
+        assert event == Event(EVENT_ID, EVENT_OCCURRED_AT, Events.SESSION_START, "payload")
         assert received == []
 
         with pytest.raises(FrozenInstanceError):
-            event.payload = "changed"  # ty: ignore[invalid-assignment]
+            event.payload = "changed"
 
         deliver_events()
 
         assert received == [event]
 
-    def test_publish_preserves_fifo_order_when_a_receiver_publishes(self, bus):
+    def test_publish_does_not_deliver_to_receivers_connected_after_publication(self, bus):
         received = []
 
-        def on_start(event):
-            received.append(event.type)
-            bus.publish(Events.SESSION_END)
-
-        def on_ready(event):
-            received.append(event.type)
-
-        def on_end(event):
-            received.append(event.type)
-
-        bus.connect(Events.SESSION_START, on_start)
-        bus.connect(Events.SESSION_READY, on_ready)
-        bus.connect(Events.SESSION_END, on_end)
+        def receive(event):
+            received.append(event)
 
         bus.publish(Events.SESSION_START)
-        bus.publish(Events.SESSION_READY)
+        bus.connect(Events.SESSION_START, receive)
         deliver_events()
 
-        assert received == [Events.SESSION_START, Events.SESSION_READY, Events.SESSION_END]
+        assert received == []
 
     def test_disconnect_skips_a_receiver_already_queued_for_delivery(self, bus):
         received = []
@@ -82,23 +96,20 @@ class TestBus:
 
         assert received == []
 
-    def test_collected_weak_receiver_is_removed_before_delivery(self, bus):
+    def test_disconnect_prevents_future_delivery(self, bus):
         received = []
 
-        class Receiver:
-            def receive(self, event):
-                received.append(event)
+        def receive(event):
+            received.append(event)
 
-        receiver = Receiver()
-        bus.connect(Events.SESSION_START, receiver.receive)
+        bus.connect(Events.SESSION_START, receive)
+        bus.disconnect(Events.SESSION_START, receive)
         bus.publish(Events.SESSION_START)
-        del receiver
-        gc.collect()
         deliver_events()
 
         assert received == []
 
-    def test_failing_receiver_is_logged_without_stopping_later_receivers(self, bus, caplog):
+    def test_a_failing_receiver_does_not_block_other_receivers(self, bus, caplog):
         received = []
 
         def fail(_):
@@ -117,8 +128,9 @@ class TestBus:
         assert str(event.id) in caplog.text
         assert Events.SESSION_START.name in caplog.text
 
-    def test_subscriber_receives_the_typed_event_envelope(self, bus):
 
+class TestSubscriber:
+    def test_connects_decorated_methods_to_their_events(self, bus):
         class Subject(Subscriber):
             @on(Events.SESSION_START)
             def receive(self, event: Event[str]):
@@ -134,12 +146,58 @@ class TestBus:
         assert subject.event.type is Events.SESSION_START
         assert subject.event.payload == "payload"
 
+    def test_connects_one_method_to_each_of_its_declared_events(self, bus):
+        received = []
 
-def test_module(graph):
-    graph.register_instance("tomate.clock", TestClock(EVENT_OCCURRED_AT))
-    graph.register_instance("tomate.id_factory", TestIDFactory(EVENT_ID))
-    scan_to_graph(["tomate.pomodoro.event"], graph)
-    instance = graph.get("tomate.bus")
+        class Subject(Subscriber):
+            @on(Events.SESSION_START, Events.SESSION_END)
+            def receive(self, event):
+                received.append(event)
 
-    assert isinstance(instance, Bus)
-    assert graph.get("tomate.bus") is instance
+        subject = Subject()
+        subject.connect(bus)
+
+        start = bus.publish(Events.SESSION_START)
+        end = bus.publish(Events.SESSION_END)
+        deliver_events()
+
+        assert received == [start, end]
+
+    def test_reconnect_does_not_duplicate_delivery(self, bus):
+        received = []
+
+        class Subject(Subscriber):
+            @on(Events.SESSION_START)
+            def receive(self, event):
+                received.append(event)
+
+        subject = Subject()
+        subject.connect(bus)
+        subject.connect(bus)
+
+        event = bus.publish(Events.SESSION_START)
+        deliver_events()
+
+        assert received == [event]
+
+    def test_disconnect_removes_all_decorated_method_receivers(self, bus):
+        received = []
+
+        class Subject(Subscriber):
+            @on(Events.SESSION_START)
+            def receive_start(self, event):
+                received.append(event)
+
+            @on(Events.SESSION_END)
+            def receive_end(self, event):
+                received.append(event)
+
+        subject = Subject()
+        subject.connect(bus)
+        subject.disconnect(bus)
+
+        bus.publish(Events.SESSION_START)
+        bus.publish(Events.SESSION_END)
+        deliver_events()
+
+        assert received == []

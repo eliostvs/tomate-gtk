@@ -1,7 +1,10 @@
-import pytest
-from wiring.scanning import scan_to_graph
 
-from tests.conftest import assert_received_event, deliver_events
+import pytest
+
+from tests.conftest import (
+    assert_received_event,
+    deliver_events,
+)
 from tomate.pomodoro import (
     Events,
     PomodoroException,
@@ -11,23 +14,23 @@ from tomate.pomodoro import (
     TimerPayload,
 )
 from tomate.pomodoro.config import Config
+from tomate.pomodoro.event import Bus
+from tomate.pomodoro.graph import (
+    Graph,
+)
 from tomate.pomodoro.session import State
+from tomate.pomodoro.timer import Timer
 from tomate.ui.testing import create_session_payload, run_loop_for
 
 
 @pytest.fixture()
-def session(graph, config, bus, mocker):
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate.pomodoro.timer", "tomate.pomodoro.session"], graph)
-    return graph.get("tomate.session")
-
-
-def test_module(graph, session):
-    instance = graph.get("tomate.session")
-
-    assert isinstance(instance, Session)
-    assert instance is session
+def session(bus: Bus, config: Config) -> Session:
+    graph = Graph()
+    graph.register_instance(Bus, bus)
+    graph.register_instance(Config, config)
+    graph.register_factory(Timer, Timer)
+    graph.register_factory(Session, Session)
+    return graph.resolve(Session)
 
 
 def test_sends_ready_event(bus, mocker, session):

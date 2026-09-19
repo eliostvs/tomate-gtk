@@ -2,53 +2,43 @@ import logging
 import time
 
 from gi.repository import GdkPixbuf, Gtk
-from wiring import Graph, SingletonScope, inject
-from wiring.scanning import register
 
-from tomate.pomodoro import (
-    Bus,
-    Config,
-    Event,
-    Events,
-    Session,
-    SessionPayload,
-    Subscriber,
-    on,
-)
+from tomate.pomodoro.config import Config
+from tomate.pomodoro.event import Bus, Event, Events, Subscriber, on
+from tomate.pomodoro.graph import Injected
+from tomate.pomodoro.plugin import PluginEngine
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.pomodoro.session import Session
 
+from .dialogs import AboutDialog, ExtensionTab, PreferenceDialog, TimerTab
 from .shortcut import ShortcutEngine
-from .systray import Systray
-from .widgets import Countdown, HeaderBar, SessionButton
+from .systray import SysTray
+from .widgets import Countdown, HeaderBar, HeaderBarMenu, SessionButton
 
 logger = logging.getLogger(__name__)
 
 
-@register.factory("tomate.ui.view", scope=SingletonScope)
 class Window(Subscriber):
-    @inject(
-        bus="tomate.bus",
-        config="tomate.config",
-        countdown="tomate.ui.countdown",
-        graph=Graph,
-        headerbar="tomate.ui.headerbar",
-        session="tomate.session",
-        session_button="tomate.ui.taskbutton",
-        shortcuts="tomate.ui.shortcut",
-    )
     def __init__(
         self,
-        bus: Bus,
-        config: Config,
-        countdown: Countdown,
-        graph: Graph,
-        headerbar: HeaderBar,
-        session: Session,
-        session_button: SessionButton,
-        shortcuts: ShortcutEngine,
-    ):
+        bus: Injected[Bus],
+        config: Injected[Config],
+        session: Injected[Session],
+        plugin_engine: Injected[PluginEngine],
+        systray: Injected[SysTray],
+    ) -> None:
         self._session = session
         self._bus = bus
-        self._graph = graph
+        self._systray = systray
+        countdown = Countdown(bus)
+        shortcuts = ShortcutEngine(config)
+        session_button = SessionButton(bus, session, shortcuts)
+        about = AboutDialog(config)
+        timer_tab = TimerTab(config)
+        extension_tab = ExtensionTab(bus, config, plugin_engine)
+        preference = PreferenceDialog(timer_tab, extension_tab)
+        menu = HeaderBarMenu(bus, about, preference, shortcuts)
+        headerbar = HeaderBar(bus, menu, session, shortcuts)
         content = self._create_content(countdown, session_button)
         self.widget = self._create_window(config, headerbar, content)
 
@@ -90,7 +80,7 @@ class Window(Subscriber):
     def hide(self):
         self._bus.publish(Events.WINDOW_HIDE)
 
-        if Systray in self._graph.providers:
+        if self._systray.available:
             logger.debug("action=hide strategy=tray")
             return self.widget.hide_on_delete()
         else:

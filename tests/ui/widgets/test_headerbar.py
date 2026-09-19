@@ -1,6 +1,5 @@
 import pytest
 from gi.repository import Gtk
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import deliver_events
 from tomate.pomodoro import Events
@@ -14,30 +13,13 @@ class TestHeaderBar:
         return mocker.Mock(spec=HeaderBarMenu, widget=Gtk.Menu())
 
     @pytest.fixture
-    def headerbar(self, graph, menu, shortcut_engine, session, bus, mocker) -> HeaderBar:
-        graph.register_instance("tomate.bus", bus)
-        graph.register_instance("tomate.session", session)
-        graph.register_factory("tomate.ui.about", mocker.Mock)
-        graph.register_factory("tomate.ui.preference", mocker.Mock)
-        graph.register_instance("tomate.ui.menu", menu)
-        graph.register_instance("tomate.ui.shortcut", shortcut_engine)
-
+    def headerbar(self, menu, shortcut_engine, session, bus) -> HeaderBar:
         # gtk shortcuts binds leave beyond the scope
         shortcut_engine.disconnect(HeaderBar.START_SHORTCUT)
         shortcut_engine.disconnect(HeaderBar.STOP_SHORTCUT)
         shortcut_engine.disconnect(HeaderBar.RESET_SHORTCUT)
 
-        namespaces = ["tomate.ui.widgets.headerbar"]
-
-        scan_to_graph(namespaces, graph)
-
-        return graph.get("tomate.ui.headerbar")
-
-    def test_module(self, graph, headerbar):
-        instance = graph.get("tomate.ui.headerbar")
-
-        assert isinstance(instance, HeaderBar)
-        assert instance is headerbar
+        return HeaderBar(bus, menu, session, shortcut_engine)
 
     @pytest.mark.parametrize(
         "shortcut,action",
@@ -130,20 +112,6 @@ class TestHeaderBarMenu:
         shortcut_engine.disconnect(HeaderBarMenu.PREFERENCE_SHORTCUT)
 
         return HeaderBarMenu(bus, about, preference, shortcut_engine)
-
-    def test_module(self, about, bus, preference, graph, shortcut_engine):
-        graph.register_instance("tomate.bus", bus)
-        graph.register_instance("tomate.ui.about", about)
-        graph.register_instance("tomate.ui.preference", preference)
-        graph.register_instance("tomate.ui.shortcut", shortcut_engine)
-
-        namespaces = ["tomate.ui.widgets.headerbar"]
-        scan_to_graph(namespaces, graph)
-
-        instance = graph.get("tomate.ui.headerbar.menu")
-
-        assert isinstance(instance, HeaderBarMenu)
-        assert instance is graph.get("tomate.ui.headerbar.menu")
 
     @pytest.mark.parametrize(
         "widget,label,mock_name",

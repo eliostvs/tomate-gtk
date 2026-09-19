@@ -1,32 +1,27 @@
 import pytest
 from gi.repository import Gdk, Gtk
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_received_event, deliver_events
-from tomate.pomodoro import Events
-from tomate.ui import Systray, Window
-from tomate.ui.testing import Q, active_shortcut, create_session_payload
+from tomate.pomodoro import Bus, Config, Events, Graph, PluginEngine, Session
+from tomate.ui import SysTray, SystrayMenu, Window
+from tomate.ui.testing import Q, create_session_payload
 
 
 @pytest.fixture
-def window(bus, config, graph, session) -> Window:
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", config)
-    graph.register_instance("tomate.session", session)
-
-    namespaces = [
-        "tomate.ui",
-        "tomate.pomodoro.plugin",
-    ]
-    scan_to_graph(namespaces, graph)
-    return graph.get("tomate.ui.view")
+def systray() -> SysTray:
+    return SysTray()
 
 
-def test_module(graph, window):
-    instance = graph.get("tomate.ui.view")
-
-    assert isinstance(instance, Window)
-    assert instance is window
+@pytest.fixture
+def window(bus, config, plugin_engine, session, systray) -> Window:
+    graph = Graph()
+    graph.register_instance(Bus, bus)
+    graph.register_instance(Config, config)
+    graph.register_instance(Session, session)
+    graph.register_instance(PluginEngine, plugin_engine)
+    graph.register_instance(SysTray, systray)
+    graph.register_factory(Window, Window)
+    return graph.resolve(Window)
 
 
 def test_init(session, window):
@@ -44,12 +39,6 @@ def test_init(session, window):
 
     # countdown
     assert Q.select(window.widget, Q.props("label", "00:00"))
-
-
-def test_shortcuts(shortcut_engine, window):
-    from tomate.ui.widgets import HeaderBar
-
-    assert active_shortcut(shortcut_engine, HeaderBar.START_SHORTCUT, window=window.widget) is True
 
 
 def test_run(mocker, window):
@@ -74,8 +63,8 @@ class TestWindowHide:
         deliver_events()
         assert_received_event(subscriber, Events.WINDOW_HIDE, None)
 
-    def test_deletes_when_tray_icon_plugin_is_registered(self, bus, graph, mocker, window):
-        graph.register_factory(Systray, mocker.Mock)
+    def test_deletes_when_a_tray_system_is_active(self, bus, mocker, systray, window):
+        systray.register(mocker.Mock())
         subscriber = mocker.Mock()
         bus.connect(Events.WINDOW_HIDE, subscriber)
         window.widget.set_visible(True)
@@ -108,8 +97,8 @@ class TestWindowQuit:
         assert_received_event(subscriber, Events.WINDOW_HIDE, None)
 
 
-def test_shows_window_and_updates_systray_after_session_end(bus, graph, mocker, window):
-    systray_menu = graph.get("tomate.ui.systray.menu")
+def test_shows_window_and_updates_systray_after_session_end(bus, mocker, window):
+    systray_menu = SystrayMenu(bus, window)
     bus.publish(Events.WINDOW_HIDE)
     deliver_events()
 

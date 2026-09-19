@@ -3,26 +3,19 @@ import logging
 from locale import gettext as _
 
 from gi.repository import Gtk
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Event, Events, Session, SessionPayload, Subscriber, on
-from tomate.ui import Shortcut, ShortcutEngine
+from tomate.pomodoro.event import Bus, Event, Events, Subscriber, on
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.pomodoro.session import Session
+from tomate.ui.shortcut import Shortcut, ShortcutEngine
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
 
-@register.factory("tomate.ui.headerbar.menu", scope=SingletonScope)
 class Menu:
     PREFERENCE_SHORTCUT = Shortcut("session.settings", "<control>comma")
 
-    @inject(
-        bus="tomate.bus",
-        about="tomate.ui.about",
-        preference="tomate.ui.preference",
-        shortcuts="tomate.ui.shortcut",
-    )
     def __init__(self, bus: Bus, about, preference, shortcuts: ShortcutEngine):
         self.widget = Gtk.Menu(halign=Gtk.Align.CENTER)
         self.widget.add(self._create_menu_item("header.menu.preference", _("Preferences"), preference.widget))
@@ -38,18 +31,11 @@ class Menu:
         return menu_item
 
 
-@register.factory("tomate.ui.headerbar", scope=SingletonScope)
 class HeaderBar(Subscriber):
     START_SHORTCUT = Shortcut("session.start", "<control>s")
     STOP_SHORTCUT = Shortcut("session.stop", "<control>p")
     RESET_SHORTCUT = Shortcut("session.reset", "<control>r")
 
-    @inject(
-        bus="tomate.bus",
-        menu="tomate.ui.headerbar.menu",
-        session="tomate.session",
-        shortcuts="tomate.ui.shortcut",
-    )
     def __init__(self, bus: Bus, menu: Menu, session: Session, shortcuts: ShortcutEngine):
         self._shortcuts = shortcuts
         self.widget = self._create_headerbar()

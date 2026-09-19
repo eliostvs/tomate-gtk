@@ -4,8 +4,6 @@ from collections.abc import Callable
 from typing import Any
 
 from gi.repository import Gdk, Gtk
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +17,7 @@ class Shortcut(namedtuple("Shortcut", ["name", "value"])):
         return f"<tomate>/Global/{self.name}"
 
 
-@register.factory("tomate.ui.shortcut", scope=SingletonScope)
 class ShortcutEngine:
-    @inject(config="tomate.config")
     def __init__(self, config, accel_group=None):
         if accel_group is None:
             accel_group = Gtk.AccelGroup()

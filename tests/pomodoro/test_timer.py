@@ -1,19 +1,22 @@
 import pytest
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import assert_received_event, deliver_events
 from tomate.pomodoro import Events, Timer, TimerPayload
+from tomate.pomodoro.event import Bus
+from tomate.pomodoro.graph import Graph
 from tomate.pomodoro.timer import State
 from tomate.ui.testing import run_loop_for
 
 
-def test_module(bus, graph):
-    graph.register_instance("tomate.bus", bus)
-    scan_to_graph(["tomate.pomodoro.timer"], graph)
+def test_module(bus):
+    graph = Graph()
+    graph.register_instance(Bus, bus)
+    graph.register_factory(Timer, Timer)
 
-    instance = graph.get("tomate.timer")
+    instance = graph.resolve(Timer)
 
     assert isinstance(instance, Timer)
+    assert graph.resolve(Timer) is instance
 
 
 class TestTimerStart:

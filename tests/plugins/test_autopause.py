@@ -10,11 +10,14 @@ from tomate.ui.testing import create_session_payload
 
 
 @pytest.fixture
-def plugin(bus, graph):
+def plugin(bus):
     from autopause import AutoPausePlugin
 
+    def no_services[T](key: type[T]) -> T:
+        raise AssertionError("Auto Pause does not resolve services")
+
     instance = AutoPausePlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, no_services)
     return instance
 
 

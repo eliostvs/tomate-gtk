@@ -4,7 +4,6 @@ from os import path
 from urllib.parse import urlparse
 
 import gi
-from wiring import Graph
 
 gi.require_version("Gtk", "3.0")
 
@@ -21,6 +20,7 @@ from tomate.pomodoro import (
     plugin,
     suppress_errors,
 )
+from tomate.pomodoro.plugin import Resolve
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +37,9 @@ class AlarmPlugin(plugin.Plugin):
         self.config: Config
         self.player: GStreamerPlayer | None = None
 
-    def configure(self, bus: Bus, graph: Graph) -> None:
-        super().configure(bus, graph)
-        self.config = graph.get("tomate.config")
+    def configure(self, bus: Bus, resolve: Resolve) -> None:
+        super().configure(bus, resolve)
+        self.config = resolve(Config)
 
     @suppress_errors
     def activate(self) -> None:

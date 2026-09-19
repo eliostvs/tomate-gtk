@@ -1,21 +1,21 @@
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from itertools import repeat
 
 import gi
 import pytest
-from wiring import Graph
 
 gi.require_version("Gtk", "3.0")
 
 from gi.repository import GLib, Gtk
 
 from tomate.pomodoro import Bus, Config, PluginEngine, Session
+from tomate.pomodoro.graph import Graph
 from tomate.ui import ShortcutEngine, Window
 
 TEST_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 EVENT_ID = "12345678-1234-4abc-8def-123456789abc"
-EVENT_OCCURRED_AT = datetime(2026, 8, 27, 12, 30, tzinfo=timezone.utc)
+EVENT_OCCURRED_AT = datetime(2026, 8, 27, 12, 30, tzinfo=UTC)
 
 
 class TestClock:
@@ -24,7 +24,8 @@ class TestClock:
     def __init__(self, occurred_at: datetime):
         if occurred_at.tzinfo is None or occurred_at.utcoffset() is None:
             raise ValueError("occurred_at must be timezone-aware")
-        self._occurred_at = occurred_at.astimezone(timezone.utc)
+
+        self._occurred_at = occurred_at.astimezone(UTC)
 
     def now(self) -> datetime:
         return self._occurred_at
@@ -69,9 +70,7 @@ def bus() -> Bus:
 
 @pytest.fixture
 def graph() -> Graph:
-    g = Graph()
-    g.register_instance(Graph, g)
-    return g
+    return Graph()
 
 
 @pytest.fixture
@@ -94,6 +93,10 @@ def shortcut_engine(config: Config) -> ShortcutEngine:
 
 
 @pytest.fixture
-def plugin_engine(bus: Bus, graph: Graph, config: Config, monkeypatch) -> PluginEngine:
+def plugin_engine(bus: Bus, config: Config, monkeypatch) -> PluginEngine:
     monkeypatch.setattr(config, "plugin_paths", lambda: [os.path.join(TEST_DATA_DIR, "tomate", "plugins")])
-    return PluginEngine(bus, config, graph)
+
+    def no_plugin_services[T](key: type[T]) -> T:
+        raise AssertionError(f"Test plugins do not resolve application service {key}")
+
+    return PluginEngine(bus, config, no_plugin_services)

@@ -9,10 +9,9 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("Gtk", "3.0")
 
 from gi.repository import Gdk
-from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro.app import Application
-from tomate.pomodoro.graph import graph
+from tomate.pomodoro.composition import create_application_graph
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ def main():
         options = parse_options()
         setup_logging(options)
 
-        scan_to_graph(["tomate"], graph)
+        graph = create_application_graph()
         app = Application.from_graph(graph)
 
         app.Run()

@@ -4,18 +4,16 @@ from collections import namedtuple
 from configparser import RawConfigParser
 from typing import ClassVar, cast
 
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 from xdg import BaseDirectory, IconTheme
 
 from .event import Bus, Events
+from .graph import Injected
 
 logger = logging.getLogger(__name__)
 
 ConfigPayload = namedtuple("ConfigPayload", "action section option value")
 
 
-@register.factory("tomate.config", scope=SingletonScope)
 class Config:
     APP_NAME = "tomate"
     SHORTCUT_SECTION = "shortcuts"
@@ -30,8 +28,7 @@ class Config:
         "long_break_interval": "4",
     }
 
-    @inject(bus="tomate.bus")
-    def __init__(self, bus: Bus, parser=None):
+    def __init__(self, bus: Injected[Bus], parser=None):
         if parser is None:
             parser = RawConfigParser(defaults=self.DEFAULTS, strict=True)
 

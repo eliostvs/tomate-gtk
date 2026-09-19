@@ -4,13 +4,11 @@ import enum
 import logging
 from collections import namedtuple
 
-from wiring import SingletonScope, inject
-from wiring.scanning import register
-
 from .config import Config, ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
 from .exception import PomodoroException
 from .fsm import fsm
+from .graph import Injected
 from .timer import SECONDS_IN_A_MINUTE, Timer, format_seconds
 from .timer import Payload as TimerPayload
 
@@ -49,14 +47,8 @@ class State(enum.Enum):
     ENDED = 3
 
 
-@register.factory("tomate.session", scope=SingletonScope)
 class Session(Subscriber):
-    @inject(
-        bus="tomate.bus",
-        config="tomate.config",
-        timer="tomate.timer",
-    )
-    def __init__(self, bus: Bus, config: Config, timer: Timer):
+    def __init__(self, bus: Injected[Bus], config: Injected[Config], timer: Injected[Timer]):
         self._config = config
         self._timer = timer
         self._bus = bus

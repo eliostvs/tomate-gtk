@@ -1,25 +1,43 @@
 from collections.abc import Callable
 from locale import gettext as _
+from typing import Protocol
 
 from gi.repository import Gtk
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Event, Events, Subscriber, on
+from tomate.pomodoro.event import Bus, Event, Events, Subscriber, on
 
 
-class Systray:
-    def show(*args, **kwargs):
-        pass
+class TraySystem(Protocol):
+    """An activated tray implementation that can show or hide its window."""
 
-    def hide(*args, **kwargs):
-        pass
+    def show(self) -> object: ...
+
+    def hide(self) -> object: ...
 
 
-@register.factory("tomate.ui.systray.menu", scope=SingletonScope)
+class SysTray:
+    def __init__(self) -> None:
+        self._systems: list[TraySystem] = []
+
+    @property
+    def available(self) -> bool:
+        return bool(self._systems)
+
+    def register(self, system: TraySystem) -> None:
+        if not any(registered is system for registered in self._systems):
+            self._systems.append(system)
+
+    def unregister(self, system: TraySystem) -> None:
+        """Stop tracking an implementation, if that exact object is active."""
+
+        for index, registered in enumerate(self._systems):
+            if registered is system:
+                del self._systems[index]
+                return
+
+
 class Menu(Subscriber):
-    @inject(bus="tomate.bus", window="tomate.ui.view")
-    def __init__(self, bus: Bus, window):
+    def __init__(self, bus: Bus, window) -> None:
         self.widget, self.show_item, self.hide_item = self._create_menu(window)
         self.connect(bus)
 

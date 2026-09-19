@@ -10,22 +10,18 @@ from tomate.ui.testing import create_session_payload
 gi.require_version("Gtk", "3.0")
 gi.require_version("Gst", "1.0")
 
-from tomate.pomodoro import Events, SessionType
+from tomate.pomodoro import Config, Events, Session, SessionType
 
 DEFAULT_ALARM = f'file://{join(dirname(dirname(__file__)), "data", "tomate", "media", "clock.ogg")}'
 
 
 @pytest.fixture
-def plugin(bus, config, graph, session):
-    graph.providers.clear()
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", config)
-    graph.register_instance("tomate.session", session)
-
+def plugin(bus, config, session):
     from ticking import TickingPlugin
 
+    session.is_running.return_value = False
     instance = TickingPlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, lambda key: {Config: config, Session: session}[key])
     return instance
 
 

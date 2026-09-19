@@ -3,8 +3,6 @@ import os
 from typing import Protocol
 
 import wrapt
-from wiring import Graph, SingletonScope, inject
-from wiring.scanning import register
 from yapsy.ConfigurablePluginManager import ConfigurablePluginManager
 from yapsy.IPlugin import IPlugin
 from yapsy.PluginInfo import PluginInfo
@@ -12,6 +10,7 @@ from yapsy.VersionedPluginManager import VersionedPluginManager
 
 from .config import Config
 from .event import Bus, Subscriber
+from .graph import Injected
 
 logger = logging.getLogger(__name__)
 
@@ -20,17 +19,23 @@ class SettingsWindow(Protocol):
     def run(self) -> object: ...
 
 
+class Resolve(Protocol):
+    """The read-only application-service capability supplied to plugins."""
+
+    def __call__[T](self, key: type[T]) -> T: ...
+
+
 class Plugin(IPlugin, Subscriber):
     has_settings = False
 
     def __init__(self):
         super().__init__()
         self.bus: Bus
-        self.graph: Graph
+        self.resolve: Resolve
 
-    def configure(self, bus: Bus, graph: Graph) -> None:
+    def configure(self, bus: Bus, resolve: Resolve) -> None:
         self.bus = bus
-        self.graph = graph
+        self.resolve = resolve
 
     def activate(self) -> None:
         super().activate()
@@ -44,12 +49,14 @@ class Plugin(IPlugin, Subscriber):
         return None
 
 
-@register.factory("tomate.plugin", scope=SingletonScope)
 class PluginEngine:
-    @inject(bus="tomate.bus", config="tomate.config", graph=Graph)
-    def __init__(self, bus: Bus, config: Config, graph: Graph):
+    def __init__(self, bus: Injected[Bus], config: Injected[Config], resolve: Injected[Resolve]):
         self._bus = bus
-        self._graph = graph
+
+        def resolve_service[T](key: type[T]) -> T:
+            return resolve(key)
+
+        self._resolve: Resolve = resolve_service
 
         logger.debug("action=init paths=%s", config.plugin_paths())
         self._plugin_manager = ConfigurablePluginManager(decorated_manager=VersionedPluginManager())
@@ -64,7 +71,7 @@ class PluginEngine:
 
     def _configure_plugin(self, plugin: PluginInfo) -> None:
         if plugin.error is None and isinstance(plugin.plugin_object, Plugin):
-            plugin.plugin_object.configure(self._bus, self._graph)
+            plugin.plugin_object.configure(self._bus, self._resolve)
 
     def deactivate(self, name: str) -> None:
         self._plugin_manager.deactivatePluginByName(name)

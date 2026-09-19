@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wiring.scanning import scan_to_graph
+from yapsy.PluginInfo import PluginInfo
 
 from tests.conftest import EVENT_ID, EVENT_OCCURRED_AT, deliver_events
 from tomate.pomodoro import Event, Events, Plugin, PluginEngine, on, suppress_errors
@@ -14,22 +14,11 @@ class ExpectedError(Exception):
 @pytest.fixture
 def plugin_engine(bus, graph, config) -> PluginEngine:
     config.plugin_paths = lambda: [os.path.join(os.path.dirname(__file__), "..", "data", "tomate", "plugins")]
-    return PluginEngine(bus, config, graph)
-
-
-def test_module(bus, config, graph):
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate.pomodoro.plugin"], graph)
-
-    instance = graph.get("tomate.plugin")
-
-    assert isinstance(instance, PluginEngine)
-    assert instance == graph.get("tomate.plugin")
+    return PluginEngine(bus, config, graph.resolve)
 
 
 class TestPluginEngine:
-    def test_collect(self, bus, graph, plugin_engine):
+    def test_collect(self, bus, plugin_engine):
         assert plugin_engine.has_plugins() is False
 
         plugin_engine.collect()
@@ -38,7 +27,23 @@ class TestPluginEngine:
 
         for plugin in plugin_engine.all():
             assert plugin.plugin_object.bus is bus
-            assert plugin.plugin_object.graph is graph
+            assert plugin.plugin_object.resolve is plugin_engine._resolve
+
+    def test_plugins_receive_no_graph_api(self, bus, config, graph):
+        engine = PluginEngine(bus, config, graph.resolve)
+
+        class InspectingPlugin(Plugin):
+            pass
+
+        plugin = InspectingPlugin()
+        plugin_info = PluginInfo("Inspecting", "")
+        plugin_info.plugin_object = plugin
+        engine._configure_plugin(plugin_info)
+
+        assert not hasattr(plugin.resolve, "register_instance")
+        assert not hasattr(plugin.resolve, "register_factory")
+        assert not hasattr(plugin.resolve, "clear")
+        assert not hasattr(plugin.resolve, "providers")
 
     def test_activate(self, plugin_engine):
         plugin_engine.collect()
@@ -97,8 +102,8 @@ class TestPluginEngine:
 
         failing = FailingPlugin()
         receiving = ReceivingPlugin()
-        failing.configure(bus, graph)
-        receiving.configure(bus, graph)
+        failing.configure(bus, graph.resolve)
+        receiving.configure(bus, graph.resolve)
         failing.activate()
         receiving.activate()
 

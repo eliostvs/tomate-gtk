@@ -2,33 +2,35 @@ import dbus
 import pytest
 from dbus.mainloop.glib import DBusGMainLoop
 from dbusmock import DBusTestCase
-from wiring.scanning import scan_to_graph
 
 from tomate.pomodoro import Application
 from tomate.pomodoro.app import State
+from tomate.pomodoro.composition import create_application_graph
+from tomate.pomodoro.graph import Graph
+from tomate.pomodoro.plugin import PluginEngine
+from tomate.ui import Window
 
 DBusGMainLoop(set_as_default=True)
 
 
 @pytest.fixture
-def app(graph, window, plugin_engine, mocker) -> Application:
-    graph.register_instance("tomate.ui.view", window)
-    graph.register_instance("tomate.plugin", plugin_engine)
-    graph.register_instance("dbus.session", mocker.Mock())
-
-    scan_to_graph(["tomate.pomodoro.app"], graph)
-
-    return graph.get("tomate.app")
+def application_graph(window, plugin_engine) -> Graph:
+    graph = create_application_graph()
+    graph.register_instance(Window, window)
+    graph.register_instance(PluginEngine, plugin_engine)
+    return graph
 
 
-def test_module(graph, app):
-    instance = graph.get("tomate.app")
-
+@pytest.fixture
+def app(application_graph, mocker) -> Application:
+    instance = Application.from_graph(application_graph, mocker.Mock())
     assert isinstance(instance, Application)
-    assert instance is app
+    return instance
 
 
-def test_collects_plugins_on_start(app, plugin_engine):
+def test_collects_plugins_on_start(window, plugin_engine, mocker):
+    Application(mocker.Mock(), window, plugin_engine)
+
     assert plugin_engine.has_plugins() is True
 
 
@@ -55,24 +57,15 @@ class TestFromGraph:
     def teardown_method(self):
         DBusTestCase.tearDownClass()
 
-    def test_create_app_instance_when_it_is_not_registered_in_dbus(self, graph, window, plugin_engine):
-        graph.register_instance("tomate.ui.view", window)
-        graph.register_instance("tomate.plugin", plugin_engine)
-        scan_to_graph(["tomate.pomodoro.app"], graph)
-
-        instance = Application.from_graph(graph, DBusTestCase.get_dbus())
+    def test_create_app_instance_when_it_is_not_registered_in_dbus(self, application_graph):
+        instance = Application.from_graph(application_graph, DBusTestCase.get_dbus())
 
         assert isinstance(instance, Application)
 
-    @pytest.fixture()
-    def mock_dbus(self):
-        mock = DBusTestCase.spawn_server(Application.BUS_NAME, Application.BUS_PATH, Application.BUS_INTERFACE)
-        yield mock
-        mock.terminate()
-        mock.wait()
+    def test_get_dbus_interface_when_is_registered_in_dbus(self, application_graph):
+        Application.from_graph(application_graph, DBusTestCase.get_dbus())
 
-    def test_get_dbus_interface_when_is_registered_in_dbus(self, graph, mock_dbus):
-        instance = Application.from_graph(graph, DBusTestCase.get_dbus())
+        instance = Application.from_graph(application_graph, DBusTestCase.get_dbus())
 
         assert isinstance(instance, dbus.Interface)
         assert instance.dbus_interface == Application.BUS_INTERFACE

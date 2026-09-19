@@ -1,23 +1,13 @@
 import pytest
 from gi.repository import Gtk
-from wiring.scanning import scan_to_graph
 
 from tomate.ui import Shortcut, ShortcutEngine
 from tomate.ui.testing import active_shortcut
 
 
 @pytest.fixture
-def shortcut_engine(bus, config, graph) -> ShortcutEngine:
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate.ui.shortcut"], graph)
-    return graph.get("tomate.ui.shortcut")
-
-
-def test_module(graph, shortcut_engine):
-    instance = graph.get("tomate.ui.shortcut")
-
-    assert isinstance(instance, ShortcutEngine)
-    assert instance is shortcut_engine
+def shortcut_engine(config) -> ShortcutEngine:
+    return ShortcutEngine(config)
 
 
 def test_label(shortcut_engine):

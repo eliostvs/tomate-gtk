@@ -10,7 +10,7 @@ gi.require_version("Gst", "1.0")
 from gi.repository import Gtk
 
 from tests.conftest import deliver_events
-from tomate.pomodoro import Events
+from tomate.pomodoro import Config, Events
 from tomate.ui.testing import Q
 
 CUSTOM_ALARM = f'file://{join(dirname(dirname(__file__)), "data", "tomate", "media", "custom.ogg")}'
@@ -20,15 +20,11 @@ URI_OPTION_NAME = "uri"
 
 
 @pytest.fixture
-def plugin(bus, config, graph):
-    graph.providers.clear()
-    graph.register_instance("tomate.config", config)
-    graph.register_instance("tomate.bus", bus)
-
+def plugin(bus, config):
     from alarm import AlarmPlugin
 
     instance = AlarmPlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, lambda key: {Config: config}[key])
     return instance
 
 

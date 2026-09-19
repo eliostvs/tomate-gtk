@@ -1,7 +1,6 @@
 import logging
 from collections import namedtuple
 from locale import gettext as _
-from typing import cast
 
 import gi
 
@@ -279,8 +278,8 @@ class BreakScreenPlugin(plugin.Plugin):
     @suppress_errors
     def activate(self):
         super().activate()
-        session = cast(Session, self.graph.get("tomate.session"))
-        config = cast(Config, self.graph.get("tomate.config"))
+        session = self.resolve(Session)
+        config = self.resolve(Config)
 
         if self.display is None:
             return
@@ -305,4 +304,4 @@ class BreakScreenPlugin(plugin.Plugin):
         del self.screens[:]
 
     def settings_window(self, parent) -> SettingsDialog:
-        return SettingsDialog(cast(Config, self.graph.get("tomate.config")), parent)
+        return SettingsDialog(self.resolve(Config), parent)

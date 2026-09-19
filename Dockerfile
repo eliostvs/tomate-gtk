@@ -25,7 +25,6 @@ RUN apt-get update -qq && apt-get install -y --no-install-recommends \
     python3-pytest-cov \
     python3-pytest-flake8 \
     python3-pytest-mock \
-    python3-venusian \
     python3-wrapt \
     python3-xdg \
     python3-yapsy \

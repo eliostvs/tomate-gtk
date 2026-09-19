@@ -8,7 +8,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from tests.conftest import deliver_events
-from tomate.pomodoro import Events, SessionType
+from tomate.pomodoro import Config, Events, SessionType
 from tomate.ui.testing import Q, create_session_payload
 
 SECTION_NAME = "script_plugin"
@@ -24,15 +24,11 @@ def subprocess_run(mocker, monkeypatch):
 
 
 @pytest.fixture
-def plugin(bus, config, graph):
-    graph.providers.clear()
-    graph.register_instance("tomate.config", config)
-    graph.register_instance("tomate.bus", bus)
-
+def plugin(bus, config):
     from script import ScriptPlugin
 
     instance = ScriptPlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, lambda key: {Config: config}[key])
     return instance
 
 

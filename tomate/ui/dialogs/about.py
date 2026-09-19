@@ -1,11 +1,7 @@
 from gi.repository import GdkPixbuf, Gtk
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
 
-@register.factory("tomate.ui.about", scope=SingletonScope)
 class AboutDialog(Gtk.AboutDialog):
-    @inject(config="tomate.config")
     def __init__(self, config):
         Gtk.AboutDialog.__init__(
             self,

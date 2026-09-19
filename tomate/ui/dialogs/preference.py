@@ -4,21 +4,16 @@ from locale import gettext as _
 from typing import ClassVar
 
 from gi.repository import GdkPixbuf, Gtk, Pango
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
-from tomate.pomodoro import Bus, Config, PluginEngine
+from tomate.pomodoro.config import Config
+from tomate.pomodoro.event import Bus
+from tomate.pomodoro.plugin import PluginEngine
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
 
-@register.factory("tomate.ui.preference", scope=SingletonScope)
 class PreferenceDialog(Gtk.Dialog):
-    @inject(
-        timer_tab="tomate.ui.preference.timer",
-        extension_tab="tomate.ui.preference.extension",
-    )
     def __init__(self, timer_tab, extension_tab):
         stack = Gtk.Stack()
         stack.add_titled(timer_tab.widget, "timer", _("Timer"))
@@ -59,9 +54,7 @@ class PreferenceDialog(Gtk.Dialog):
         return super().run()
 
 
-@register.factory("tomate.ui.preference.timer", scope=SingletonScope)
 class TimerTab:
-    @inject(config="tomate.config")
     def __init__(self, config: Config):
         self._config = config
 
@@ -110,9 +103,7 @@ class TimerTab:
         self._config.set("Timer", option, value)
 
 
-@register.factory("tomate.ui.preference.extension", scope=SingletonScope)
 class ExtensionTab:
-    @inject(bus="tomate.bus", config="tomate.config", plugin_engine="tomate.plugin")
     def __init__(self, bus: Bus, config: Config, plugin_engine: PluginEngine):
         self._plugins = plugin_engine
         self._config = config

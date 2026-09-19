@@ -1,7 +1,6 @@
 import random
 
 import pytest
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import deliver_events
 from tomate.pomodoro import Events, TimerPayload
@@ -10,17 +9,8 @@ from tomate.ui.widgets import Countdown
 
 
 @pytest.fixture
-def countdown(bus, graph) -> Countdown:
-    graph.register_instance("tomate.bus", bus)
-    scan_to_graph(["tomate.ui.widgets.countdown"], graph)
-    return graph.get("tomate.ui.countdown")
-
-
-def test_module(countdown, graph):
-    instance = graph.get("tomate.ui.countdown")
-
-    assert isinstance(instance, Countdown)
-    assert instance is countdown
+def countdown(bus) -> Countdown:
+    return Countdown(bus)
 
 
 @pytest.mark.parametrize(

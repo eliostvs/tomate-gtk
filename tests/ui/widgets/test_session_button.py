@@ -1,5 +1,4 @@
 import pytest
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import deliver_events
 from tomate.pomodoro import Events, SessionType
@@ -8,25 +7,14 @@ from tomate.ui.widgets import SessionButton
 
 
 @pytest.fixture
-def session_button(bus, graph, session, shortcut_engine) -> SessionButton:
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.session", session)
-    graph.register_instance("tomate.ui.shortcut", shortcut_engine)
-    scan_to_graph(["tomate.ui.widgets.session_button"], graph)
+def session_button(bus, session, shortcut_engine) -> SessionButton:
 
     # clean key binds between tests
     shortcut_engine.disconnect(SessionButton.POMODORO_SHORTCUT)
     shortcut_engine.disconnect(SessionButton.SHORT_BREAK_SHORTCUT)
     shortcut_engine.disconnect(SessionButton.LONG_BREAK_SHORTCUT)
 
-    return graph.get("tomate.ui.taskbutton")
-
-
-def test_module(graph, session_button):
-    instance = graph.get("tomate.ui.taskbutton")
-
-    assert isinstance(instance, SessionButton)
-    assert instance is session_button
+    return SessionButton(bus, session, shortcut_engine)
 
 
 @pytest.mark.parametrize(

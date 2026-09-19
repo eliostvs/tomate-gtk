@@ -27,13 +27,15 @@ jobs:
             gir1.2-gtk-3.0 \
             gir1.2-notify-0.7 \
             gir1.2-playerctl-2.0 \
+            dbus \
             python3-gi \
             python3-wrapt \
             python3-xdg \
             python3-yapsy \
             libdbus-1-dev \
             libglib2.0-dev \
-            pkg-config
+            pkg-config \
+            xvfb
 
       - name: Set up uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1

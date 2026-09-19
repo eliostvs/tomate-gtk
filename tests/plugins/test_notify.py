@@ -15,15 +15,11 @@ IconPath = join(dirname(dirname(__file__)), "data", "icons", "hicolor", "24x24",
 
 @pytest.fixture
 @patch("gi.repository.Notify.Notification.new")
-def plugin(_, graph, bus):
-    graph.providers.clear()
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", Config(bus))
-
+def plugin(_, bus):
     from notify import NotifyPlugin
 
     instance = NotifyPlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, lambda key: {Config: Config(bus)}[key])
     return instance
 
 

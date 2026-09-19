@@ -5,7 +5,6 @@ from locale import gettext as _
 from string import Template
 
 import gi
-from wiring import Graph
 
 gi.require_version("Gtk", "3.0")
 
@@ -21,6 +20,7 @@ from tomate.pomodoro import (
     plugin,
     suppress_errors,
 )
+from tomate.pomodoro.plugin import Resolve
 
 locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
@@ -44,9 +44,9 @@ class ScriptPlugin(plugin.Plugin):
         super().__init__()
         self.config: Config
 
-    def configure(self, bus: Bus, graph: Graph) -> None:
-        super().configure(bus, graph)
-        self.config = graph.get("tomate.config")
+    def configure(self, bus: Bus, resolve: Resolve) -> None:
+        super().configure(bus, resolve)
+        self.config = resolve(Config)
 
     @suppress_errors
     @on(Events.SESSION_START)

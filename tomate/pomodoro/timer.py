@@ -3,11 +3,10 @@ import logging
 from collections import namedtuple
 
 from gi.repository import GLib
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
 from .event import Bus, Events
 from .fsm import fsm
+from .graph import Injected
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_A_MINUTE = 60
@@ -54,12 +53,10 @@ class State(enum.Enum):
     ENDED = 3
 
 
-@register.factory("tomate.timer", scope=SingletonScope)
 class Timer:
     ONE_SECOND = 1
 
-    @inject(bus="tomate.bus")
-    def __init__(self, bus: Bus):
+    def __init__(self, bus: Injected[Bus]):
         self.duration = self.time_left = 0
         self.state = State.STOPPED
         self._bus = bus
@@ -69,7 +66,7 @@ class Timer:
         logger.debug("action=start")
         self.duration = self.time_left = seconds
         GLib.timeout_add_seconds(
-            Timer.ONE_SECOND, self._update, priority=GLib.PRIORITY_HIGH   # ty: ignore[unknown-argument]
+            Timer.ONE_SECOND, self._update, priority=GLib.PRIORITY_HIGH  # ty: ignore[unknown-argument]
         )
         return True
 

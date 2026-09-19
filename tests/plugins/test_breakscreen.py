@@ -9,7 +9,7 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from tests.conftest import deliver_events
-from tomate.pomodoro import ConfigPayload, Events, SessionType, TimerPayload
+from tomate.pomodoro import Config, ConfigPayload, Events, Session, SessionType, TimerPayload
 from tomate.ui.testing import Q, create_session_payload, run_loop_for
 
 SECTION_NAME = "break_screen"
@@ -18,16 +18,11 @@ AUTO_START_OPTION = "auto_start"
 
 
 @pytest.fixture
-def plugin(bus, config, graph, session):
-    graph.providers.clear()
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.config", config)
-    graph.register_instance("tomate.session", session)
-
+def plugin(bus, config, session):
     from breakscreen import BreakScreenPlugin
 
     instance = BreakScreenPlugin()
-    instance.configure(bus, graph)
+    instance.configure(bus, lambda key: {Config: config, Session: session}[key])
     return instance
 
 

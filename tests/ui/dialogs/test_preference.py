@@ -1,6 +1,5 @@
 import pytest
 from gi.repository import Gtk
-from wiring.scanning import scan_to_graph
 
 from tests.conftest import deliver_events
 from tomate.pomodoro import Config, Events
@@ -12,17 +11,6 @@ from tomate.ui.testing import TV, Q
 def preference(bus, plugin_engine, config, mocker) -> PreferenceDialog:
     mocker.patch("tomate.ui.dialogs.preference.Gtk.Dialog.run")
     return PreferenceDialog(TimerTab(config), ExtensionTab(bus, config, plugin_engine))
-
-
-def test_preference_module(graph, bus, config, plugin_engine):
-    graph.register_instance("tomate.bus", bus)
-    graph.register_instance("tomate.plugin", plugin_engine)
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate.ui.dialogs.preference"], graph)
-    instance = graph.get("tomate.ui.preference")
-
-    assert isinstance(instance, PreferenceDialog)
-    assert graph.get("tomate.ui.preference") is instance
 
 
 def test_refresh_reload_plugins(preference, plugin_engine):

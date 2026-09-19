@@ -3,7 +3,7 @@ from .clock import Clock
 from .config import Config, ConfigPayload
 from .event import Bus, Event, Events, Subscriber, on
 from .exception import PomodoroException
-from .graph import graph
+from .graph import DependencyCycleError, Graph, Injected, MissingProviderError
 from .id import IDFactory
 from .plugin import Plugin, PluginEngine, suppress_errors
 from .session import Payload as SessionPayload
@@ -18,9 +18,13 @@ __all__ = [
     "Clock",
     "Config",
     "ConfigPayload",
+    "DependencyCycleError",
     "Event",
     "Events",
+    "Graph",
     "IDFactory",
+    "Injected",
+    "MissingProviderError",
     "Plugin",
     "PluginEngine",
     "PomodoroException",
@@ -31,7 +35,6 @@ __all__ = [
     "Timer",
     "TimerPayload",
     "format_seconds",
-    "graph",
     "on",
     "suppress_errors",
 ]

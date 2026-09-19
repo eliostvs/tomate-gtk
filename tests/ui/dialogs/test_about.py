@@ -1,21 +1,14 @@
 import pytest
 from gi.repository import Gtk
-from wiring.scanning import scan_to_graph
 
 from tomate import __version__
+from tomate.ui.dialogs import AboutDialog
 from tomate.ui.testing import refresh_gui
 
 
 @pytest.fixture
-def about(graph, config):
-    graph.register_instance("tomate.config", config)
-    scan_to_graph(["tomate.ui.dialogs.about"], graph)
-
-    return graph.get("tomate.ui.about")
-
-
-def test_module(graph, about):
-    assert graph.get("tomate.ui.about") is about
+def about(config):
+    return AboutDialog(config)
 
 
 def test_dialog_info(about):

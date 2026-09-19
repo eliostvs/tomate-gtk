@@ -3,20 +3,11 @@ import logging
 from collections.abc import Callable
 from locale import gettext as _
 
-from wiring import SingletonScope, inject
-from wiring.scanning import register
-
-from tomate.pomodoro import (
-    Bus,
-    Event,
-    Events,
-    Session,
-    SessionPayload,
-    SessionType,
-    Subscriber,
-    on,
-)
-from tomate.ui import Shortcut, ShortcutEngine
+from tomate.pomodoro.event import Bus, Event, Events, Subscriber, on
+from tomate.pomodoro.session import Payload as SessionPayload
+from tomate.pomodoro.session import Session
+from tomate.pomodoro.session import Type as SessionType
+from tomate.ui.shortcut import Shortcut, ShortcutEngine
 
 from .mode_button import ModeButton
 
@@ -24,17 +15,11 @@ locale.textdomain("tomate")
 logger = logging.getLogger(__name__)
 
 
-@register.factory("tomate.ui.taskbutton", scope=SingletonScope)
 class SessionButton(Subscriber):
     POMODORO_SHORTCUT = Shortcut("session.pomodoro", "<control>1")
     SHORT_BREAK_SHORTCUT = Shortcut("session.short_break", "<control>2")
     LONG_BREAK_SHORTCUT = Shortcut("session.long_break", "<control>3")
 
-    @inject(
-        bus="tomate.bus",
-        session="tomate.session",
-        shortcuts="tomate.ui.shortcut",
-    )
     def __init__(self, bus: Bus, session: Session, shortcuts: ShortcutEngine):
         self._session = session
         self._shortcuts = shortcuts

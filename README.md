@@ -60,6 +60,17 @@ sudo dnf install tomate-gtk
 
 The packages are available in [aur repository](https://aur.archlinux.org/packages/tomate-gtk/)
 
+## Development
+
+The test suite creates GTK windows and private D-Bus sessions. Install a virtual X server and D-Bus daemon before running it locally:
+
+```bash
+sudo apt-get install dbus xvfb
+task test
+```
+
+`task test` uses `xvfb-run` automatically when it is available.
+
 ## Plugins
 
 ### Pre-installed
@@ -73,9 +84,9 @@ The packages are available in [aur repository](https://aur.archlinux.org/package
 
 ### External
 
-- [Indicator][indicator-plugin] Displays a countdown icon in the systray (uses libappindicator)
-- [StatusIcon][statusicon-plugin] Displays a countdown icon in the systray (old method for creating a systray with GNOME)
-- [StatusNotifierItem][statusnotifieritem-plugin] Displays a countdown icon in the systray (freedesktop standard for creating a systray)
+- [Indicator][indicator-plugin] 0.14.0 or newer displays a countdown icon in the systray (uses libappindicator)
+- [StatusIcon][statusicon-plugin] 0.11.0 or newer displays a countdown icon in the systray (old method for creating a systray with GNOME)
+- [StatusNotifierItem][statusnotifieritem-plugin] 0.3.0 or newer displays a countdown icon in the systray (freedesktop standard for creating a systray)
 - [Launcher][launcher-plugin] Shows the timer countdown and the total of sessions in the launcher (ubuntu only)
 
 ---

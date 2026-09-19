@@ -5,13 +5,12 @@ from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Generic, TypeVar
+from typing import Any, TypeVar
 
 from gi.repository import GLib
-from wiring import SingletonScope, inject
-from wiring.scanning import register
 
 from .clock import Clock
+from .graph import Injected
 from .id import IDFactory
 
 logger = logging.getLogger(__name__)
@@ -41,7 +40,7 @@ class Events(enum.Enum):
 
 
 @dataclass(frozen=True, slots=True)
-class Event(Generic[T]):
+class Event[T]:
     id: str
     occurred_at: datetime
     type: Events
@@ -66,10 +65,8 @@ class Subscription:
         return self.resolve() == receiver
 
 
-@register.factory("tomate.bus", scope=SingletonScope)
 class Bus:
-    @inject(clock="tomate.clock", id_factory="tomate.id_factory")
-    def __init__(self, clock: Clock, id_factory: IDFactory):
+    def __init__(self, clock: Injected[Clock], id_factory: Injected[IDFactory]):
         self._clock = clock
         self._id_factory = id_factory
         self._subscriptions: dict[Events, list[Subscription]] = {event: [] for event in Events}

@@ -1,24 +1,19 @@
 import os
 
 import pytest
-from wiring.scanning import scan_to_graph
 
-from tests.conftest import TEST_DATA_DIR, assert_received_event, deliver_events
-from tomate.pomodoro import Config, ConfigPayload, Events
+from tests.conftest import (
+    TEST_DATA_DIR,
+    assert_received_event,
+    deliver_events,
+)
+from tomate.pomodoro.config import Config, ConfigPayload
+from tomate.pomodoro.event import Events
 
 
 @pytest.fixture
-def config(graph, bus):
-    graph.register_instance("tomate.bus", bus)
-    scan_to_graph(["tomate.pomodoro.config"], graph)
-    return graph.get("tomate.config")
-
-
-def test_module(graph, config):
-    instance = graph.get("tomate.config")
-
-    assert isinstance(instance, Config)
-    assert instance is config
+def config(bus):
+    return Config(bus)
 
 
 def test_get_plugin_paths(config):

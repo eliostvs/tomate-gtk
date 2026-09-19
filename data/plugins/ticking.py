@@ -1,7 +1,6 @@
 import logging
 
 import gi
-from wiring import Graph
 
 gi.require_version("Gst", "1.0")
 
@@ -18,6 +17,7 @@ from tomate.pomodoro import (
     plugin,
     suppress_errors,
 )
+from tomate.pomodoro.plugin import Resolve
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,10 @@ class TickingPlugin(plugin.Plugin):
         self.player: GStreamerPlayer | None = None
         self.session: Session
 
-    def configure(self, bus: Bus, graph: Graph) -> None:
-        super().configure(bus, graph)
-        self.config = graph.get("tomate.config")
-        self.session = graph.get("tomate.session")
+    def configure(self, bus: Bus, resolve: Resolve) -> None:
+        super().configure(bus, resolve)
+        self.config = resolve(Config)
+        self.session = resolve(Session)
 
     @suppress_errors
     def activate(self) -> None:
